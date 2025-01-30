@@ -6,7 +6,7 @@
 class Headers
 {
 	private:
-		void						clear();
+		void						range( std::map< String, String > &headers );
 		void						cookie( std::map< String, String > &headers );
 		void						contentType( std::map< String, String > &headers );
 		void						hostAndPort( std::map< String, String > &headers );
@@ -20,13 +20,13 @@ class Headers
 		int							__port;
 		String						__host;
 		String						__cookie;
-		String						__boundary;
 		String						__contentType;
 		size_t						__contentLength;
 		String						__transferEncoding;
 		t_connectionType			__connectionType;
 		t_bodyType					__transferType;
 
+		void						clear();
 		void						parseHeaders(std::map< String, String > &headers);
 
 		Headers();

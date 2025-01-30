@@ -18,6 +18,12 @@ public:
 		persist();
 		virtual const char *what(void) const throw();
 	};
+	class Close : public std::exception
+	{
+	public:
+		Close();
+		virtual const char *what(void) const throw();
+	};
 
 	static std::map<int16_t, String> __defaultErrorPages;
 	static std::map<int16_t, String> __errCode;
@@ -49,14 +55,17 @@ public:
 	static String intToString(int number);
 	static int hexToInt(const String &str);
 	static void setNonBlockingMode(int sd);
+    static String methodToString(t_method t);
 	static void toUpperString(String &input);
 	static void toLowerString(String &input);
 	static String generateTimeBasedFileName();
-	static int stringToInt(const String &str);
+	static long stringToInt(const String &str);
 	static struct pollfd *data(t_events &events);
 	static String resolvePath(const String &path);
+    static String readFielContent(String fileName);
 	static String getParentPath(const String &path);
 	static String getContentType(const String &uri);
+    static ssize_t getFileSize(const String &filename);
 	static std::vector<String> splitBySpaces(const String &input);
 	static bool samePath(const String &path1, const String &path2);
 	static String buildListingBody(String path, const t_svec &list);

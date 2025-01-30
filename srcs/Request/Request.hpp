@@ -6,27 +6,29 @@
 class Request
 {
 	private:
+		t_connection_phase				&__phase;
+		String							__requestLine;
+		String							__requestHeaders;
+
 		void							clear();
-		void							proccessURI();
-		void							proccessHeaders( String requestHeaders );
-		void							proccessRequestLine( const String &requestLine );
+		void							validateURI();
+		void							parseRequest();
+		void							validateHeaders();
+		void							validateRequestLine();
 
 	public:
 		String							__URI;
-		e_requestPhase					__phase;
 		t_method						__method;
 		Headers							__headers;
-		size_t							__bodySize;
+        size_t                          __bodySize;
 		String							__fragement;
 		String							__protocole;
 		String							__queryString;
 		std::map< String, String >		__headerFeilds;
-		std::vector< s_body >			__body;
 
-		void							parseRequest(String requestLine, String requestHeaders);
+		void							processData(BasicString &data);
 
-
-		Request();
+		Request(t_connection_phase &phase);
 		Request( const Request &copy );
 		Request& operator=( const Request &assign );
 		~Request();

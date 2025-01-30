@@ -61,8 +61,17 @@ typedef std::map<String, String>::iterator mapIterator;
 #define RESET "\033[1;0m"
 
 #define MAX_EVENTS 4096
-#define READ_SIZE 4096
+#define READ_SIZE 8192
+#define REQUEST_MAX_SIZE 4096
+#define REQUEST_LINE_MAX_SIZE 4096
+#define REQUEST_HEADERS_MAX_SIZE 8192
+#define REQUEST_HEADER_FEILD_MAX_SIZE 4096
 
+#define FORM_DATA "application/x-www-form-urlencoded"
+#define MULTIPART_DATA_FORM "multipart/form-data"
+
+#define LINE_BREAK "\r\n"
+#define D_LINE_BREAK "\r\n\r\n"
 #define PROTOCOLE_V "HTTP/1.1"
 #define URI_CHAR_SET "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/?#[]@!$&\'()*+,;=-._~"
 #define H_KEY_CHAR_SET "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&\'*+-.^_`|~"
@@ -96,7 +105,7 @@ typedef enum e_method
 typedef enum e_type
 {
 	FILE_,
-	FOLDER
+	FOLDER,
 } t_type;
 
 typedef enum e_connectionType
@@ -110,10 +119,9 @@ typedef enum e_bodyType
 	NONE,
 	DEFINED,
 	CHUNKED,
-	MULTIPART,
 } t_bodyType;
 
-typedef enum e_uri
+typedef enum e_uri // to be removed
 {
 	DIRECTORY,
 	FILE_TOO_SERVE,
@@ -121,13 +129,39 @@ typedef enum e_uri
 	CGI_PROGRAM,
 } t_URI;
 
-typedef enum e_requestPhase
+typedef enum e_requestPhase // to be removed
 {
 	NEWREQUEST,
 	INITIALIZING,
 	PROCESSING,
 	COMPLETE,
 } t_requestPhase;
+
+typedef enum e_connection_phase {
+    PROCESSING_REQUEST,
+    IDENTIFY_WORKERS,
+    PROCESSING_RESPONSE,
+} t_connection_phase;
+
+typedef enum e_response_phase {
+    PREPARING_RESPONSE,
+    CGI_PROCESS,
+    GET_PROCESS,
+    POST_PROCESS,
+    DELETE_PROCESS,
+} t_response_phase;
+
+typedef enum e_get_phase {
+    GET_IN,
+    DURING_GET,
+    GET_OUT,
+} t_get_phase;
+
+typedef enum e_post_type {
+
+    FORM,
+    UPLOAD,
+} t_post_type;
 
 struct	s_body {
 	t_svec				_headers;

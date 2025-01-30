@@ -5,26 +5,19 @@
 class RessourceHandler
 {
 	private:
-
-
 		void			loadType(const char* path);
-
+		void			loadPathExploring(void);
+        void            clear();
 
 	public:
-		String& 		__URI;
-		String			__fullPath;
+		String 		    __URI;
 		t_type			__type;
+		String			__fullPath;
+		Location		*__location;
 
-		//public temporarely
-		Location&		__location; // should stay public
+		void			prepareRessource(const Location& location, const String& uri);
 
-		void			loadPathExploring(void);
-
-		String	getPath() const;
-		String	getURI() const;
-		t_type	  getType() const;
-
-		RessourceHandler(Location& location, String& uri);
+		RessourceHandler();
 		RessourceHandler(const RessourceHandler &copy);
 		RessourceHandler &operator=(const RessourceHandler &assign);
 		~RessourceHandler();

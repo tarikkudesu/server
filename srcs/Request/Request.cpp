@@ -1,10 +1,9 @@
 #include "Request.hpp"
 
-Request::Request() : __phase(NEWREQUEST),
-                     __bodySize(0)
+Request::Request(t_connection_phase &phase) : __phase(phase)
 {
 }
-Request::Request(const Request &copy)
+Request::Request(const Request &copy) : __phase(copy.__phase)
 {
     *this = copy;
 }
@@ -15,7 +14,6 @@ Request &Request::operator=(const Request &assign)
         this->__URI = assign.__URI;
         this->__method = assign.__method;
         this->__headers = assign.__headers;
-        this->__bodySize = assign.__bodySize;
         this->__protocole = assign.__protocole;
         this->__queryString = assign.__queryString;
         this->__headerFeilds = assign.__headerFeilds;
@@ -32,32 +30,29 @@ Request::~Request()
 
 void Request::clear()
 {
-    for (std::vector<s_body>::iterator it = __body.begin(); it != __body.end(); it++)
-        it->_headers.clear();
     this->__URI.clear();
-    this->__body.clear();
-    this->__body.clear();
-    this->__bodySize = 0;
+    this->__headers.clear();
     this->__fragement.clear();
     this->__protocole.clear();
     this->__headerFeilds.clear();
     this->__queryString.clear();
+    this->__headerFeilds.clear();
 }
 
 /*****************************************************************************
  *                                  METHODS                                  *
  *****************************************************************************/
 
-void Request::proccessHeaders(String requestHeaders)
+void Request::validateHeaders()
 {
     size_t pos = 0;
     do
     {
-        pos = requestHeaders.find("\r\n");
+        pos = __requestHeaders.find("\r\n");
         if (pos == String::npos)
             break;
         {
-            String hf(requestHeaders.begin(), requestHeaders.begin() + pos);
+            String hf(__requestHeaders.begin(), __requestHeaders.begin() + pos);
             size_t p = hf.find(": ");
             if (p == String::npos)
                 throw ErrorResponse(400, "invalid Header feild");
@@ -67,11 +62,11 @@ void Request::proccessHeaders(String requestHeaders)
             if (key.empty() || String::npos != key.find_first_not_of(H_KEY_CHAR_SET))
                 throw ErrorResponse(400, "invalid Header feild");
             this->__headerFeilds[key] = value;
-            requestHeaders.erase(0, pos + 2);
+            __requestHeaders.erase(0, pos + 2);
         }
-    } while (requestHeaders.empty() == false);
+    } while (__requestHeaders.empty() == false);
 }
-void Request::proccessURI()
+void Request::validateURI()
 {
     size_t start = 0;
     size_t end = 0;
@@ -88,11 +83,11 @@ void Request::proccessURI()
         this->__URI.erase(start);
     }
 }
-void Request::proccessRequestLine(const String &requestLine)
+void Request::validateRequestLine()
 {
-    if (2 < std::count(requestLine.begin(), requestLine.end(), ' '))
+    if (2 < std::count(__requestLine.begin(), __requestLine.end(), ' '))
         throw ErrorResponse(400, "invalid Request Line (extra space)");
-    std::istringstream iss(requestLine);
+    std::istringstream iss(__requestLine);
     String method, URI, protocole;
     iss >> method;
     iss >> URI;
@@ -123,17 +118,32 @@ void Request::proccessRequestLine(const String &requestLine)
     this->__protocole = protocole;
     if (this->__protocole != PROTOCOLE_V)
         throw ErrorResponse(505, "Unsupported protocole");
-    proccessURI();
+    validateURI();
 }
-void Request::parseRequest(String requestLine, String requestHeaders)
+void Request::parseRequest()
 {
-    clear();
-    proccessRequestLine(requestLine);
-    proccessHeaders(requestHeaders);
+    validateRequestLine();
+    validateHeaders();
     __headers.parseHeaders(__headerFeilds);
-    __headerFeilds.clear();
 }
-
+void Request::processData(BasicString &data)
+{
+    size_t s = data.find(LINE_BREAK);
+    size_t h = data.find(D_LINE_BREAK);
+    if (s == String::npos || h == String::npos)
+    {
+        if (data.length() > REQUEST_MAX_SIZE)
+            throw ErrorResponse(400, "Oversized request");
+        throw wsu::persist();
+    }
+    h -= (s + 2);
+    __requestLine = data.substr(0, s).to_string();
+    data.erase(0, s + 2);
+    __requestHeaders = data.substr(0, h + 2).to_string();
+    data.erase(0, h + 4);
+    parseRequest();
+    this->__phase = IDENTIFY_WORKERS;
+}
 std::ostream &operator<<(std::ostream &o, const Request &req)
 {
     std::cout << "Request: \n";
@@ -145,6 +155,5 @@ std::ostream &operator<<(std::ostream &o, const Request &req)
     std::cout << "\tFragement: " << req.__fragement << "\n";
     std::cout << "\theaders: \n";
     std::cout << req.__headers << "\n";
-    std::cout << "\tbody size: " << req.__bodySize << "\n";
     return o;
 }

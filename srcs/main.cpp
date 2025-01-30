@@ -1,11 +1,9 @@
 
 #include "ServerManager/ServerManager.hpp"
 
-ServerManager *webservP = NULL;
-
 void f()
 {
-	int fd = open(".logs/sds.log", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	int fd = open(".log", O_WRONLY | O_CREAT | O_TRUNC, 0666);
 	if (-1 == fd)
 	{
 		wsu::terr(String(" .logs/sds.log cannot be opened"));

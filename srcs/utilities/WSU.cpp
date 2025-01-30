@@ -20,27 +20,12 @@ bool wsu::__error = false;
 bool wsu::__fatal = false;
 wsu::persist::persist(void) {}
 const char *wsu::persist::what(void) const throw() { return "persist"; }
+wsu::Close::Close(void) {}
+const char *wsu::Close::what(void) const throw() { return "Close"; }
 
 /************************************************************************************************
  *                                             LOGS                                             *
  ************************************************************************************************/
-
-String wsu::generateTimeBasedFileName()
-{
-	static unsigned long cpt;
-	return "./.temp/." + wsu::intToString(std::time(NULL) + cpt++) + ".tmp"; // change path Later
-}
-
-bool wsu::endWith(const std::string &file, const char *extension)
-{
-	int fileLen = file.length();
-	int exLen = strlen(extension);
-
-	if (fileLen < exLen)
-		return false;
-
-	return file.compare(fileLen - exLen, exLen, extension) == 0;
-}
 
 void wsu::logs(std::vector<String> &args)
 {
@@ -166,6 +151,56 @@ void wsu::terr(String __error_message)
 /*************************************************************************************************
  *                                           UTILITIES                                           *
  *************************************************************************************************/
+String	wsu::readFielContent(String fileName)
+{
+	String buffer;
+	String userInfo;
+	std::ifstream file(fileName.c_str());
+	while (std::getline(file, buffer))
+		userInfo.append(buffer);
+    file.close();
+	return userInfo;
+}
+String wsu::methodToString(t_method t)
+{
+	if (t == GET)
+		return "GET";
+	else if (t == OPTIONS)
+		return "OPTIONS";
+	else if (t == HEAD)
+		return "HEAD";
+	else if (t == POST)
+		return "POST";
+	else if (t == PUT)
+		return "PUT";
+	else if (t == DELETE)
+		return "DELETE";
+	else if (t == TRACE)
+		return "TRACE";
+	else if (t == CONNECT)
+		return "CONNECT";
+	return "NONE";
+}
+ssize_t wsu::getFileSize(const String &filename)
+{
+    struct stat st;
+    if (stat(filename.c_str(), &st) == 0)
+        return st.st_size;
+    return -1;
+}
+String wsu::generateTimeBasedFileName()
+{
+	static unsigned long cpt;
+	return "./.temp/." + wsu::intToString(std::time(NULL) + cpt++) + ".tmp"; // change path Later
+}
+bool wsu::endWith(const std::string &file, const char *extension)
+{
+	int fileLen = file.length();
+	int exLen = strlen(extension);
+	if (fileLen < exLen)
+		return false;
+	return file.compare(fileLen - exLen, exLen, extension) == 0;
+}
 String wsu::generateTokenId()
 {
     String tokenId;
@@ -247,10 +282,10 @@ String wsu::intToString(int number)
 	oss << number;
 	return oss.str();
 }
-int wsu::stringToInt(const String &str)
+long wsu::stringToInt(const String &str)
 {
 	std::istringstream iss(str);
-	int number = 0;
+	long number = 0;
 	iss >> number;
 	return number;
 }

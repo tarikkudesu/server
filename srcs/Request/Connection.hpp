@@ -12,11 +12,13 @@ class Connection
 		int								__sd;
 		BasicString						__data;
 		Request							__request;
+		Response						__response;
 		t_Server						*__serversP;
-		static std::ofstream			__fs;
+		t_connection_phase				__phase;
 
 		Server							*identifyServer();
 		void							processRequest();
+		void							identifyWorkers();
 		void							processResponse();
 		void							processCunkedBody();
 		void							initializeTmpFiles();

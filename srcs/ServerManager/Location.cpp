@@ -280,28 +280,6 @@ void Location::parse()
 	this->__directives.clear();
 	__line.clear();
 }
-
-String methodToString(t_method t)
-{
-	if (t == GET)
-		return "GET";
-	else if (t == OPTIONS)
-		return "OPTIONS";
-	else if (t == HEAD)
-		return "HEAD";
-	else if (t == POST)
-		return "POST";
-	else if (t == PUT)
-		return "PUT";
-	else if (t == DELETE)
-		return "DELETE";
-	else if (t == TRACE)
-		return "TRACE";
-	else if (t == CONNECT)
-		return "CONNECT";
-	return "NONE";
-}
-
 std::ostream &operator<<(std::ostream &o, const Location &loc)
 {
 	std::cout << "\tlocation: " << loc.__path << "\n";
