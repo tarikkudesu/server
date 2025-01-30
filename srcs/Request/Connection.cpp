@@ -66,7 +66,6 @@ Server *Connection::identifyServer()
  ***************************************************************************/
 void Connection::processResponse()
 {
-    std::cout << __request << "\n";
     wsu::info("COMPLETE");
     Server *server = identifyServer();
     Location &location = server->identifyLocation(__request.__URI);

@@ -13,7 +13,8 @@ ErrorResponse::ErrorResponse(String redirection, String setCookie)
 		this->__reasonPhrase = "Ok";
 		buildStatusLine();
 		this->__Body = readFielContent(redirection);
-		this->__headers = "Set-Cookie: token=" + setCookie + "; expires=Thu, 31 Feb 2025 12:00:00 UTC;";
+		if (!setCookie.empty())
+			this->__headers = "Set-Cookie: token=" + setCookie + "; expires=Thu, 31 Feb 2025 12:00:00 UTC;";
 		buildHeaderFeilds();
 }
 

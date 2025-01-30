@@ -12,6 +12,7 @@ class Token
 
 	public:
 		bool						authentified(const String &id);
+		bool						userInDb(String& user);
 		String						generateTokenId();
 		String						getCookie(String& id);
 		String						addUserInDb(String userInfo, String serverFile);

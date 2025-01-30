@@ -40,12 +40,12 @@ Token	&Token::operator=( const Token &assign )
 String    Token::addUserInDb(String userInfo, String serverFile)
 {
 	String cookie("");
-	std::ofstream file( ("essentials/" + serverFile).c_str() ,std::ios::app); // Open file for appending
+	std::ofstream file( ("essentials/serversDB/" + serverFile + ".csv").c_str() ,std::ios::app); // Open file for appending
 
 	if (file.is_open())
 	{
 		cookie = generateTokenId();
-		file << userInfo + " " + cookie  << "\n";
+		file << cookie + " " +userInfo << "\n";
 		file.close();
 	}
 	return cookie;
@@ -57,6 +57,14 @@ String	Token::getCookie(String& id)
 	if (element == tokenDB.end())
 		return "";
 	return element->second;
+}
+
+bool	Token::userInDb(String& user)
+{
+	for (std::map<String, String>::iterator it = this->tokenDB.begin(); it != tokenDB.end(); it++)
+		if (it->second.compare(user))
+			return true;
+	return false;
 }
 
 String Token::generateTokenId()
@@ -78,7 +86,5 @@ String Token::generateTokenId()
 
 bool Token::authentified(const String &id)
 {
-	if (tokenDB.find(id) != tokenDB.end())
-		return true;
-	return false;
+	return tokenDB.find(id) != tokenDB.end();
 }

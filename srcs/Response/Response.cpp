@@ -86,7 +86,7 @@ bool	Response::authenticated()
 	if (__request.__headers.__cookie.empty())
 		return false;
 	t_svec cookies = wsu::splitByChar(__request.__headers.__cookie, ';');
-	for (t_svec::iterator it = cookies.begin(); it != cookies.end(); it++)
+		for (t_svec::iterator it = cookies.begin(); it != cookies.end(); it++)
 	{
 		t_svec cook = wsu::splitByChar(*it, '=');
 		if (cook.size() == 2 && token.authentified(cook[1]))
@@ -147,16 +147,15 @@ void Response::executePost()
 	//verify if the post content shouldnt be reconstructed;  
 	if (__request.__headers.__transferType != MULTIPART && !__location.__authenticate.empty())
 	{
-		String cook;
-		String id = readFielContent(__request.__body[0]._fileName);
-		if (!token.authentified(id))
+		String cookie;
+		String data = readFielContent(__request.__body[0]._fileName);
+		if (!token.userInDb(data))
 		{
-			__server.__tokenDB.insert(std::make_pair(id, token.generateTokenId()));
-			cook = token.addUserInDb(id, __server.serverIdentity());
+			cookie = token.addUserInDb(data, __server.serverIdentity());
+			if (!cookie.empty())
+				__server.__tokenDB.insert(std::make_pair(cookie, data));
 		}
-		else
-			cook = token.getCookie(id);
-		throw ErrorResponse(explorer.__fullPath, cook);
+		throw ErrorResponse(explorer.__fullPath, cookie);
 	}
 	Post post(explorer, __request);
 	code = 200;
