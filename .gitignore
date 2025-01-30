@@ -1,11 +1,24 @@
 # Prerequisites
 *.d
 
+.temp
+.uploads
+.logs
+tester
+webserv
+cgi_tester
+prog
+i
+o
+j
+*DS_Store
+
 # Compiled Object files
 *.slo
 *.lo
 *.o
 *.obj
+*.out
 
 # Precompiled Headers
 *.gch
