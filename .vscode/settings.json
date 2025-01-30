@@ -83,7 +83,8 @@
 		"concepts": "cpp",
 		"numeric": "cpp",
 		"random": "cpp",
-		"numbers": "cpp"
+		"numbers": "cpp",
+		"ranges": "cpp"
 	},
 	"editor.fontWeight": "bold",
 	// "workbench.sash.size": 1,

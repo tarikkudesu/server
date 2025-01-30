@@ -14,9 +14,22 @@ Response::Response(Request &request,
 	for (; it != __location.__allowMethods.end() && *it != __request.__method; it++)
 		;
 	if (it == __location.__allowMethods.end())
-		throw ErrorResponse(405, __location, "method not allowed in this location");
+		throw ErrorResponse(405, __location, getMethod(__request.__method) + " : method not allowed in this location");
 	__check_methods();
 	buildResponse();
+}
+
+String Response::getMethod(t_method Method)
+{
+	switch (Method)
+	{
+		case GET:
+			return "GET";
+		case POST:
+			return "POST";
+		default:
+			return "DELETE";
+	}
 }
 
 Response::Response(const Response &copy) : explorer(RessourceHandler(copy.explorer)),
@@ -78,7 +91,7 @@ bool	Response::authenticated()
 		t_svec cook = wsu::splitByChar(*it, '=');
 		if (cook.size() == 2 && token.authentified(cook[1]))
 			return true;
-	}	
+	}
 	return false;
 }
 
@@ -105,22 +118,45 @@ void Response::executeCgi()
 void Response::executeGet()
 {
 	if (shouldAuthenticate() && !authenticated())
-		throw ErrorResponse(301, __location.__authenticate, __location);
-	Get get(__location.__autoindex, explorer, body);
+	{
+		Location location(__location); //we shouldnt update the location of the config
+		location.__index.clear();
+		location.__index.push_back(__location.__authenticate);
+		RessourceHandler tmpExplorer(location, __request.__URI);
+		Get get(location.__autoindex, tmpExplorer, body);
+	}
+	else
+		Get get(__location.__autoindex, explorer, body);
 	reasonPhrase = "Ok";
 	code = 200;
+}
+
+String	readFielContent(String fileName)
+{
+	String userInfo;
+	String buffer;
+	std::ifstream file(fileName.c_str());
+	
+	while (std::getline(file, buffer))
+		userInfo.append(buffer);
+	return userInfo;
 }
 
 void Response::executePost()
 {
 	//verify if the post content shouldnt be reconstructed;  
-	if (__request.__headers.__transferType != MULTIPART)
+	if (__request.__headers.__transferType != MULTIPART && !__location.__authenticate.empty())
 	{
-		String cook = token.UserInDb();
-		if (cook.empty())
-			throw ErrorResponse(301, __location.__authenticate, __location);
-		__request.__headers.__cookie = cook;
-		throw ErrorResponse(301, __request.__URI, __location);
+		String cook;
+		String id = readFielContent(__request.__body[0]._fileName);
+		if (!token.authentified(id))
+		{
+			__server.__tokenDB.insert(std::make_pair(id, token.generateTokenId()));
+			cook = token.addUserInDb(id, __server.serverIdentity());
+		}
+		else
+			cook = token.getCookie(id);
+		throw ErrorResponse(explorer.__fullPath, cook);
 	}
 	Post post(explorer, __request);
 	code = 200;
@@ -141,7 +177,6 @@ void Response::buildResponse()
 	for (std::map<String, String>::iterator it = headers.begin(); it != headers.end(); ++it)
 		resMsg.join(it->first + ": " + it->second + "\r\n");
 	resMsg.join(String("\r\n"));
-	std::cout << resMsg << std::endl;
 	body.insert(body.begin(), resMsg);
 }
 

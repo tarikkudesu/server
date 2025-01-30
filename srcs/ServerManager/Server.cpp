@@ -22,7 +22,6 @@ Server::Server(String line) : __sd(-1),
 	if (__host.empty())
 		__host = "0.0.0.0";
 	__directives.clear();
-    LoadUsers();
 }
 Server::Server(const Server &copy)
 {
@@ -61,11 +60,15 @@ Server::~Server()
 void Server::LoadUsers()
 {
 	String line;
-	std::ifstream __sessionFile("essentials/sessionDB.csv");
+	std::ifstream __sessionFile(("essentials/serversDB/" + this->serverIdentity() + ".csv").c_str());
 	if (!__sessionFile.is_open())
 		return ;
 	while (std::getline(__sessionFile, line))
-		__tokenDB.insert(std::make_pair(wsu::generateTokenId(), line));
+	{
+		std::vector<String> vect = wsu::splitByChar(line, ' ');
+		if (vect.size() == 2)
+			__tokenDB.insert(std::make_pair(vect.at(0), vect.at(1)));
+	}
 	__sessionFile.close();
 }
 int Server::getServerSocket() const
@@ -158,6 +161,7 @@ void Server::setup()
 		throw std::runtime_error(serverIdentity() + ": non functional: failed to bind socket");
 	if (-1 == listen(this->__sd, 10))
 		throw std::runtime_error(serverIdentity() + ": non functional: failed to listen for connections");
+	LoadUsers();
 }
 
 /**************************************************************************************************************
