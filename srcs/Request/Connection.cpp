@@ -82,9 +82,11 @@ void Connection::identifyWorkers()
 void Connection::addData(const BasicString &input)
 {
 	this->__data.join(input);
+    std::cout << __data << "\n";
 }
 void Connection::processData()
 {
+    wsu::info("processing data");
     if (__phase == PROCESSING_REQUEST && this->__data.length() == 0)
         return ;
 	try
@@ -103,6 +105,7 @@ void Connection::processData()
 	}
 	catch (BasicString &e)
 	{
+        std::cout << e;
 		this->__responseQueue.push(e);
 	}
 	catch (wsu::persist &e)

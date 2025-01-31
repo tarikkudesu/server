@@ -122,18 +122,23 @@ void Response::cgiPhase()
 }
 void Response::getPhase()
 {
+    static bool wtf = true;
     wsu::info("Get phase");
     if (checkCgi())
         __responsePhase = CGI_PROCESS;
     else
     {
-        if (__get.__phase == GET_IN)
+        if (__get.__phase == GET_IN && wtf)
         {
             wsu::warn("got in");
             buildResponse();
             __get.setWorkers(explorer, *__location, *__server);
+            wtf = false;
+            throw __body;
         }
         __get.executeGet(__body);
+        if (__responsePhase == PREPARING_RESPONSE)
+            wtf = true;
         throw __body;
     }
 }

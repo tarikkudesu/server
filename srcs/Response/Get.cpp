@@ -98,11 +98,11 @@ void Get::duringGetPhase(BasicString &body)
     char buffer[100];
     __file.read(buffer, sizeof(buffer));
     BasicString k(buffer, __file.gcount());
-    std::cout << YELLOW << k << RESET;
+    // std::cout << YELLOW << k << RESET;
     if (__file.eof())
         __phase = GET_OUT;
     if (__file.gcount() > 0)
-        body.join(k);
+        body = k;
 }
 void Get::setWorkers(RessourceHandler &explorer, Location &location, Server &server)
 {

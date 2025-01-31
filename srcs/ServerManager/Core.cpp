@@ -343,7 +343,10 @@ void Core::proccessPollEvent(int sd, int &retV)
 
 void Core::extraProcess(int sd)
 {
-        t_Connections::iterator iter = Core::__connections.find(sd);
+    struct pollfd &sockStruct = Core::__events[sd];
+    t_Connections::iterator iter = Core::__connections.find(sockStruct.fd);
+    if (!isServerSocket(sockStruct.fd))
+    {
         if (iter != Core::__connections.end())
         {
             try
@@ -356,6 +359,7 @@ void Core::extraProcess(int sd)
                 wsu::info("removing connection");
             }
         }
+    }
 }
 void Core::mainLoop()
 {
