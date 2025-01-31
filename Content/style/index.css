@@ -7,7 +7,7 @@ body {
 .container {
     max-width: 1200px;
     margin: 80px auto;
-    padding: 100px 20px 400px 20px;
+    padding: 20px 20px 400px 20px;
 }
 
 .title {
@@ -28,13 +28,14 @@ body {
     text-align: center;
     color: rgb(210, 215, 223);
     margin-bottom: 50px;
+    margin-top: 100px;
 }
 
 .team-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
-    margin-top: 40px;
+    margin: 100px auto;
 }
 
 .team-member {
@@ -87,6 +88,7 @@ body {
 }
 
 .social-link {
+    font-size: 16px;
     color: rgb(210, 215, 223);
     text-decoration: none;
     padding: 8px 16px;
@@ -104,4 +106,99 @@ body {
     .team-grid {
         grid-template-columns: 1fr;
     }
+}
+
+.form-container {
+    border: 1px solid rgba(210, 215, 223, 0.26);
+    border-radius: 4px;
+    margin: 100px auto;
+    background-color: rgb(22, 27, 34);
+    padding: 20px;
+    max-width: 400px;
+}
+
+h2 {
+    font-size: 25px;
+    text-align: center;
+    padding: 0 0 25px 0;
+    margin: 0;
+    color: rgb(210, 215, 223);
+}
+
+.file-input-container {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-input-label {
+    display: block;
+    padding: 10px 15px;
+    background-color: rgb(33, 38, 45);
+    color: rgb(210, 215, 223);
+    border: 1px solid rgba(210, 215, 223, 0.26);
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-input-label:hover {
+    background-color: rgb(45, 50, 57);
+    border-color: rgb(210, 215, 223);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.file-name {
+    margin-top: 5px;
+    color: rgb(210, 215, 223);
+    font-size: 14px;
+    text-align: center;
+    word-break: break-all;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px 24px;
+    background-color: #238636;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    margin-top: 40px;
+}
+
+.submit-btn:hover {
+    background-color: #2ea043;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.listing {
+    width: 100%;
+    margin-top: 20px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    color: white;
+    border: 1px solid rgba(210, 215, 223, 0.26);
+    border-radius: 4px;
+}
+.listing:hover {
+    background-color: rgba(210, 215, 223, 0.1);
+    transform: translateY(-2px);
+    -webkit-transform: translateY(-2px);
+    -moz-transform: translateY(-2px);
+    -ms-transform: translateY(-2px);
+    -o-transform: translateY(-2px);
 }
