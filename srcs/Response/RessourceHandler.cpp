@@ -4,8 +4,7 @@ RessourceHandler::RessourceHandler()
 {
 }
 
-RessourceHandler::RessourceHandler(const RessourceHandler &copy) : __URI(copy.__URI),
-                                                                   __type(copy.__type),
+RessourceHandler::RessourceHandler(const RessourceHandler &copy) : __type(copy.__type),
                                                                    __fullPath(copy.__fullPath),
                                                                    __location(copy.__location)
 {
@@ -15,7 +14,6 @@ RessourceHandler &RessourceHandler::operator=(const RessourceHandler &assign)
 {
     if (this != &assign)
     {
-        __URI = assign.__URI;
         __type = assign.__type;
         __location = assign.__location;
         __fullPath = assign.__fullPath;
@@ -25,12 +23,6 @@ RessourceHandler &RessourceHandler::operator=(const RessourceHandler &assign)
 RessourceHandler::~RessourceHandler()
 {
 }
-
-
-void RessourceHandler::clear()
-{
-    // a implementer
-}
 void RessourceHandler::loadType(const char *path)
 {
     struct stat file_stat;
@@ -38,12 +30,11 @@ void RessourceHandler::loadType(const char *path)
         throw ErrorResponse(404, *__location, "the file does not exist on the server"); // to check what the exact status code and reason phrase
     else if (!(file_stat.st_mode & S_IRUSR))
         throw ErrorResponse(401, *__location, "don't have permission to read the file"); // to check what the exact status code and reason phrase
-    if (S_ISREG(file_stat.st_mode))
-        __type = FILE_;
-    else if (S_ISDIR(file_stat.st_mode))
+    if (S_ISDIR(file_stat.st_mode))
         __type = FOLDER;
+    else
+        __type = FILE_;
 }
-
 void	RessourceHandler::changeRequestedFile(String file)
 {
 	size_t pos = __fullPath.find_last_of("/");
@@ -52,10 +43,9 @@ void	RessourceHandler::changeRequestedFile(String file)
 	__fullPath.erase(pos + 1);
 	__fullPath = wsu::joinPaths(__fullPath, file);
 }
-
-void RessourceHandler::loadPathExploring(void)
+void RessourceHandler::loadPathExploring(const String& uri)
 {
-    __fullPath = wsu::joinPaths(__location->__root, __URI);
+    __fullPath = wsu::joinPaths(__location->__root, uri);
     loadType(__fullPath.c_str());
     if (__type == FOLDER)
     {
@@ -72,19 +62,19 @@ void RessourceHandler::loadPathExploring(void)
         }
     }
 }
-void RessourceHandler::prepareRessource(const Location& location, const String& uri)
+void RessourceHandler::prepareRessource(Location& location, const String& uri)
 {
-    clear();
+    __fullPath.clear();
+    __location = &location;
     if (wsu::__criticalOverLoad == true)
-        throw ErrorResponse(503, "critical server overload");
+        throw ErrorResponse(503, *__location, "critical server overload");
     if (!__location->__return.empty())
         throw ErrorResponse(301, __location->__return, *__location);
-    loadPathExploring();
+    loadPathExploring(uri);
 }
 
 std::ostream &operator<<(std::ostream &o, RessourceHandler const &r)
 {
-    std::cout << "URI: " << r.__URI << "\n";
     std::cout << "fullPath: " << r.__fullPath << "\n";
     std::cout << "type: ";
     if (r.__type == FOLDER)

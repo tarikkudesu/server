@@ -71,7 +71,7 @@ void Connection::identifyWorkers()
 {
 	Server *server = identifyServer();
 	Location &location = server->identifyLocation(__request.__URI);
-	__response.setupWorkers(__request, *server, location);
+	__response.setupWorkers(*server, location);
 	this->__phase = PROCESSING_RESPONSE;
 }
 /**********************************************************************************
@@ -82,7 +82,6 @@ void Connection::proccessData(BasicString input)
 	this->__data.join(input);
 	try
 	{
-		wsu::info("proccessing request");
 		if (__phase == PROCESSING_REQUEST)
 			__request.processData(__data);
 		if (__phase == IDENTIFY_WORKERS)
@@ -105,5 +104,7 @@ void Connection::proccessData(BasicString input)
 	}
 	catch (std::exception &e)
 	{
+		wsu::fatal("presist");
+		__phase = PROCESSING_REQUEST;
 	}
 }

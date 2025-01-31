@@ -18,29 +18,22 @@ class Response
 		String							reasonPhrase;
 		std::map<String, String>		headers;
 		int 							code;
-		Token							token;
 
-
-		void							__check_methods();
-		void							buildResponse();
-		void							setHeader();
-		void							executeGet(void);
-		void							executePost(void);
-		void							executeDelete(void);
-		void							executeCgi(void);
+		void							reset();
+		void							cgiPhase();
+		void							getPhase();
 		bool							checkCgi();
+		void							setHeader();
 		void							deleteFile();
-		void							executeAuth();
-		bool							authenticated();
+		void							deletePhase();
+		void							preparePhase();
+		void							buildResponse();
+		void							__check_methods();
 		bool							shouldAuthenticate();
-
+		void							postPhase(BasicString &data);
 
 	public:
-		const std::vector<BasicString>&	getResponse(void) const;
-		String							getMethod(t_method Method);
-		void							print() const;
-
-		void							setupWorkers(Request &request, Server &server, Location &location);
+		void							setupWorkers(Server &server, Location &location);
 		void							processData(BasicString &data);
 
 		Response(t_connection_phase &phase, Request &request);
@@ -48,7 +41,5 @@ class Response
 		Response &operator=(const Response &assign);
 		~Response();
 };
-
-std::ostream &operator<<(std::ostream &o, const Response &r);
 
 #endif

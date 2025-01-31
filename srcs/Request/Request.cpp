@@ -133,7 +133,10 @@ void Request::processData(BasicString &data)
     if (s == String::npos || h == String::npos)
     {
         if (data.length() > REQUEST_MAX_SIZE)
+        {
+            data.clear();
             throw ErrorResponse(400, "Oversized request");
+        }
         throw wsu::persist();
     }
     h -= (s + 2);
@@ -148,7 +151,7 @@ std::ostream &operator<<(std::ostream &o, const Request &req)
 {
     std::cout << "Request: \n";
     std::cout << "\tprotocole: " << req.__protocole << "\n";
-    std::cout << "\tmethod: " << methodToString(req.__method) << "\n";
+    std::cout << "\tmethod: " << wsu::methodToString(req.__method) << "\n";
     std::cout << "\tURI: " << req.__URI << "\n";
     std::cout << "\tquery: " << req.__queryString << "\n";
     std::cout << "\n";

@@ -232,7 +232,7 @@ void Core::readDataFromSocket(int sd)
             {
                 iter->second->proccessData(BasicString(buff, bytesRead));
             }
-            catch (Close &e)
+            catch (wsu::Close &e)
             {
                 removeConnection(sd);
                 wsu::info("removing connection");

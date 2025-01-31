@@ -52,11 +52,40 @@ Server::~Server()
 	__serverNames.clear();
 	wsu::debug("Server destructor");
 }
-
-/****************************************************************************
- *                               MINI METHODS                               *
- ****************************************************************************/
-
+/*****************************************************************************************
+ *									  COOKIES SECTION									 *
+ *****************************************************************************************/
+String	  Server::addUserInDb(const String &userInfo) const
+{
+	String cookie("");
+	std::ofstream file( ("essentials/serversDB/" + serverIdentity() + ".csv").c_str() ,std::ios::app);
+	{
+		cookie = wsu::generateTokenId();
+		file << cookie + " " +userInfo << "\n";
+		file.close();
+	}
+	return cookie;
+}
+String	Server::getCookie(String& id) const
+{
+	std::map<String, String>::const_iterator element = this->__tokenDB.find(id);
+	if (element == __tokenDB.end())
+		return "";
+	return element->second;
+}
+bool	Server::userInDb(String& user) const
+{
+	for (std::map<String, String>::const_iterator it = this->__tokenDB.begin(); it != __tokenDB.end(); it++)
+	{
+		if (it->second.compare(user))
+			return true;
+	}
+	return false;
+}
+bool Server::authentified(const String &id) const
+{
+	return __tokenDB.find(id) != __tokenDB.end();
+}
 void Server::LoadUsers()
 {
 	String line;
@@ -71,6 +100,9 @@ void Server::LoadUsers()
 	}
 	__sessionFile.close();
 }
+/****************************************************************************
+ *								 MINI METHODS								*
+ ****************************************************************************/
 int Server::getServerSocket() const
 {
 	return this->__sd;
@@ -123,9 +155,8 @@ Location &Server::identifyLocation(const String &URI)
 	return *loc;
 }
 /***********************************************************************
- *                               METHODS                               *
+ *								 METHODS							   *
  ***********************************************************************/
-
 void Server::setup()
 {
 	struct sockaddr_in addr;
@@ -163,11 +194,9 @@ void Server::setup()
 		throw std::runtime_error(serverIdentity() + ": non functional: failed to listen for connections");
 	LoadUsers();
 }
-
 /**************************************************************************************************************
- *                                           PROCCESSING DIRECTIVES                                           *
+ *											 PROCCESSING DIRECTIVES 										  *
  **************************************************************************************************************/
-
 void Server::proccessRootToken(t_svec &tokens)
 {
 	if (!__root.empty())

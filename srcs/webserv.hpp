@@ -61,7 +61,9 @@ typedef std::map<String, String>::iterator mapIterator;
 #define RESET "\033[1;0m"
 
 #define MAX_EVENTS 4096
+
 #define READ_SIZE 8192
+#define FORM_MAX_SIZE 1024
 #define REQUEST_MAX_SIZE 4096
 #define REQUEST_LINE_MAX_SIZE 4096
 #define REQUEST_HEADERS_MAX_SIZE 8192
@@ -80,6 +82,7 @@ typedef std::map<String, String>::iterator mapIterator;
 
 typedef enum e_multipartsection
 {
+    MP_INIT,
 	MP_HEADERS,
 	MP_BODY,
 } t_multipartsection;

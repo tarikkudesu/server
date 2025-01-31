@@ -151,6 +151,7 @@ void wsu::terr(String __error_message)
 /*************************************************************************************************
  *                                           UTILITIES                                           *
  *************************************************************************************************/
+
 String	wsu::readFielContent(String fileName)
 {
 	String buffer;
@@ -203,7 +204,7 @@ bool wsu::endWith(const std::string &file, const char *extension)
 }
 String wsu::generateTokenId()
 {
-    String tokenId;
+	String tokenId;
 	std::string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	std::string specialChars = "123456789";
 	static int sed = 0;
@@ -215,7 +216,7 @@ String wsu::generateTokenId()
 		tokenId += alphabet[randomAlphabetIndex];
 		tokenId += specialChars[randomSpecialIndex];
 	}
-    return tokenId;
+	return tokenId;
 }
 String wsu::logDate()
 {

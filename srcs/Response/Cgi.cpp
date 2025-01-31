@@ -5,14 +5,12 @@ typedef std::map<String, String> Map;
 
 /*=---------------------constructors-----------------------*/
 
-Cgi::Cgi(RessourceHandler &explorer,
-         Request &request,
-         Location &location) : __request(request),
-                               __explorer(explorer),
-                               __location(location),
-                               __start(std::clock_t()),
-                               __body("")
-
+Cgi::Cgi(RessourceHandler &explorer, Request &request, Location &location, BasicString &body) : __request(request),
+                                                                                                __explorer(explorer),
+                                                                                                __location(location),
+                                                                                                __reqBody(body),
+                                                                                                __start(std::time(NULL)),
+                                                                                                __body("")
 {
     cgiProcess();
 }
@@ -37,12 +35,12 @@ void Cgi::execute(const char *path, int fd)
     {
         perror("dup2");
         clear();
-		close(fd);
+        close(fd);
         exit(1);
     }
     const char *argv[] = {"/usr/bin/php", path, NULL};
-	if (wsu::endWith(path, ".java"))
-		argv[0] = "/usr/bin/java";
+    if (wsu::endWith(path, ".java"))
+        argv[0] = "/usr/bin/java";
     execve(argv[0], (char *const *)argv, env);
     clear();
     close(fd);
@@ -70,23 +68,7 @@ const char *Cgi::getMethod()
 
 String Cgi::getQueryString()
 {
-    std::string queryString;
-    if (__request.__method == POST)
-    {
-        char buffer[READ_SIZE];
-		std::vector<s_body>& vect = __request.__body;
-		if (!vect.size())
-			throw ErrorResponse(403, __location, "emoty POST body");
-        std::ifstream reader(vect.at(0)._fileName.c_str());
-        do
-        {
-            reader.read(buffer, READ_SIZE);
-            queryString.append(buffer);
-            bzero(buffer, READ_SIZE);
-        } while (reader.gcount());
-        return queryString;
-    }
-    return __request.__queryString;
+    return __request.__method == POST ? __reqBody.to_string() : __request.__queryString;
 }
 
 void Cgi::setCgiEnvironement()

@@ -44,7 +44,6 @@ public:
 	static void running(String __log_message);
 	static void terr(String __error_message);
 	static void terr(char *__eror_message);
-
 	static String logDate();
 	static void loadErrPages();
 	static void loadMimeTypes();

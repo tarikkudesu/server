@@ -33,8 +33,13 @@ class Server
 		std::vector< Location >			__locations;
 		t_svec							__serverNames;
 
+
 		bool							amITheServerYouAreLookingFor( const String &sN );
+		String							addUserInDb(const String &userInfo) const;
 		Location						&identifyLocation( const String &URI );
+		bool							authentified(const String &id) const;
+		bool							userInDb(String& user) const;
+		String							getCookie(String& id) const;
 		int								getServerSocket() const;
 		String							serverIdentity() const;
 		const String					&getServerHost() const;

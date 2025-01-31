@@ -13,7 +13,7 @@ request = (
         "Content-Length: 374\r\n"
         "\r\n"
         "-----------------------------12345\r\n"
-        "Content-Disposition: form-data; name=\"file1\"; filename=\"test.txt\"\r\n"
+        "Content-Disposition: form-data; name=\"file1\"; filename=\"test.txt\";\r\n"
         "Content-Type: text/plain\r\n"
         "\r\n"
         "11111111111111111111111111111111111111111111111111111111111111111111111111\r\n"

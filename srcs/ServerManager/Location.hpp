@@ -1,7 +1,7 @@
 #ifndef __LOCATION_HPP__
 # define __LOCATION_HPP__
 
-# include "../utilities/Token.hpp"
+# include "../utilities/BasicString.hpp"
 
 class Location
 {
@@ -17,7 +17,7 @@ class Location
 		void								proccessReturnDirective( t_svec &tokens );
 		void								proccessIndexDirective( t_svec &tokens );
 		void								proccessRootDirective( t_svec &tokens );
-		void								proccessToken(t_svec &tokens );
+		void								proccessToken( t_svec &tokens );
 		void								LocationBlock( size_t pos );
 		void								addDirective( size_t end );
 		void								proccessDirectives();
@@ -36,8 +36,8 @@ class Location
 		std::deque< String >				__directives;
 		std::map< int16_t, String >			__errorPages;
 		std::vector< t_method >				__allowMethods;
-		String								__authenticate;
-		long								__clientBodyBufferSize;
+		std::vector< String >				__authenticate;
+		size_t								__clientBodyBufferSize;
 
 
 		Location( const Location &copy );
@@ -47,7 +47,6 @@ class Location
 		~Location();
 };
 
-String methodToString(t_method t);
 std::ostream &operator<<( std::ostream &o, const Location &loc );
 
 #endif

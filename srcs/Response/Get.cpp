@@ -1,17 +1,22 @@
 #include "Get.hpp"
 
-Get::Get(t_response_phase& phase, Request& request)	:	__request(request),
-														__responsePhase(phase),
-														__phase(GET_IN)
+Get::Get(Request &request, t_response_phase &phase) : request(request),
+                                                      __responsePhase(phase),
+                                                      explorer(NULL),
+                                                      location(NULL),
+                                                      server(NULL),
+                                                      __phase(GET_IN)
 {
 }
-
-Get::Get(const Get &copy) // a implementer
+Get::Get(const Get &copy) : request(copy.request),
+                            __responsePhase(copy.__responsePhase),
+                            explorer(copy.explorer),
+                            location(copy.location),
+                            server(copy.server),
+                            __phase(copy.__phase)
 {
     *this = copy;
 }
-
-// a implementer
 Get &Get::operator=(const Get &assign)
 {
     if (this != &assign)
@@ -19,95 +24,95 @@ Get &Get::operator=(const Get &assign)
     }
     return *this;
 }
-
-// a implementer
 Get::~Get()
 {
 }
 
-// void Get::readFile(void)
-// {
-//     std::ifstream file(explorer.getPath().c_str(), std::ios::binary);
-//     if (!file.is_open())
-//         throw ErrorResponse(500, explorer.__location, "Internal Server Error");
-//     char buffer[4096];
-//     while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0)
-//         this->body.push_back(BasicString(buffer, file.gcount()));
-//     file.close();
-// }
-
-
-bool	Get::authenticated()
+void Get::reset()
 {
-	if (__request.__headers.__cookie.empty())
-		return false;
-	t_svec cookies = wsu::splitByChar(__request.__headers.__cookie, ';');
-	for (t_svec::iterator it = cookies.begin(); it != cookies.end(); it++)
-	{
-		t_svec cook = wsu::splitByChar(*it, '=');
-		if (cook.size() == 2 && __token.authentified(cook[1]))
-			return true;
-	}
-	return false;
-}
-
-void Get::executeGet(RessourceHandler &explorer, Location &location, BasicString &body)
-{
-    if (__phase == GET_IN)
-    {
-        if (explorer.__type == FILE_)
-        {
-			if (explorer.__fullPath.compare(location.__authenticate[0]) && !authenticated())
-				explorer.changeRequestedFile(location.__authenticate[1]);
-			this->__file.open(explorer.__fullPath.c_str());
-			if (!__file.is_open())
-			{
-				__responsePhase = PREPARING_RESPONSE;
-				throw ErrorResponse(403, location, "Internal Server Error");
-			}
-			__phase = DURING_GET;
-            // open File
-            /*****************************************************************
-             * IN CASE OF AN ERROR SET __RESPONSEPHASE = PREPARING_RESPONSE; *
-             *****************************************************************/
-            // std::ifstream file(explorer.getPath().c_str(), std::ios::binary);
-            // if (!file.is_open())
-            //     throw ErrorResponse(500, explorer.__location, "Internal Server Error");
-        }
-        else if (location.__autoindex)
-        {
-            __responsePhase = PREPARING_RESPONSE;
-            t_svec directories;
-            DIR *dir = opendir(explorer.__fullPath.c_str());
-            if (!dir)
-                throw ErrorResponse(500, *explorer.__location, "could not open directory");
-            struct dirent *entry;
-            while ((entry = readdir(dir)))
-            {
-                directories.push_back(entry->d_name);
-                directories.push_back(" ");
-            }
-            closedir(dir);
-            body = wsu::buildListingBody(explorer.__fullPath, directories);
-        }
-        else
-            throw ErrorResponse(403, "Forbidden");
-    }
-    if (__phase == DURING_GET)
-    {
-		char buffer[READ_SIZE];
-		__file.read(buffer, sizeof(buffer));
-        if (__file.eof())
-        {
-            __phase = GET_OUT;
-            __responsePhase = PREPARING_RESPONSE;
-        }
-		if (__file.gcount() > 0)
-			throw BasicString(buffer, __file.gcount());
-    }
-    if (__phase == GET_OUT)
-    {
+    if (__file.is_open())
         __file.close();
-        __phase = GET_IN;
+    __phase = GET_IN;
+    __responsePhase = PREPARING_RESPONSE;
+}
+bool Get::authenticated()
+{
+    if (request.__headers.__cookie.empty())
+        return false;
+    t_svec cookies = wsu::splitByChar(request.__headers.__cookie, ';');
+    for (t_svec::iterator it = cookies.begin(); it != cookies.end(); it++)
+    {
+        t_svec cook = wsu::splitByChar(*it, '=');
+        if (cook.size() == 2 && server->authentified(cook[1]))
+            return true;
+    }
+    return false;
+}
+void Get::getInPhase(BasicString &body)
+{
+    if (explorer->__type == FILE_)
+    {
+        if (location->__authenticate.size())
+        {
+            if (explorer->__fullPath.compare(location->__authenticate[0]) && !authenticated())
+                explorer->changeRequestedFile(location->__authenticate[1]);
+        }
+        this->__file.open(explorer->__fullPath.c_str(), std::ios::binary);
+        if (!__file.is_open())
+            throw ErrorResponse(403, *location, "Internal Server Error");
+        __phase = DURING_GET;
+    }
+    else if (location->__autoindex)
+    {
+        __responsePhase = PREPARING_RESPONSE;
+        t_svec directories;
+        DIR *dir = opendir(explorer->__fullPath.c_str());
+        if (!dir)
+            throw ErrorResponse(500, *location, "could not open directory");
+        struct dirent *entry;
+        while ((entry = readdir(dir)))
+        {
+            directories.push_back(entry->d_name);
+            directories.push_back(" ");
+        }
+        closedir(dir);
+        body = wsu::buildListingBody(explorer->__fullPath, directories);
+        __phase = GET_OUT;
+    }
+    else
+        throw ErrorResponse(403, "Forbidden");
+}
+void Get::duringGetPhase(BasicString &body)
+{
+    char buffer[READ_SIZE];
+    __file.read(buffer, sizeof(buffer));
+    if (__file.fail())
+        throw ErrorResponse(403, *location, "Internal Server Error");
+    if (__file.eof())
+        __phase = GET_OUT;
+    if (__file.gcount() > 0)
+        body.join(BasicString(buffer, __file.gcount()));
+}
+void Get::setWorkers(RessourceHandler &explorer, Location &location, Server &server)
+{
+    this->location = &location;
+    this->explorer = &explorer;
+    this->server = &server;
+}
+void Get::executeGet(BasicString &body)
+{
+    try
+    {
+        if (__phase == GET_IN)
+            getInPhase(body);
+        if (__phase == DURING_GET)
+            duringGetPhase(body);
+        if (__phase == GET_OUT)
+            reset();
+    }
+    catch (ErrorResponse &e)
+    {
+        reset();
+        throw e;
     }
 }

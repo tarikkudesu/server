@@ -9,7 +9,7 @@ Location::Location(const String &conf, const String &root) : b__r(true),
 															 __line(conf),
 															 __root(root),
 															 __autoindex(false),
-															 __clientBodyBufferSize(-1)
+															 __clientBodyBufferSize(8000)
 {
 	wsu::debug("Location single para constructor");
 	parse();
@@ -110,23 +110,15 @@ void Location::proccessAllowMethodsDirective(t_svec &tokens)
 	for (t_svec::iterator it = tokens.begin() + 1; it != tokens.end(); it++)
 	{
 		if (*it != "OPTIONS" && *it != "GET" && *it != "HEAD" && *it != "PUT" && *it != "DELETE" && *it != "TRACE" && *it != "CONNECT" && *it != "POST")
-			throw std::runtime_error(*it + " invalid value");
-		if (*it == "OPTIONS" && std::find(__allowMethods.begin(), __allowMethods.end(), OPTIONS) == __allowMethods.end())
-			this->__allowMethods.push_back(OPTIONS);
-		else if (*it == "GET" && std::find(__allowMethods.begin(), __allowMethods.end(), GET) == __allowMethods.end())
+			throw std::runtime_error(*it + "invalid value");
+		if (*it == "GET" && std::find(__allowMethods.begin(), __allowMethods.end(), GET) == __allowMethods.end())
 			this->__allowMethods.push_back(GET);
-		else if (*it == "HEAD" && std::find(__allowMethods.begin(), __allowMethods.end(), HEAD) == __allowMethods.end())
-			this->__allowMethods.push_back(HEAD);
-		else if (*it == "PUT" && std::find(__allowMethods.begin(), __allowMethods.end(), PUT) == __allowMethods.end())
-			this->__allowMethods.push_back(PUT);
 		else if (*it == "DELETE" && std::find(__allowMethods.begin(), __allowMethods.end(), DELETE) == __allowMethods.end())
 			this->__allowMethods.push_back(DELETE);
-		else if (*it == "TRACE" && std::find(__allowMethods.begin(), __allowMethods.end(), TRACE) == __allowMethods.end())
-			this->__allowMethods.push_back(TRACE);
-		else if (*it == "CONNECT" && std::find(__allowMethods.begin(), __allowMethods.end(), CONNECT) == __allowMethods.end())
-			this->__allowMethods.push_back(CONNECT);
 		else if (*it == "POST" && std::find(__allowMethods.begin(), __allowMethods.end(), POST) == __allowMethods.end())
 			this->__allowMethods.push_back(POST);
+        else
+			throw std::runtime_error(*it + " method not supported");
 	}
 }
 void Location::proccessReturnDirective(t_svec &tokens)
@@ -143,8 +135,6 @@ void Location::proccessCgiPassDirective(t_svec &tokens)
 }
 void Location::proccessClientBodyBufferSizeToken(t_svec &tokens)
 {
-	if (this->__clientBodyBufferSize != -1)
-		throw std::runtime_error(tokens.at(0) + " directive is duplicate");
 	if (tokens.size() == 1)
 		throw std::runtime_error(tokens.at(0) + ": no client_body_buffer_size value");
 	if (tokens.size() > 2)
@@ -276,8 +266,6 @@ void Location::parse()
 	}
 	if (__index.empty())
 		this->__index.push_back("index.html");
-	if (__clientBodyBufferSize == -1)
-		__clientBodyBufferSize = 8000;
 	this->__directives.clear();
 	__line.clear();
 }
@@ -302,7 +290,7 @@ std::ostream &operator<<(std::ostream &o, const Location &loc)
     std::cout << "\n";
 	for (std::vector<t_method>::const_iterator it = loc.__allowMethods.begin(); it != loc.__allowMethods.end(); it++)
 	{
-		std::cout << "\t\t" << methodToString(*it) << " ";
+		std::cout << "\t\t" << wsu::methodToString(*it) << " ";
 	}
 	std::cout << "\n";
 	std::cout << "\t\terror_pages: ";
