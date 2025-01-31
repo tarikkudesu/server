@@ -13,7 +13,7 @@ class Response
 		Post							__post;
 		RessourceHandler				explorer;
 		Server							*__server;
-		Request							*__request;
+		Request							&__request;
 		Location						*__location;
 		String							reasonPhrase;
 		std::map<String, String>		headers;
@@ -43,7 +43,7 @@ class Response
 		void							setupWorkers(Request &request, Server &server, Location &location);
 		void							processData(BasicString &data);
 
-		Response(t_connection_phase &phase);
+		Response(t_connection_phase &phase, Request &request);
 		Response(const Response &copy);
 		Response &operator=(const Response &assign);
 		~Response();

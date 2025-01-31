@@ -1,7 +1,8 @@
 #include "Get.hpp"
 
-Get::Get(t_response_phase phase) : __responsePhase(phase),
-                                   __phase(GET_IN)
+Get::Get(t_response_phase& phase, Request& request)	:	__request(request),
+														__responsePhase(phase),
+														__phase(GET_IN)
 {
 }
 
@@ -35,12 +36,36 @@ Get::~Get()
 //     file.close();
 // }
 
-void Get::executeGet(RessourceHandler &explorer, const Location &location, BasicString &body)
+
+bool	Get::authenticated()
+{
+	if (__request.__headers.__cookie.empty())
+		return false;
+	t_svec cookies = wsu::splitByChar(__request.__headers.__cookie, ';');
+	for (t_svec::iterator it = cookies.begin(); it != cookies.end(); it++)
+	{
+		t_svec cook = wsu::splitByChar(*it, '=');
+		if (cook.size() == 2 && __token.authentified(cook[1]))
+			return true;
+	}
+	return false;
+}
+
+void Get::executeGet(RessourceHandler &explorer, Location &location, BasicString &body)
 {
     if (__phase == GET_IN)
     {
         if (explorer.__type == FILE_)
         {
+			if (explorer.__fullPath.compare(location.__authenticate[0]) && !authenticated())
+				explorer.changeRequestedFile(location.__authenticate[1]);
+			this->__file.open(explorer.__fullPath.c_str());
+			if (!__file.is_open())
+			{
+				__responsePhase = PREPARING_RESPONSE;
+				throw ErrorResponse(403, location, "Internal Server Error");
+			}
+			__phase = DURING_GET;
             // open File
             /*****************************************************************
              * IN CASE OF AN ERROR SET __RESPONSEPHASE = PREPARING_RESPONSE; *
@@ -48,7 +73,6 @@ void Get::executeGet(RessourceHandler &explorer, const Location &location, Basic
             // std::ifstream file(explorer.getPath().c_str(), std::ios::binary);
             // if (!file.is_open())
             //     throw ErrorResponse(500, explorer.__location, "Internal Server Error");
-            __phase = DURING_GET;
         }
         else if (location.__autoindex)
         {
@@ -71,21 +95,19 @@ void Get::executeGet(RessourceHandler &explorer, const Location &location, Basic
     }
     if (__phase == DURING_GET)
     {
-        // insert in body
-        // char buffer[4096];
-        // while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0)
-        //     this->body.push_back(BasicString(buffer, file.gcount()));
+		char buffer[READ_SIZE];
+		__file.read(buffer, sizeof(buffer));
         if (__file.eof())
         {
             __phase = GET_OUT;
             __responsePhase = PREPARING_RESPONSE;
         }
-        // throw __body;
+		if (__file.gcount() > 0)
+			throw BasicString(buffer, __file.gcount());
     }
     if (__phase == GET_OUT)
     {
-        // close file
-        // file.close();
+        __file.close();
         __phase = GET_IN;
     }
 }

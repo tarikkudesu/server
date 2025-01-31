@@ -44,8 +44,10 @@ void createFile(std::vector<BasicString> &h)
  ***********************************************************************************************/
 void Post::processData(BasicString &data)
 {
-    if (request->__headers.__contentType == FORM_DATA)
-        __responsePhase = CGI_PROCESS; // authenticate, otherwise do something
+    if (request->__headers.__contentType == FORM_DATA && location->__authenticate.size())
+        ;//create a session 
+	else if (request->__headers.__contentType == FORM_DATA && !location->__authenticate.size())
+        __responsePhase = CGI_PROCESS; //verify the logic later
     else if (request->__headers.__contentType == MULTIPART_DATA_FORM) // no exactly, you need to get the boundry
         processMultiPartBody(data);
     else

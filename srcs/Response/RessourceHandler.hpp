@@ -6,7 +6,6 @@ class RessourceHandler
 {
 	private:
 		void			loadType(const char* path);
-		void			loadPathExploring(void);
         void            clear();
 
 	public:
@@ -15,6 +14,8 @@ class RessourceHandler
 		String			__fullPath;
 		Location		*__location;
 
+		void			loadPathExploring(void);
+		void			changeRequestedFile(String file);
 		void			prepareRessource(const Location& location, const String& uri);
 
 		RessourceHandler();

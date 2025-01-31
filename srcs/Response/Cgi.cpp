@@ -128,7 +128,7 @@ void Cgi::cgiProcess(void)
         throw ErrorResponse(500, __location, "internal server error");
 
     if (!pid)
-        close(pip[0]), execute(__explorer.getPath().c_str(), pip[1]);
+        close(pip[0]), execute(__explorer.__fullPath.c_str(), pip[1]);
 
     close(pip[1]);
 
