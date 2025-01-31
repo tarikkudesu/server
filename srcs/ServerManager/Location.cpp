@@ -85,9 +85,10 @@ void Location::proccessAutoindexDirective(t_svec &tokens)
 }
 void Location::proccessAuthenticateDirective(t_svec &tokens)
 {
-	if (tokens.size() != 2)
+	if (tokens.size() != 3)
 		throw std::runtime_error(tokens.at(0) + " invalid number of arguments");
-	this->__authenticate = tokens.at(1);
+	this->__authenticate.push_back(tokens.at(1));
+	this->__authenticate.push_back(tokens.at(2));
 }
 void Location::proccessErrorPageDirective(t_svec &tokens)
 {
@@ -295,7 +296,10 @@ std::ostream &operator<<(std::ostream &o, const Location &loc)
 	std::cout << "\t\tcgi_pass: " << loc.__cgiPass << "\n";
 	std::cout << "\t\treturn: " << loc.__return << "\n";
 	std::cout << "\t\tallow_methods: \n";
-	std::cout << "\t\tauthenticate: " << loc.__authenticate << std::endl;
+	std::cout << "\t\tauthenticate: ";
+    for (t_svec::const_iterator it = loc.__authenticate.begin(); it != loc.__authenticate.end(); it++)
+        std::cout << *it << " ";
+    std::cout << "\n";
 	for (std::vector<t_method>::const_iterator it = loc.__allowMethods.begin(); it != loc.__allowMethods.end(); it++)
 	{
 		std::cout << "\t\t" << methodToString(*it) << " ";
