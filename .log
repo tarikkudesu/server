@@ -1,34 +1,34 @@
 COMMAND   PID    USER   FD   TYPE DEVICE SIZE/OFF                NODE NAME
-webserv 40936 tamehri  cwd    DIR    1,9      578             3935691 /Users/tamehri/Desktop/server
-webserv 40936 tamehri  txt    REG    1,9   970024             3960195 /Users/tamehri/Desktop/server/webserv
-webserv 40936 tamehri  txt    REG    1,5  1572480 1152921500312412784 /usr/lib/dyld
-webserv 40936 tamehri    0u   CHR   16,5  0t34850                 695 /dev/ttys005
-webserv 40936 tamehri    1w   REG    1,9        0             3960199 /Users/tamehri/Desktop/server/.log
-webserv 40936 tamehri    2w   REG    1,9        0             3960199 /Users/tamehri/Desktop/server/.log
+webserv 58633 tamehri  cwd    DIR    1,9      578             3935691 /Users/tamehri/Desktop/server
+webserv 58633 tamehri  txt    REG    1,9   988240             3965856 /Users/tamehri/Desktop/server/webserv
+webserv 58633 tamehri  txt    REG    1,5  1572480 1152921500312412784 /usr/lib/dyld
+webserv 58633 tamehri    0u   CHR  16,12  0t16809                 715 /dev/ttys012
+webserv 58633 tamehri    1w   REG    1,9        0             3960199 /Users/tamehri/Desktop/server/.log
+webserv 58633 tamehri    2w   REG    1,9        0             3960199 /Users/tamehri/Desktop/server/.log
 
 ********************************************************************
 ********************************************************************
 
-Process:         webserv [40936]
+Process:         webserv [58633]
 Path:            /Volumes/VOLUME/*/webserv
-Load Address:    0x109475000
+Load Address:    0x10d560000
 Identifier:      webserv
 Version:         ???
 Code Type:       X86-64
-Parent Process:  zsh [29632]
+Parent Process:  zsh [56097]
 
-Date/Time:       2025-01-31 17:51:02.272 +0100
-Launch Time:     2025-01-31 17:51:00.626 +0100
+Date/Time:       2025-01-31 18:58:52.014 +0100
+Launch Time:     2025-01-31 18:58:23.977 +0100
 OS Version:      Mac OS X 10.15.7 (19H2026)
 Report Version:  7
 Analysis Tool:   /Applications/Xcode.app/Contents/Developer/usr/bin/leaks
 Analysis Tool Version:  Xcode 12.4 (12D4e)
 
-Physical footprint:         508K
-Physical footprint (peak):  508K
+Physical footprint:         616K
+Physical footprint (peak):  616K
 ----
 
 leaks Report Version: 3.0
-Process 40936: 411 nodes malloced for 70 KB
-Process 40936: 0 leaks for 0 total leaked bytes.
+Process 58633: 411 nodes malloced for 70 KB
+Process 58633: 0 leaks for 0 total leaked bytes.
 
