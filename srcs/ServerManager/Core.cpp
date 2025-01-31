@@ -230,7 +230,7 @@ void Core::readDataFromSocket(int sd)
         {
             try
             {
-                iter->second->proccessData(BasicString(buff, bytesRead));
+                iter->second->addData(BasicString(buff, bytesRead));
             }
             catch (wsu::Close &e)
             {
@@ -241,7 +241,6 @@ void Core::readDataFromSocket(int sd)
     }
     else
     {
-
         /*********************
          * SHOULD BE REMOVED *
          *********************/
@@ -342,6 +341,22 @@ void Core::proccessPollEvent(int sd, int &retV)
  *                                      MAIN LOOP                                      *
  ***************************************************************************************/
 
+void Core::extraProcess(int sd)
+{
+        t_Connections::iterator iter = Core::__connections.find(sd);
+        if (iter != Core::__connections.end())
+        {
+            try
+            {
+                iter->second->processData();
+            }
+            catch (wsu::Close &e)
+            {
+                removeConnection(sd);
+                wsu::info("removing connection");
+            }
+        }
+}
 void Core::mainLoop()
 {
     int retV = 0;
@@ -355,13 +370,14 @@ void Core::mainLoop()
             retV = poll(Core::__events, Core::__sockets.size(), timeout);
             if (retV != 0)
             {
-                for (int sd = 0; sd < Core::__sockNum && retV; sd++) // remember to add sd < retV
+                for (int sd = 0; sd < Core::__sockNum; sd++) // remember to add sd < retV
                 {
                     if (wsu::__criticalOverLoad == true)
                         retV = Core::__sockNum;
                     try
                     {
                         proccessPollEvent(sd, retV);
+                        extraProcess(sd);
                     }
                     catch (std::exception &e)
                     {

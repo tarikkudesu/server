@@ -128,6 +128,7 @@ void Request::parseRequest()
 }
 void Request::processData(BasicString &data)
 {
+    wsu::info("process request");
     size_t s = data.find(LINE_BREAK);
     size_t h = data.find(D_LINE_BREAK);
     if (s == String::npos || h == String::npos)

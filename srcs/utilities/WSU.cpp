@@ -151,7 +151,12 @@ void wsu::terr(String __error_message)
 /*************************************************************************************************
  *                                           UTILITIES                                           *
  *************************************************************************************************/
-
+void    wsu::ft_bzero(void *s, size_t n)
+{
+    char    *bytePtr = static_cast<char*>(s);
+    for (size_t i = 0; i < n; ++i)
+        bytePtr[i] = 0;
+}
 String	wsu::readFielContent(String fileName)
 {
 	String buffer;

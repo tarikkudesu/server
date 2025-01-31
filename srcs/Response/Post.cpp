@@ -23,12 +23,21 @@ Post &Post::operator=(const Post &assign)
 {
     if (this != &assign)
     {
+        this->request = assign.request;
+        this->__responsePhase = assign.__responsePhase;
+        this->explorer = assign.explorer;
+        this->location = assign.location;
+        this->server = assign.server;
+        this->__phase = assign.__phase;
+        this->__boundary = assign.__boundary;
+        this->__form = assign.__form;
     }
     return *this;
 }
 
 Post::~Post()
 {
+    reset();
 }
 
 /****************************************************************************
@@ -82,6 +91,7 @@ void Post::createFile(std::vector<String> &headers)
 }
 void Post::mpBody(BasicString &data)
 {
+    wsu::info("Post form data body");
     size_t end = data.find(LINE_BREAK "--" + this->__boundary + "--" LINE_BREAK);
     size_t pos = data.find(LINE_BREAK "--" + this->__boundary + LINE_BREAK);
     if (pos == String::npos && end == String::npos)
@@ -116,6 +126,7 @@ void Post::mpBody(BasicString &data)
 }
 void Post::mpHeaders(BasicString &data)
 {
+    wsu::info("Post form data headers");
     size_t pos = data.find(D_LINE_BREAK);
     if (pos == String::npos)
     {
@@ -146,7 +157,7 @@ void Post::setBoundry()
         wsu::trimSpaces(*it);
         t_svec kv = wsu::splitByChar(*it, '=');
         if (kv.size() != 2)
-            continue ;
+            continue;
         if (kv.at(0) == "boundary")
             __boundary = kv.at(1);
     }
@@ -155,6 +166,7 @@ void Post::setBoundry()
 }
 void Post::mpInit(BasicString &data)
 {
+    wsu::info("Post form data init");
     setBoundry();
     size_t pos1 = data.find("--" + __boundary + LINE_BREAK);
     size_t pos2 = data.find("--" + __boundary + "--" LINE_BREAK);
@@ -177,6 +189,7 @@ void Post::mpInit(BasicString &data)
 }
 void Post::processMultiPartBody(BasicString &data)
 {
+    wsu::info("Post form data");
     do
     {
         if (__phase == MP_INIT)
@@ -196,11 +209,21 @@ void Post::processData(BasicString &data)
         throw ErrorResponse(413, *location, "Request body too large.");
     if (request.__headers.__contentType == FORM_DATA)
     {
+        wsu::info("Post form data");
         __form.join(data);
         if (__form.length() > FORM_MAX_SIZE)
             throw ErrorResponse(415, *location, "Content-Type not supported");
         if (location->__authenticate.size())
-            ; //create a seesion //change the location to the index
+        {
+            String cook;
+            if (!server->authentified(__form.to_string()))
+            {
+                cook = server->addUserInDb(__form.to_string());
+            }
+            else
+                cook = server->getCookie(__form.to_string());
+            throw ErrorResponse(location->__authenticate[0], cook);
+        }
         else
             __responsePhase = CGI_PROCESS;
         //verify the logic later
@@ -215,6 +238,7 @@ void Post::processData(BasicString &data)
  ***********************************************************************************************/
 void Post::processCunkedBody(BasicString &data)
 {
+    wsu::info("Post chunked body");
     static size_t chunkSize;
     do
     {
@@ -262,6 +286,7 @@ void Post::processCunkedBody(BasicString &data)
 }
 void Post::processDefinedBody(BasicString &data)
 {
+    wsu::info("Post defined body");
     if (request.__headers.__contentLength < data.length())
     {
         BasicString tmp = data.substr(0, request.__headers.__contentLength);

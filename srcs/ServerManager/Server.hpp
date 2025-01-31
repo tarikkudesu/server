@@ -35,11 +35,11 @@ class Server
 
 
 		bool							amITheServerYouAreLookingFor( const String &sN );
-		String							addUserInDb(const String &userInfo) const;
 		Location						&identifyLocation( const String &URI );
 		bool							authentified(const String &id) const;
+		String							addUserInDb(const String &userInfo);
+		String							getCookie(const String& id) const;
 		bool							userInDb(String& user) const;
-		String							getCookie(String& id) const;
 		int								getServerSocket() const;
 		String							serverIdentity() const;
 		const String					&getServerHost() const;

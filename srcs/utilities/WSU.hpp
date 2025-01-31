@@ -34,7 +34,6 @@ public:
 	static bool __warn;
 	static bool __error;
 	static bool __fatal;
-
 	static void logs(std::vector<std::string> &args);
 	static void debug(String __log_message);
 	static void info(String __log_message);
@@ -44,6 +43,7 @@ public:
 	static void running(String __log_message);
 	static void terr(String __error_message);
 	static void terr(char *__eror_message);
+
 	static String logDate();
 	static void loadErrPages();
 	static void loadMimeTypes();
@@ -54,6 +54,7 @@ public:
 	static String intToString(int number);
 	static int hexToInt(const String &str);
 	static void setNonBlockingMode(int sd);
+    static void ft_bzero(void *s, size_t n);
     static String methodToString(t_method t);
 	static void toUpperString(String &input);
 	static void toLowerString(String &input);

@@ -32,11 +32,22 @@ ErrorResponse::ErrorResponse(int code, String redirection, Location &location) :
 }
 ErrorResponse::ErrorResponse(const ErrorResponse &copy)
 {
-	(void)copy;
+	*this = copy;
 }
 ErrorResponse &ErrorResponse::operator=(const ErrorResponse &assign)
 {
-	(void)assign;
+    if (this != &assign)
+    {
+        this->__page = assign.__page;
+        this->__code = assign.__code;
+        this->__Body = assign.__Body;
+        this->__headers = assign.__headers;
+        this->__location = assign.__location;
+        this->__StatusLine = assign.__StatusLine;
+        this->__indication = assign.__indication;
+        this->__redirection = assign.__redirection;
+        this->__reasonPhrase = assign.__reasonPhrase;
+    }
 	return *this;
 }
 ErrorResponse::~ErrorResponse()
@@ -67,7 +78,7 @@ String ErrorResponse::readFielContent(String fileName)
     {
         file.read(buffer, 1024);
         userInfo.append(buffer);
-        bzero(buffer, 1024);
+        wsu::ft_bzero(buffer, 1024);
     }
 	return userInfo;
 }

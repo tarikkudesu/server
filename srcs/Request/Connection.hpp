@@ -32,8 +32,9 @@ class Connection
 	public:
 		std::queue< BasicString >		__responseQueue;
 
+		void							addData(const BasicString &input);
 		void							setServers( t_Server &servers );
-		void							proccessData(BasicString);
+		void							processData();
 		int								getSock();
 
 

@@ -55,18 +55,19 @@ Server::~Server()
 /*****************************************************************************************
  *									  COOKIES SECTION									 *
  *****************************************************************************************/
-String	  Server::addUserInDb(const String &userInfo) const
+String	  Server::addUserInDb(const String &userInfo)
 {
 	String cookie("");
 	std::ofstream file( ("essentials/serversDB/" + serverIdentity() + ".csv").c_str() ,std::ios::app);
 	{
 		cookie = wsu::generateTokenId();
+        this->__tokenDB.insert(std::make_pair(cookie, userInfo));
 		file << cookie + " " +userInfo << "\n";
 		file.close();
 	}
 	return cookie;
 }
-String	Server::getCookie(String& id) const
+String	Server::getCookie(const String& id) const
 {
 	std::map<String, String>::const_iterator element = this->__tokenDB.find(id);
 	if (element == __tokenDB.end())

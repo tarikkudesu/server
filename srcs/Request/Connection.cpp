@@ -69,6 +69,7 @@ Server *Connection::identifyServer()
 }
 void Connection::identifyWorkers()
 {
+    wsu::info("identifying workers");
 	Server *server = identifyServer();
 	Location &location = server->identifyLocation(__request.__URI);
 	__response.setupWorkers(*server, location);
@@ -77,9 +78,15 @@ void Connection::identifyWorkers()
 /**********************************************************************************
  *                                  PROCESS DATA                                  *
  **********************************************************************************/
-void Connection::proccessData(BasicString input)
+
+void Connection::addData(const BasicString &input)
 {
 	this->__data.join(input);
+}
+void Connection::processData()
+{
+    if (__phase == PROCESSING_REQUEST && this->__data.length() == 0)
+        return ;
 	try
 	{
 		if (__phase == PROCESSING_REQUEST)
@@ -104,7 +111,7 @@ void Connection::proccessData(BasicString input)
 	}
 	catch (std::exception &e)
 	{
-		wsu::fatal("presist");
+		wsu::fatal("error");
 		__phase = PROCESSING_REQUEST;
 	}
 }

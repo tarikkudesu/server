@@ -20,7 +20,7 @@ void f()
 
 void signalHandler(int signal)
 {
-	if (signal == SIGINT)
+	if (signal == SIGINT || signal == SIGPIPE)
 	{
 		std::cout << "exiting\n";
 		Core::up = false;
@@ -31,6 +31,7 @@ int main(int ac, char **av)
 {
 	atexit(f);
 	signal(SIGINT, signalHandler);
+	signal(SIGPIPE, signalHandler);
 	std::vector<String> args;
 	for (int i = 1; i < ac; ++i)
 		args.push_back(String(av[i]));

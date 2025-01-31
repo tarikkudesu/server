@@ -24,6 +24,18 @@ Response &Response::operator=(const Response &assign)
 {
     if (this != &assign)
     {
+        this->__connectionPhase = assign.__connectionPhase;
+        this->__responsePhase = assign.__responsePhase;
+        this->__body = assign.__body;
+        this->__get = assign.__get;
+        this->__post = assign.__post;
+        this->explorer = assign.explorer;
+        this->__server = assign.__server;
+        this->__request = assign.__request;
+        this->__location = assign.__location;
+        this->reasonPhrase = assign.reasonPhrase;
+        this->headers = assign.headers;
+        this->code = assign.code;
     }
     return *this;
 }
@@ -39,7 +51,7 @@ void Response::reset()
 void Response::deleteFile(void)
 {
     if (unlink(explorer.__fullPath.c_str()) != 0)
-        throw ErrorResponse(500, *__location, "Internal Server Error");
+        throw ErrorResponse(500, *__location, "unlink");
 }
 bool Response::shouldAuthenticate()
 {
@@ -47,11 +59,13 @@ bool Response::shouldAuthenticate()
 }
 void Response::buildResponse()
 {
+    code = 200;
+    __body.clear();
     setHeader();
-    BasicString resMsg = PROTOCOLE_V " " + wsu::intToString(code) + " " + reasonPhrase + LINE_BREAK;
+    __body.join(PROTOCOLE_V " " + wsu::intToString(code) + " " + reasonPhrase + LINE_BREAK);
     for (std::map<String, String>::iterator it = headers.begin(); it != headers.end(); ++it)
-        resMsg.join(it->first + ": " + it->second + "\r\n");
-    resMsg.join(String("\r\n"));
+        __body.join(it->first + ": " + it->second + "\r\n");
+    __body.join(String("\r\n"));
 }
 void Response::setHeader()
 {
@@ -92,6 +106,7 @@ void Response::setupWorkers(Server &server, Location &location)
 }
 void Response::deletePhase()
 {
+    wsu::info("Delete phase");
     deleteFile();
     buildResponse();
     __responsePhase = PREPARING_RESPONSE;
@@ -99,6 +114,7 @@ void Response::deletePhase()
 }
 void Response::cgiPhase()
 {
+    wsu::info("CGI phase");
     Cgi cgi(explorer, __request, *__location, __body);
     __body = cgi.getBody();
     buildResponse();
@@ -106,21 +122,24 @@ void Response::cgiPhase()
 }
 void Response::getPhase()
 {
+    wsu::info("Get phase");
     if (checkCgi())
         __responsePhase = CGI_PROCESS;
     else
     {
         if (__get.__phase == GET_IN)
         {
-            __body.clear();
+            wsu::warn("got in");
             buildResponse();
             __get.setWorkers(explorer, *__location, *__server);
         }
         __get.executeGet(__body);
+        throw __body;
     }
 }
 void Response::postPhase(BasicString &data)
 {
+    wsu::info("post phase");
     __post.setWorkers(explorer, *__location, *__server);
     __post.executePost(data);
     if (__responsePhase == PREPARING_RESPONSE)
@@ -131,6 +150,7 @@ void Response::postPhase(BasicString &data)
 }
 void Response::preparePhase()
 {
+    wsu::info("preparing response");
     __body.clear();
     this->explorer.prepareRessource(*__location, __request.__URI);
     std::vector<t_method>::iterator it = __location->__allowMethods.begin();
@@ -142,6 +162,7 @@ void Response::preparePhase()
 }
 void Response::processData(BasicString &data)
 {
+    wsu::info("processing response");
     try
     {
         if (__responsePhase == PREPARING_RESPONSE)

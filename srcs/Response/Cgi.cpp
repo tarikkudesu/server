@@ -53,7 +53,7 @@ void Cgi::readFromPipe(int fd)
     while (read(fd, buffer, 1023))
     {
         __body.append(buffer);
-        bzero(buffer, 1024);
+        wsu::ft_bzero(buffer, 1024);
     }
     size_t pos = __body.find('\n');
     __body = __body.substr(pos + 1);
@@ -103,11 +103,11 @@ void Cgi::cgiProcess(void)
 
     int child, status, pip[2], pid;
     if (pipe(pip) < 0)
-        throw ErrorResponse(500, __location, "internal server error");
+        throw ErrorResponse(500, __location, "pipe error");
 
     pid = fork();
     if (pid < 0)
-        throw ErrorResponse(500, __location, "internal server error");
+        throw ErrorResponse(500, __location, "fork error");
 
     if (!pid)
         close(pip[0]), execute(__explorer.__fullPath.c_str(), pip[1]);
@@ -119,7 +119,7 @@ void Cgi::cgiProcess(void)
     if (!child)
         kill(pid, SIGKILL), throw ErrorResponse(408, __location, "Request Time-out");
     if (WIFEXITED(pid) && WEXITSTATUS(status))
-        throw ErrorResponse(500, __location, "internal server error");
+        throw ErrorResponse(500, __location, "wait error");
     readFromPipe(pip[0]);
     close(pip[0]);
 }

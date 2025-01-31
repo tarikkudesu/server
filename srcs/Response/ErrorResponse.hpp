@@ -5,7 +5,8 @@
 class ErrorResponse
 {
 	private :
-		String								__page;
+
+		static String						__errPage;		String								__page;
 		int16_t								__code;
 		String								__Body;
 		String								__headers;
@@ -14,7 +15,6 @@ class ErrorResponse
 		String 								__indication;
 		String 								__redirection;
 		String								__reasonPhrase;
-		static String						__errPage;
 
 		void								buildStatusLine();
 		void								buildHeaderFeilds();
