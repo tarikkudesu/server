@@ -75,17 +75,9 @@ typedef std::map<String, String>::iterator mapIterator;
 #define LINE_BREAK "\r\n"
 #define D_LINE_BREAK "\r\n\r\n"
 #define PROTOCOLE_V "HTTP/1.1"
-#define URI_CHAR_SET "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/?#[]@!$&\'()*+,;=-._~"
 #define H_KEY_CHAR_SET "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&\'*+-.^_`|~"
 #define PRINTABLE " \t\n\r\v\f0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 #define USAGE "\nUsage: ./webserv [OPTIONS] [configuration file]\n\nOptions:\n\t-l, --logs string\tlog events(\"debug\"|\"info\"|\"warn\"|\"error\"|\"fatal\"|\"all\")\n"
-
-typedef enum e_multipartsection
-{
-    MP_INIT,
-	MP_HEADERS,
-	MP_BODY,
-} t_multipartsection;
 
 typedef enum e_endian
 {
@@ -124,15 +116,6 @@ typedef enum e_bodyType
 	CHUNKED,
 } t_bodyType;
 
-typedef enum e_uri // to be removed
-{
-	DIRECTORY,
-	FILE_TOO_SERVE,
-	FILE_TO_CREATE,
-	CGI_PROGRAM,
-} t_URI;
-
-
 typedef enum e_connection_phase {
     PROCESSING_REQUEST,
     IDENTIFY_WORKERS,
@@ -159,14 +142,17 @@ typedef enum e_get_phase {
     GET_EXECUTE,
 } t_get_phase;
 
-typedef enum e_post_type {
+typedef enum e_content_type {
     FORM,
-    UPLOAD,
-} t_post_type;
+    MULTIPART,
+    OTHER,
+} t_content_type;
 
-struct	s_body {
-	t_svec				_headers;
-	String				_fileName;
-};
+typedef enum e_multipartsection
+{
+    MP_INIT,
+	MP_HEADERS,
+	MP_BODY,
+} t_multipartsection;
 
 #endif

@@ -117,9 +117,6 @@ void Request::validateRequestLine()
     else
         throw ErrorResponse(501, "invalid method");
     this->__URI = wsu::decode(URI);
-    std::cout << this->__URI << "\n";
-    // if (String::npos != URI.find_first_not_of(URI_CHAR_SET))
-    //     throw ErrorResponse(400, "invalid URI (out of URI CHARSET)");
     this->__protocole = protocole;
     if (this->__protocole != PROTOCOLE_V)
         throw ErrorResponse(505, "Unsupported protocole");
@@ -152,7 +149,6 @@ void Request::processData(BasicString &data)
     data.erase(0, h + 4);
     parseRequest();
     this->__phase = IDENTIFY_WORKERS;
-    std::cout << *this << "\n";
 }
 std::ostream &operator<<(std::ostream &o, const Request &req)
 {

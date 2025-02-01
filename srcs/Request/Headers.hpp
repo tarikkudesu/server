@@ -20,7 +20,8 @@ class Headers
 		int							__port;
 		String						__host;
 		String						__cookie;
-		String						__contentType;
+		String						__boundary;
+		t_content_type				__contentType;
 		size_t						__contentLength;
 		String						__transferEncoding;
 		t_connectionType			__connectionType;

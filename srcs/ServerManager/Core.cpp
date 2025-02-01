@@ -9,23 +9,19 @@ struct pollfd *Core::__events = NULL;
 
 Core::Core()
 {
-    wsu::debug("Core constructor");
 }
 Core::Core(const Core &copy)
 {
-    wsu::debug("Core copy constructor");
     (void)copy;
 }
 Core &Core::operator=(const Core &assign)
 {
-    wsu::debug("Core copy assignement operator");
     (void)assign;
     return *this;
 }
 Core::~Core()
 {
     clear();
-    wsu::debug("Core destructor");
 }
 
 /****************************************************************************
@@ -66,6 +62,7 @@ void Core::clear()
 }
 void Core::removeConnection(int sd)
 {
+    wsu::info("closing connection");
     t_Connections::iterator it = Core::__connections.find(sd);
     if (it != Core::__connections.end())
     {
@@ -77,12 +74,14 @@ void Core::removeConnection(int sd)
 }
 void Core::addConnection(int sd)
 {
+    wsu::info("creating connection");
     Core::__connections[sd] = new Connection(sd);
     Core::__connections[sd]->setServers(Core::__servers);
     addSocket(sd, CONNECTION);
 }
 void Core::removeServer(int sd)
 {
+    wsu::info("removing connection");
     t_Server::iterator it = Core::__servers.find(sd);
     if (it != Core::__servers.end())
     {
@@ -94,6 +93,7 @@ void Core::removeServer(int sd)
 }
 void Core::addServer(Server *server)
 {
+    wsu::info("creating connection");
     if (Core::__servers.size() >= MAX_EVENTS)
         throw std::runtime_error("critical server overload, " + server->getServerHost() + ":" + wsu::intToString(server->getServerPort()) + " non functional");
     Core::__servers[server->getServerSocket()] = server;
@@ -193,24 +193,19 @@ void Core::writeDataToSocket(int sd)
     Core::__connections[sd]->__responseQueue.pop();
     ssize_t bytesWritten = send(sd, response.getBuff(), response.length(), 0);
     if (bytesWritten > 0)
+    {
         wsu::info("response sent");
+        if (Core::__connections[sd]->close())
+            removeConnection(sd);
+    }
     else
     {
-        /*********************
-         * SHOULD BE REMOVED *
-         *********************/
-        int sockError = errno;
-        char errorMsg[256];
-        strerror_r(sockError, errorMsg, sizeof(errorMsg));
-        wsu::error("Socket error: " + std::string(errorMsg));
-
         int sockErr = 0;
         if (setsockopt(sd, SOL_SOCKET, SO_ERROR,
                        &sockErr, sizeof(sockErr)) != 0 ||
             sockErr != 0)
         {
             removeConnection(sd);
-            wsu::info("removing connection");
         }
     }
 }
@@ -235,27 +230,17 @@ void Core::readDataFromSocket(int sd)
             catch (wsu::Close &e)
             {
                 removeConnection(sd);
-                wsu::info("removing connection");
             }
         }
     }
     else
     {
-        /*********************
-         * SHOULD BE REMOVED *
-         *********************/
-        int sockError = errno;
-        char errorMsg[256];
-        strerror_r(sockError, errorMsg, sizeof(errorMsg));
-        wsu::error("Socket error: " + std::string(errorMsg));
-
         int sockErr = 0;
         if (setsockopt(sd, SOL_SOCKET, SO_ERROR,
                        &sockErr, sizeof(sockErr)) != 0 ||
             sockErr != 0) // surprise
         {
             removeConnection(sd);
-            wsu::info("removing connection");
         }
     }
 }
@@ -269,19 +254,10 @@ void Core::acceptNewConnection(int sd)
     newSock = accept(sd, NULL, NULL);
     if (newSock >= 0)
     {
-        wsu::info("accepting new connection");
         addConnection(newSock);
     }
     else
     {
-        /*********************
-         * SHOULD BE REMOVED *
-         *********************/
-        int sockError = errno;
-        char errorMsg[256];
-        strerror_r(sockError, errorMsg, sizeof(errorMsg));
-        wsu::error("Socket error: " + std::string(errorMsg));
-
         int sockErr = 0;
         if (setsockopt(sd, SOL_SOCKET, SO_ERROR,
                        &sockErr, sizeof(sockErr)) != 0 ||
@@ -321,7 +297,6 @@ void Core::proccessPollEvent(int sd, int &retV)
     else if (sockStruct.revents & POLLHUP)
     {
         removeConnection(sockStruct.fd);
-        wsu::info("removing connection");
         retV--;
     }
     else if (wsu::__criticalOverLoad == true)
@@ -330,7 +305,6 @@ void Core::proccessPollEvent(int sd, int &retV)
         if (!Core::isServerSocket(sockStruct.fd))
         {
             removeConnection(sockStruct.fd);
-            wsu::info("removing connection");
         }
     }
     if (Core::__servers.size() == Core::__sockets.size())

@@ -1,6 +1,7 @@
 #include "Headers.hpp"
 
-Headers::Headers() : __contentLength(0),
+Headers::Headers() : __contentType(OTHER),
+                     __contentLength(0),
                      __connectionType(KEEP_ALIVE),
                      __transferType(NONE)
 {
@@ -16,6 +17,7 @@ Headers &Headers::operator=(const Headers &assign)
         this->__host = assign.__host;
         this->__port = assign.__port;
         this->__cookie = assign.__cookie;
+        this->__boundary = assign.__boundary;
         this->__contentType = assign.__contentType;
         this->__contentLength = assign.__contentLength;
         this->__connectionType = assign.__connectionType;
@@ -35,8 +37,9 @@ void Headers::clear()
     this->__port = 8080;
     this->__host.clear();
     this->__cookie.clear();
+    this->__boundary.clear();
     this->__contentLength = 0;
-    this->__contentType.clear();
+    this->__contentType = OTHER;
     this->__transferEncoding.clear();
     this->__connectionType = KEEP_ALIVE;
 }
@@ -64,7 +67,20 @@ void Headers::contentType(std::map<String, String> &headers)
 {
     try
     {
-        this->__contentType = getHeaderFeildValue("CONTENT-TYPE", headers);
+        String contentType = getHeaderFeildValue("CONTENT-TYPE", headers);
+        t_svec elements = wsu::splitByChar(contentType, ';');
+        if (elements.size() == 1 && elements.at(0) == FORM_DATA)
+            this->__contentType = FORM;
+        if (elements.size() == 2 && elements.at(0) == MULTIPART_DATA_FORM)
+        {
+            wsu::trimSpaces(elements.at(1));
+            t_svec tmp = wsu::splitByChar(elements.at(1), '=');
+            if (tmp.size() == 2)
+            {
+                __boundary = tmp.at(1);
+                this->__contentType = MULTIPART;
+            }
+        }
     }
     catch (std::exception &e)
     {
@@ -109,7 +125,7 @@ void Headers::range(std::map<String, String> &headers)
 {
     try
     {
-         getHeaderFeildValue("RANGE", headers);
+        getHeaderFeildValue("RANGE", headers);
         throw ErrorResponse(416, "Range requests are not supported");
     }
     catch (std::exception &e)

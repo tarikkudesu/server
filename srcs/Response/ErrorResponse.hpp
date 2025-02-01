@@ -6,7 +6,8 @@ class ErrorResponse
 {
 	private :
 
-		static String						__errPage;		String								__page;
+		static String						__errPage;
+        String								__page;
 		int16_t								__code;
 		String								__Body;
 		String								__headers;

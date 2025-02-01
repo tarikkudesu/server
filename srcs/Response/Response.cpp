@@ -36,9 +36,6 @@ Response &Response::operator=(const Response &assign)
         this->__server = assign.__server;
         this->__request = assign.__request;
         this->__location = assign.__location;
-        this->reasonPhrase = assign.reasonPhrase;
-        this->headers = assign.headers;
-        this->code = assign.code;
     }
     return *this;
 }
@@ -46,6 +43,8 @@ void Response::reset()
 {
     __get.reset();
     __post.reset();
+    __body.clear();
+    __getPhase = GET_INIT;
     __responsePhase = PREPARING_RESPONSE;
     __connectionPhase = PROCESSING_REQUEST;
 }
@@ -113,21 +112,6 @@ void Response::setupWorkers(Server &server, Location &location)
     this->__server = &server;
     this->__location = &location;
 }
-void Response::deletePhase()
-{
-    wsu::info("Delete phase");
-    deleteFile();
-    buildResponse(204, 0);
-    __responsePhase = RESPONSE_DONE;
-}
-void Response::cgiPhase()
-{
-    wsu::info("CGI phase");
-    Cgi cgi(explorer, __request, *__location, __body);
-    buildResponse(200, __body.length());
-    __body.join(cgi.getBody());
-    __responsePhase = RESPONSE_DONE;
-}
 void Response::autoindex()
 {
     wsu::info("autoindex");
@@ -151,19 +135,20 @@ void Response::getProcess()
 {
     if (__getPhase == GET_INIT)
     {
-        wsu::info("preparing Get");
         buildResponse(200, wsu::getFileSize(explorer.__fullPath));
         __get.setWorkers(explorer, *__location, *__server);
         __getPhase = GET_EXECUTE;
     }
     else
     {
-        wsu::info("executing Get");
         __get.executeGet(__body);
         if (__responsePhase == RESPONSE_DONE)
             __getPhase = GET_INIT;
     }
 }
+/******************************************************************************
+ *                                   PHASES                                   *
+ ******************************************************************************/
 void Response::getPhase()
 {
     wsu::info("Get phase");
@@ -179,6 +164,21 @@ void Response::getPhase()
             throw ErrorResponse(403, "Forbidden");
     }
 }
+void Response::deletePhase()
+{
+    wsu::info("Delete phase");
+    deleteFile();
+    buildResponse(204, 0);
+    __responsePhase = RESPONSE_DONE;
+}
+void Response::cgiPhase()
+{
+    wsu::info("CGI phase");
+    Cgi cgi(explorer, __request, *__location, __body);
+    buildResponse(200, cgi.getBody().length());
+    __body.join(cgi.getBody());
+    __responsePhase = RESPONSE_DONE;
+}
 void Response::postPhase(BasicString &data)
 {
     wsu::info("post phase");
@@ -186,10 +186,14 @@ void Response::postPhase(BasicString &data)
     __post.executePost(data);
     if (__responsePhase == RESPONSE_DONE)
     {
-        buildResponse(201, 0);
+        String r = "<h2>Success!</h2>";
+        buildResponse(201, r.length());
+        std::cout << __body << "\n";
+        __body.join(r);
         reset();
     }
 }
+
 void Response::preparePhase()
 {
     wsu::info("preparing response");
@@ -224,9 +228,5 @@ void Response::processData(BasicString &data)
     {
         reset();
         throw e;
-    }
-    catch (int &i)
-    {
-        exit(1);
     }
 }

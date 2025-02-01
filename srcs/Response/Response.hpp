@@ -8,17 +8,14 @@ class Response
 	private:
 		t_connection_phase				&__connectionPhase;
 		t_response_phase				__responsePhase;
-        t_get_phase                     __getPhase;
-		BasicString 					__body;
-		Get 							__get;
+		t_get_phase						__getPhase;
+		Get								__get;
 		Post							__post;
-		FileExplorer				    explorer;
+		BasicString 					__body;
+		FileExplorer					explorer;
 		Server							*__server;
 		Request							&__request;
 		Location						*__location;
-		String							reasonPhrase;
-		std::map<String, String>		headers;
-		int 							code;
 
 		void							reset();
 		void							cgiPhase();

@@ -47,6 +47,10 @@ int Connection::getSock()
 {
 	return __sd;
 }
+bool Connection::close()
+{
+    return __request.__headers.__connectionType == CLOSE ? true : false;
+}
 /*****************************************************************************
  *                                  METHODS                                  *
  *****************************************************************************/
@@ -71,9 +75,7 @@ void Connection::identifyWorkers()
 {
 	wsu::info("identifying workers");
 	Server *server = identifyServer();
-	std::cout << *server;
 	Location &location = server->identifyLocation(__request.__URI);
-	std::cout << location;
 	__response.setupWorkers(*server, location);
 	this->__phase = PROCESSING_RESPONSE;
 }
@@ -106,7 +108,7 @@ void Connection::processData()
 	{
 		this->__responseQueue.push(e.getResponse());
 		__phase = PROCESSING_REQUEST;
-		wsu::info("Response is an Error");
+		std::cout << "Response is an Error " + e.__StatusLine;
 	}
 	catch (wsu::persist &e)
 	{
