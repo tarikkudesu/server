@@ -81,6 +81,5 @@ std::ostream &operator<<(std::ostream &o, RessourceHandler const &r)
         std::cout << "FOLDER\n";
     else
         std::cout << "FILE\n";
-    std::cout << r.__location;
     return o;
 }

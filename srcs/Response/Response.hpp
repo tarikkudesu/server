@@ -19,6 +19,9 @@ class Response
 		std::map<String, String>		headers;
 		int 							code;
 
+
+        bool                            __tmp;
+
 		void							reset();
 		void							cgiPhase();
 		void							getPhase();
@@ -33,8 +36,10 @@ class Response
 		void							postPhase(BasicString &data);
 
 	public:
+		BasicString 					getResponse();
 		void							setupWorkers(Server &server, Location &location);
 		void							processData(BasicString &data);
+
 
 		Response(t_connection_phase &phase, Request &request);
 		Response(const Response &copy);

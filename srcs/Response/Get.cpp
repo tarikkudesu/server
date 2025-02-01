@@ -96,9 +96,9 @@ void Get::duringGetPhase(BasicString &body)
 {
     wsu::info("During GET phase");
     char buffer[100];
+    wsu::ft_bzero(buffer, 100);
     __file.read(buffer, sizeof(buffer));
-    BasicString k(buffer, __file.gcount());
-    // std::cout << YELLOW << k << RESET;
+    String k(buffer, __file.gcount());
     if (__file.eof())
         __phase = GET_OUT;
     if (__file.gcount() > 0)
@@ -112,6 +112,11 @@ void Get::setWorkers(RessourceHandler &explorer, Location &location, Server &ser
 }
 void Get::executeGet(BasicString &body)
 {
+    if (!explorer || !location || !server)
+    {
+        wsu::fatal("no objects to be referenced");
+        return;
+    }
     try
     {
         if (__phase == GET_IN)

@@ -19,7 +19,6 @@ class Core
 		static t_Connections		__connections;
 
 
-		static void					extraProcess( int sd );
 		static void					removeSocket( int sd );
 		static void					writeDataToSocket( int sd );
 		static void					readDataFromSocket( int sd );

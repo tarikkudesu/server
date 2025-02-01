@@ -18,6 +18,7 @@ public:
 	std::string to_string() const;
 	char *getBuff() const;
 	size_t length() const;
+	bool empty() const;
 	void clear();
 
 	BasicString();

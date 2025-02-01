@@ -36,6 +36,10 @@ BasicString::~BasicString()
 {
 	delete[] __buff;
 }
+bool BasicString::empty() const
+{
+    return !__size;
+}
 void BasicString::clear()
 {
 	delete[] __buff;

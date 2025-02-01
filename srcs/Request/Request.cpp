@@ -145,6 +145,7 @@ void Request::processData(BasicString &data)
     data.erase(0, s + 2);
     __requestHeaders = data.substr(0, h + 2).to_string();
     data.erase(0, h + 4);
+    std::cout << YELLOW << __requestLine << RESET << "\n" << __requestHeaders << "\n";
     parseRequest();
     this->__phase = IDENTIFY_WORKERS;
 }

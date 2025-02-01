@@ -132,13 +132,6 @@ typedef enum e_uri // to be removed
 	CGI_PROGRAM,
 } t_URI;
 
-typedef enum e_requestPhase // to be removed
-{
-	NEWREQUEST,
-	INITIALIZING,
-	PROCESSING,
-	COMPLETE,
-} t_requestPhase;
 
 typedef enum e_connection_phase {
     PROCESSING_REQUEST,

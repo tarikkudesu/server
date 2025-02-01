@@ -4,7 +4,8 @@ Response::Response(t_connection_phase &phase, Request &request) : __connectionPh
                                                                   __responsePhase(PREPARING_RESPONSE),
                                                                   __get(request, __responsePhase),
                                                                   __post(request, __responsePhase),
-                                                                  __request(request)
+                                                                  __request(request),
+                                                                  __tmp(true)
 {
 }
 // a implementer
@@ -12,7 +13,8 @@ Response::Response(const Response &copy) : __connectionPhase(copy.__connectionPh
                                            __responsePhase(PREPARING_RESPONSE),
                                            __get(copy.__request, __responsePhase),
                                            __post(copy.__request, __responsePhase),
-                                           __request(copy.__request)
+                                           __request(copy.__request),
+                                           __tmp(copy.__tmp)
 {
     *this = copy;
 }
@@ -36,6 +38,7 @@ Response &Response::operator=(const Response &assign)
         this->reasonPhrase = assign.reasonPhrase;
         this->headers = assign.headers;
         this->code = assign.code;
+        this->__tmp = assign.__tmp;
     }
     return *this;
 }
@@ -48,6 +51,10 @@ void Response::reset()
  *								 METHODS							   *
  ***********************************************************************/
 
+BasicString Response::getResponse()
+{
+    return __body;
+}
 void Response::deleteFile(void)
 {
     if (unlink(explorer.__fullPath.c_str()) != 0)
@@ -60,6 +67,7 @@ bool Response::shouldAuthenticate()
 void Response::buildResponse()
 {
     code = 200;
+    reasonPhrase = "OK";
     __body.clear();
     setHeader();
     __body.join(PROTOCOLE_V " " + wsu::intToString(code) + " " + reasonPhrase + LINE_BREAK);
@@ -71,7 +79,7 @@ void Response::setHeader()
 {
     headers["Accept-Ranges"] = "none";
     headers["Connection"] = "keep-alive";
-    headers["content-length"] = wsu::intToString(wsu::getFileSize(explorer.__fullPath));
+    headers["Content-Length"] = wsu::intToString(wsu::getFileSize(explorer.__fullPath));
     headers["Content-Type"] = wsu::getContentType(explorer.__fullPath) + "; charset=UTF-8";
     headers["server"] = "webserv/1.0";
     headers["date"] = wsu::buildIMFDate();
@@ -110,7 +118,7 @@ void Response::deletePhase()
     deleteFile();
     buildResponse();
     __responsePhase = PREPARING_RESPONSE;
-    throw __body;
+    __connectionPhase = PROCESSING_REQUEST;
 }
 void Response::cgiPhase()
 {
@@ -119,27 +127,33 @@ void Response::cgiPhase()
     __body = cgi.getBody();
     buildResponse();
     __responsePhase = PREPARING_RESPONSE;
+    __connectionPhase = PROCESSING_REQUEST;
 }
 void Response::getPhase()
 {
-    static bool wtf = true;
     wsu::info("Get phase");
     if (checkCgi())
         __responsePhase = CGI_PROCESS;
     else
     {
-        if (__get.__phase == GET_IN && wtf)
+        if (__tmp == true)
         {
-            wsu::warn("got in");
+            wsu::info("preparing Get");
             buildResponse();
+            std::cout << __body << "\n";
             __get.setWorkers(explorer, *__location, *__server);
-            wtf = false;
-            throw __body;
+            __tmp = false;
         }
-        __get.executeGet(__body);
-        if (__responsePhase == PREPARING_RESPONSE)
-            wtf = true;
-        throw __body;
+        else
+        {
+            wsu::info("executing Get");
+            __get.executeGet(__body);
+            if (__responsePhase == PREPARING_RESPONSE)
+            {
+                __tmp = true;
+                __connectionPhase = PROCESSING_REQUEST;
+            }
+        }
     }
 }
 void Response::postPhase(BasicString &data)
@@ -149,8 +163,8 @@ void Response::postPhase(BasicString &data)
     __post.executePost(data);
     if (__responsePhase == PREPARING_RESPONSE)
     {
+        __connectionPhase = PROCESSING_REQUEST;
         buildResponse();
-        throw __body;
     }
 }
 void Response::preparePhase()
@@ -164,6 +178,7 @@ void Response::preparePhase()
     if (it == __location->__allowMethods.end())
         throw ErrorResponse(405, *__location, wsu::methodToString(__request.__method) + " : method not allowed in this location");
     __check_methods();
+    std::cout << explorer;
 }
 void Response::processData(BasicString &data)
 {
@@ -185,5 +200,9 @@ void Response::processData(BasicString &data)
     {
         reset();
         throw e;
+    }
+    catch (int &i)
+    {
+        exit(1);
     }
 }

@@ -341,26 +341,6 @@ void Core::proccessPollEvent(int sd, int &retV)
  *                                      MAIN LOOP                                      *
  ***************************************************************************************/
 
-void Core::extraProcess(int sd)
-{
-    struct pollfd &sockStruct = Core::__events[sd];
-    t_Connections::iterator iter = Core::__connections.find(sockStruct.fd);
-    if (!isServerSocket(sockStruct.fd))
-    {
-        if (iter != Core::__connections.end())
-        {
-            try
-            {
-                iter->second->processData();
-            }
-            catch (wsu::Close &e)
-            {
-                removeConnection(sd);
-                wsu::info("removing connection");
-            }
-        }
-    }
-}
 void Core::mainLoop()
 {
     int retV = 0;
@@ -374,19 +354,20 @@ void Core::mainLoop()
             retV = poll(Core::__events, Core::__sockets.size(), timeout);
             if (retV != 0)
             {
-                for (int sd = 0; sd < Core::__sockNum; sd++) // remember to add sd < retV
+                try
                 {
-                    if (wsu::__criticalOverLoad == true)
-                        retV = Core::__sockNum;
-                    try
+                    for (int sd = 0; sd < Core::__sockNum && retV; sd++)
                     {
+                        if (wsu::__criticalOverLoad == true)
+                            retV = Core::__sockNum;
                         proccessPollEvent(sd, retV);
-                        extraProcess(sd);
                     }
-                    catch (std::exception &e)
-                    {
-                        wsu::terr(e.what());
-                    }
+                    for (t_Connections::iterator it = __connections.begin(); it != __connections.end(); it++)
+                        it->second->processData();
+                }
+                catch (std::exception &e)
+                {
+                    wsu::terr(e.what());
                 }
             }
             delete[] Core::__events;
