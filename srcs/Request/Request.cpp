@@ -1,6 +1,7 @@
 #include "Request.hpp"
 
-Request::Request(t_connection_phase &phase) : __phase(phase)
+Request::Request(t_connection_phase &phase) : __phase(phase),
+                                                __bodySize(0)
 {
 }
 Request::Request(const Request &copy) : __phase(copy.__phase)
@@ -31,12 +32,15 @@ Request::~Request()
 void Request::clear()
 {
     this->__URI.clear();
+    __requestLine.clear();
     this->__headers.clear();
+    __requestHeaders.clear();
     this->__fragement.clear();
     this->__protocole.clear();
-    this->__headerFeilds.clear();
     this->__queryString.clear();
     this->__headerFeilds.clear();
+    this->__headerFeilds.clear();
+    this->__bodySize = 0;
 }
 
 /*****************************************************************************
@@ -112,9 +116,10 @@ void Request::validateRequestLine()
         this->__method = CONNECT;
     else
         throw ErrorResponse(501, "invalid method");
-    this->__URI = URI;
-    if (String::npos != URI.find_first_not_of(URI_CHAR_SET))
-        throw ErrorResponse(400, "invalid URI (out of URI CHARSET)");
+    this->__URI = wsu::decode(URI);
+    std::cout << this->__URI << "\n";
+    // if (String::npos != URI.find_first_not_of(URI_CHAR_SET))
+    //     throw ErrorResponse(400, "invalid URI (out of URI CHARSET)");
     this->__protocole = protocole;
     if (this->__protocole != PROTOCOLE_V)
         throw ErrorResponse(505, "Unsupported protocole");
@@ -145,9 +150,9 @@ void Request::processData(BasicString &data)
     data.erase(0, s + 2);
     __requestHeaders = data.substr(0, h + 2).to_string();
     data.erase(0, h + 4);
-    std::cout << YELLOW << __requestLine << RESET << "\n" << __requestHeaders << "\n";
     parseRequest();
     this->__phase = IDENTIFY_WORKERS;
+    std::cout << *this << "\n";
 }
 std::ostream &operator<<(std::ostream &o, const Request &req)
 {
@@ -156,7 +161,7 @@ std::ostream &operator<<(std::ostream &o, const Request &req)
     std::cout << "\tmethod: " << wsu::methodToString(req.__method) << "\n";
     std::cout << "\tURI: " << req.__URI << "\n";
     std::cout << "\tquery: " << req.__queryString << "\n";
-    std::cout << "\n";
+    std::cout << "\tContent:Length: " << req.__headers.__contentLength << "\n";
     std::cout << "\tFragement: " << req.__fragement << "\n";
     std::cout << "\theaders: \n";
     std::cout << req.__headers << "\n";

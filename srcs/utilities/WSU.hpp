@@ -51,6 +51,7 @@ public:
 	static String buildIMFDate();
     static String generateTokenId();
 	static void trimSpaces(String &str);
+	static String decode(String& encoded);
 	static String intToString(int number);
 	static int hexToInt(const String &str);
 	static void setNonBlockingMode(int sd);

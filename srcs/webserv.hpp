@@ -145,16 +145,21 @@ typedef enum e_response_phase {
     GET_PROCESS,
     POST_PROCESS,
     DELETE_PROCESS,
+    RESPONSE_DONE,
 } t_response_phase;
 
+typedef enum e_get_file_operation {
+    OPEN_FILE,
+    READ_FILE,
+    CLOSE_FILE,
+} t_get_file_operation;
+
 typedef enum e_get_phase {
-    GET_IN,
-    DURING_GET,
-    GET_OUT,
+    GET_INIT,
+    GET_EXECUTE,
 } t_get_phase;
 
 typedef enum e_post_type {
-
     FORM,
     UPLOAD,
 } t_post_type;

@@ -7,7 +7,7 @@ SRC		=	srcs/main.cpp \
 			srcs/Response/Get.cpp \
 			srcs/Response/Post.cpp \
 			srcs/Response/Response.cpp \
-			srcs/Response/RessourceHandler.cpp \
+			srcs/Response/FileExplorer.cpp \
 			srcs/ServerManager/Core.cpp \
 			srcs/ServerManager/Location.cpp \
 			srcs/ServerManager/Server.cpp \
@@ -31,7 +31,7 @@ $(NAME): $(OBJ)
 			srcs/Response/Get.hpp \
 			srcs/Response/Post.hpp \
 			srcs/Response/Response.hpp \
-			srcs/Response/RessourceHandler.hpp \
+			srcs/Response/FileExplorer.hpp \
 			srcs/ServerManager/Core.hpp \
 			srcs/ServerManager/Location.hpp \
 			srcs/ServerManager/Server.hpp \

@@ -7,7 +7,7 @@ class Cgi
 {
 	private:
 		Request&				__request;
-		RessourceHandler&		__explorer;
+		FileExplorer&		__explorer;
 		Location&				__location;
         BasicString             __reqBody;
 		std::time_t				__start;
@@ -26,7 +26,7 @@ class Cgi
 	public:
 		String& 				 getBody();
 
-		Cgi(RessourceHandler &explorer, Request &request, Location &location, BasicString &body);
+		Cgi(FileExplorer &explorer, Request &request, Location &location, BasicString &body);
 		~Cgi();
 		// Cgi(const Cgi &copy);
 		// Cgi &operator=(const Cgi &assign);

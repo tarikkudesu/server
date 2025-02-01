@@ -96,10 +96,9 @@ void Connection::processData()
 		if (__phase == PROCESSING_REQUEST)
 			__request.processData(__data);
 		if (__phase == IDENTIFY_WORKERS)
-			identifyWorkers();
+			this->identifyWorkers();
 		if (__phase == PROCESSING_RESPONSE)
 			__response.processData(__data);
-		// std::cout << __response.getResponse();
 		if (!__response.getResponse().empty())
 			this->__responseQueue.push(__response.getResponse());
 	}

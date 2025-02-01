@@ -77,7 +77,7 @@ void Post::createFile(std::vector<String> &headers)
                     std::string fileName = it->substr(startPos, endPos - startPos);
                     __fs.open(fileName);
                     if (!__fs.is_open())
-                        throw ErrorResponse(500, *location, "Could not create file on the server");
+                        throw ErrorResponse(403, *location, "Could not create file on the server");
                     return;
                 }
                 else
@@ -120,7 +120,7 @@ void Post::mpBody(BasicString &data)
         writeDataIntoFile(tmp);
         data.erase(0, end + len);
         request.__bodySize += end + len;
-        __responsePhase = PREPARING_RESPONSE;
+        __responsePhase = RESPONSE_DONE;
         reset();
     }
 }
@@ -131,7 +131,10 @@ void Post::mpHeaders(BasicString &data)
     if (pos == String::npos)
     {
         if (data.length() > REQUEST_MAX_SIZE)
+        {
+            data.clear();
             throw ErrorResponse(400, *location, "Oversized headers");
+        }
         throw wsu::persist();
     }
     std::vector<String> headers;
@@ -198,7 +201,7 @@ void Post::processMultiPartBody(BasicString &data)
             mpHeaders(data);
         if (__phase == MP_BODY)
             mpBody(data);
-    } while (__responsePhase != PREPARING_RESPONSE);
+    } while (__responsePhase != RESPONSE_DONE);
 }
 /***********************************************************************************************
  *                                           METHODS                                           *
@@ -206,7 +209,11 @@ void Post::processMultiPartBody(BasicString &data)
 void Post::processData(BasicString &data)
 {
     if (request.__bodySize > location->__clientBodyBufferSize)
+    {
+        data.clear();
+        std::cout << "------------------------------ " << request.__bodySize << "\n";
         throw ErrorResponse(413, *location, "Request body too large.");
+    }
     if (request.__headers.__contentType == FORM_DATA)
     {
         wsu::info("Post form data");
@@ -248,7 +255,10 @@ void Post::processCunkedBody(BasicString &data)
             if (pos == String::npos)
             {
                 if (data.length() > REQUEST_MAX_SIZE)
+                {
+                    data.clear();
                     throw ErrorResponse(400, *location, "Oversized chunk value");
+                }
                 throw wsu::persist();
             }
             BasicString hex = data.substr(0, pos);
@@ -309,7 +319,7 @@ void Post::processDefinedBody(BasicString &data)
 /***********************************************************************************************
  *                                           METHODS                                           *
  ***********************************************************************************************/
-void Post::setWorkers(RessourceHandler &explorer, Location &location, Server &server)
+void Post::setWorkers(FileExplorer &explorer, Location &location, Server &server)
 {
     this->location = &location;
     this->explorer = &explorer;

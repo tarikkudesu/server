@@ -20,7 +20,7 @@ class Request
 		String							__URI;
 		t_method						__method;
 		Headers							__headers;
-        size_t                          __bodySize;
+		size_t							__bodySize;
 		String							__fragement;
 		String							__protocole;
 		String							__queryString;

@@ -151,6 +151,25 @@ void wsu::terr(String __error_message)
 /*************************************************************************************************
  *                                           UTILITIES                                           *
  *************************************************************************************************/
+
+String wsu::decode(String& encoded)
+{
+    String decoded;
+    for (String::iterator it = encoded.begin(); it != encoded.end(); it++)
+    {
+        if (*it == '%' && it + 1 != encoded.end() && it + 2 != encoded.end())
+        {
+            String number = String(it + 1, it + 3);
+            decoded += static_cast<char>(wsu::hexToInt("0x" + number));
+            it+=2;
+        }
+        else if (*it == '+')
+            decoded += ' ';
+        else
+            decoded += *it;
+    }
+    return decoded;
+}
 void    wsu::ft_bzero(void *s, size_t n)
 {
     char    *bytePtr = static_cast<char*>(s);

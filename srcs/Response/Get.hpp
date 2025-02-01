@@ -9,7 +9,7 @@ class Get
 		Request							&request;
 		t_response_phase				&__responsePhase;
 
-		RessourceHandler				*explorer;
+		FileExplorer				*explorer;
 		Location						*location;
 		Server							*server;
 
@@ -18,14 +18,14 @@ class Get
 		void							readFile(void);
 		void							autoIndexing(void);
 		bool							authenticated();
-		void							getInPhase(BasicString &body);
+		void							getInPhase();
 		void							duringGetPhase(BasicString &body);
 
 	public:
-		t_get_phase 					__phase;
+		t_get_file_operation 			__phase;
 
 		void							reset();
-		void							setWorkers(RessourceHandler &explorer, Location &location, Server &server);
+		void							setWorkers(FileExplorer &explorer, Location &location, Server &server);
 		void							executeGet(BasicString &body);
 
 		Get(Request &request, t_response_phase &phase);

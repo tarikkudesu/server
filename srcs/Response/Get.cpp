@@ -5,7 +5,7 @@ Get::Get(Request &request, t_response_phase &phase) : request(request),
                                                       explorer(NULL),
                                                       location(NULL),
                                                       server(NULL),
-                                                      __phase(GET_IN)
+                                                      __phase(OPEN_FILE)
 {
 }
 Get::Get(const Get &copy) : request(copy.request),
@@ -40,8 +40,8 @@ void Get::reset()
     wsu::info("GET out phase");
     if (__file.is_open())
         __file.close();
-    __phase = GET_IN;
-    __responsePhase = PREPARING_RESPONSE;
+    __phase = OPEN_FILE;
+    __responsePhase = RESPONSE_DONE;
 }
 bool Get::authenticated()
 {
@@ -56,41 +56,18 @@ bool Get::authenticated()
     }
     return false;
 }
-void Get::getInPhase(BasicString &body)
+void Get::getInPhase()
 {
-    wsu::info("GET in phase");
-    if (explorer->__type == FILE_)
+    if (location->__authenticate.size())
     {
-        if (location->__authenticate.size())
-        {
-            if (explorer->__fullPath.compare(location->__authenticate[0]) && !authenticated())
-                explorer->changeRequestedFile(location->__authenticate[1]);
-        }
-        this->__file.open(explorer->__fullPath.c_str(), std::ios::binary);
-        if (!__file.is_open())
-            throw ErrorResponse(403, *location, "could not open file");
-        wsu::info("opened file : " + explorer->__fullPath);
-        __phase = DURING_GET;
+        if (explorer->__fullPath.compare(location->__authenticate[0]) && !authenticated())
+            explorer->changeRequestedFile(location->__authenticate[1]);
     }
-    else if (location->__autoindex)
-    {
-        __responsePhase = PREPARING_RESPONSE;
-        t_svec directories;
-        DIR *dir = opendir(explorer->__fullPath.c_str());
-        if (!dir)
-            throw ErrorResponse(500, *location, "could not open directory");
-        struct dirent *entry;
-        while ((entry = readdir(dir)))
-        {
-            directories.push_back(entry->d_name);
-            directories.push_back(" ");
-        }
-        closedir(dir);
-        body = wsu::buildListingBody(explorer->__fullPath, directories);
-        __phase = GET_OUT;
-    }
-    else
-        throw ErrorResponse(403, "Forbidden");
+    this->__file.open(explorer->__fullPath.c_str(), std::ios::binary);
+    if (!__file.is_open())
+        throw ErrorResponse(403, *location, "could not open file");
+    wsu::info("opened file : " + explorer->__fullPath);
+    __phase = READ_FILE;
 }
 void Get::duringGetPhase(BasicString &body)
 {
@@ -100,11 +77,11 @@ void Get::duringGetPhase(BasicString &body)
     __file.read(buffer, sizeof(buffer));
     String k(buffer, __file.gcount());
     if (__file.eof())
-        __phase = GET_OUT;
+        __phase = CLOSE_FILE;
     if (__file.gcount() > 0)
         body = k;
 }
-void Get::setWorkers(RessourceHandler &explorer, Location &location, Server &server)
+void Get::setWorkers(FileExplorer &explorer, Location &location, Server &server)
 {
     this->location = &location;
     this->explorer = &explorer;
@@ -119,11 +96,11 @@ void Get::executeGet(BasicString &body)
     }
     try
     {
-        if (__phase == GET_IN)
-            getInPhase(body);
-        if (__phase == DURING_GET)
+        if (__phase == OPEN_FILE)
+            getInPhase();
+        if (__phase == READ_FILE)
             duringGetPhase(body);
-        if (__phase == GET_OUT)
+        if (__phase == CLOSE_FILE)
             reset();
     }
     catch (ErrorResponse &e)

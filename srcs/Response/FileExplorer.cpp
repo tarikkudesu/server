@@ -1,16 +1,16 @@
-#include "./RessourceHandler.hpp"
+#include "./FileExplorer.hpp"
 
-RessourceHandler::RessourceHandler()
+FileExplorer::FileExplorer()
 {
 }
 
-RessourceHandler::RessourceHandler(const RessourceHandler &copy) : __type(copy.__type),
+FileExplorer::FileExplorer(const FileExplorer &copy) : __type(copy.__type),
                                                                    __fullPath(copy.__fullPath),
                                                                    __location(copy.__location)
 {
     *this = copy;
 }
-RessourceHandler &RessourceHandler::operator=(const RessourceHandler &assign)
+FileExplorer &FileExplorer::operator=(const FileExplorer &assign)
 {
     if (this != &assign)
     {
@@ -20,10 +20,10 @@ RessourceHandler &RessourceHandler::operator=(const RessourceHandler &assign)
     }
     return *this;
 }
-RessourceHandler::~RessourceHandler()
+FileExplorer::~FileExplorer()
 {
 }
-void RessourceHandler::loadType(const char *path)
+void FileExplorer::loadType(const char *path)
 {
     struct stat file_stat;
     if (stat(path, &file_stat) == -1)
@@ -35,7 +35,7 @@ void RessourceHandler::loadType(const char *path)
     else
         __type = FILE_;
 }
-void	RessourceHandler::changeRequestedFile(String file)
+void	FileExplorer::changeRequestedFile(String file)
 {
 	size_t pos = __fullPath.find_last_of("/");
 	if (pos == String::npos)
@@ -43,7 +43,7 @@ void	RessourceHandler::changeRequestedFile(String file)
 	__fullPath.erase(pos + 1);
 	__fullPath = wsu::joinPaths(__fullPath, file);
 }
-void RessourceHandler::loadPathExploring(const String& uri)
+void FileExplorer::loadPathExploring(const String& uri)
 {
     __fullPath = wsu::joinPaths(__location->__root, uri);
     loadType(__fullPath.c_str());
@@ -62,7 +62,7 @@ void RessourceHandler::loadPathExploring(const String& uri)
         }
     }
 }
-void RessourceHandler::prepareRessource(Location& location, const String& uri)
+void FileExplorer::prepareRessource(Location& location, const String& uri)
 {
     __fullPath.clear();
     __location = &location;
@@ -73,7 +73,7 @@ void RessourceHandler::prepareRessource(Location& location, const String& uri)
     loadPathExploring(uri);
 }
 
-std::ostream &operator<<(std::ostream &o, RessourceHandler const &r)
+std::ostream &operator<<(std::ostream &o, FileExplorer const &r)
 {
     std::cout << "fullPath: " << r.__fullPath << "\n";
     std::cout << "type: ";

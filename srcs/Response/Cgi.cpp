@@ -5,7 +5,7 @@ typedef std::map<String, String> Map;
 
 /*=---------------------constructors-----------------------*/
 
-Cgi::Cgi(RessourceHandler &explorer, Request &request, Location &location, BasicString &body) : __request(request),
+Cgi::Cgi(FileExplorer &explorer, Request &request, Location &location, BasicString &body) : __request(request),
                                                                                                 __explorer(explorer),
                                                                                                 __location(location),
                                                                                                 __reqBody(body),

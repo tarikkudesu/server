@@ -8,10 +8,11 @@ class Response
 	private:
 		t_connection_phase				&__connectionPhase;
 		t_response_phase				__responsePhase;
+        t_get_phase                     __getPhase;
 		BasicString 					__body;
 		Get 							__get;
 		Post							__post;
-		RessourceHandler				explorer;
+		FileExplorer				    explorer;
 		Server							*__server;
 		Request							&__request;
 		Location						*__location;
@@ -19,14 +20,13 @@ class Response
 		std::map<String, String>		headers;
 		int 							code;
 
-
-        bool                            __tmp;
-
 		void							reset();
 		void							cgiPhase();
-		void							getPhase();
 		bool							checkCgi();
+		void							getPhase();
+		void							autoindex();
 		void							setHeader();
+		void							getProcess();
 		void							deleteFile();
 		void							deletePhase();
 		void							preparePhase();

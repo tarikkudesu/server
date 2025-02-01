@@ -2,19 +2,19 @@
 
 Response::Response(t_connection_phase &phase, Request &request) : __connectionPhase(phase),
                                                                   __responsePhase(PREPARING_RESPONSE),
+                                                                  __getPhase(GET_INIT),
                                                                   __get(request, __responsePhase),
                                                                   __post(request, __responsePhase),
-                                                                  __request(request),
-                                                                  __tmp(true)
+                                                                  __request(request)
 {
 }
 // a implementer
 Response::Response(const Response &copy) : __connectionPhase(copy.__connectionPhase),
-                                           __responsePhase(PREPARING_RESPONSE),
-                                           __get(copy.__request, __responsePhase),
-                                           __post(copy.__request, __responsePhase),
-                                           __request(copy.__request),
-                                           __tmp(copy.__tmp)
+                                           __responsePhase(copy.__responsePhase),
+                                           __getPhase(copy.__getPhase),
+                                           __get(copy.__get),
+                                           __post(copy.__post),
+                                           __request(copy.__request)
 {
     *this = copy;
 }
@@ -28,6 +28,7 @@ Response &Response::operator=(const Response &assign)
     {
         this->__connectionPhase = assign.__connectionPhase;
         this->__responsePhase = assign.__responsePhase;
+        this->__getPhase = assign.__getPhase;
         this->__body = assign.__body;
         this->__get = assign.__get;
         this->__post = assign.__post;
@@ -38,14 +39,15 @@ Response &Response::operator=(const Response &assign)
         this->reasonPhrase = assign.reasonPhrase;
         this->headers = assign.headers;
         this->code = assign.code;
-        this->__tmp = assign.__tmp;
     }
     return *this;
 }
 void Response::reset()
 {
+    __get.reset();
     __post.reset();
     __responsePhase = PREPARING_RESPONSE;
+    __connectionPhase = PROCESSING_REQUEST;
 }
 /***********************************************************************
  *								 METHODS							   *
@@ -117,8 +119,7 @@ void Response::deletePhase()
     wsu::info("Delete phase");
     deleteFile();
     buildResponse();
-    __responsePhase = PREPARING_RESPONSE;
-    __connectionPhase = PROCESSING_REQUEST;
+    __responsePhase = RESPONSE_DONE;
 }
 void Response::cgiPhase()
 {
@@ -126,8 +127,41 @@ void Response::cgiPhase()
     Cgi cgi(explorer, __request, *__location, __body);
     __body = cgi.getBody();
     buildResponse();
-    __responsePhase = PREPARING_RESPONSE;
-    __connectionPhase = PROCESSING_REQUEST;
+    __responsePhase = RESPONSE_DONE;
+}
+void Response::autoindex()
+{
+    t_svec directories;
+    DIR *dir = opendir(explorer.__fullPath.c_str());
+    if (!dir)
+        throw ErrorResponse(500, *__location, "could not open directory");
+    struct dirent *entry;
+    while ((entry = readdir(dir)))
+    {
+        directories.push_back(entry->d_name);
+        directories.push_back(" ");
+    }
+    closedir(dir);
+    String body = wsu::buildListingBody(explorer.__fullPath, directories);
+    buildResponse();
+    __responsePhase = RESPONSE_DONE;
+}
+void Response::getProcess()
+{
+    if (__getPhase == GET_INIT)
+    {
+        wsu::info("preparing Get");
+        buildResponse();
+        __get.setWorkers(explorer, *__location, *__server);
+        __getPhase = GET_EXECUTE;
+    }
+    else
+    {
+        wsu::info("executing Get");
+        __get.executeGet(__body);
+        if (__responsePhase == RESPONSE_DONE)
+            __getPhase = GET_INIT;
+    }
 }
 void Response::getPhase()
 {
@@ -136,24 +170,13 @@ void Response::getPhase()
         __responsePhase = CGI_PROCESS;
     else
     {
-        if (__tmp == true)
-        {
-            wsu::info("preparing Get");
-            buildResponse();
-            std::cout << __body << "\n";
-            __get.setWorkers(explorer, *__location, *__server);
-            __tmp = false;
-        }
+        wsu::info("GET in phase");
+        if (explorer.__type == FILE_)
+            getProcess();
+        else if (__location->__autoindex)
+            autoindex();
         else
-        {
-            wsu::info("executing Get");
-            __get.executeGet(__body);
-            if (__responsePhase == PREPARING_RESPONSE)
-            {
-                __tmp = true;
-                __connectionPhase = PROCESSING_REQUEST;
-            }
-        }
+            throw ErrorResponse(403, "Forbidden");
     }
 }
 void Response::postPhase(BasicString &data)
@@ -161,10 +184,10 @@ void Response::postPhase(BasicString &data)
     wsu::info("post phase");
     __post.setWorkers(explorer, *__location, *__server);
     __post.executePost(data);
-    if (__responsePhase == PREPARING_RESPONSE)
+    if (__responsePhase == RESPONSE_DONE)
     {
-        __connectionPhase = PROCESSING_REQUEST;
         buildResponse();
+        reset();
     }
 }
 void Response::preparePhase()
@@ -195,6 +218,8 @@ void Response::processData(BasicString &data)
             cgiPhase();
         if (__responsePhase == DELETE_PROCESS)
             deletePhase();
+        if (__responsePhase == RESPONSE_DONE)
+            reset();
     }
     catch (ErrorResponse &e)
     {

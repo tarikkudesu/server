@@ -2,7 +2,7 @@
 #define __POST_HPP__
 
 
-#include "RessourceHandler.hpp"
+#include "FileExplorer.hpp"
 
 class Post
 {
@@ -10,7 +10,7 @@ class Post
 		Request 					&request;
 		t_response_phase			&__responsePhase;
 
-		RessourceHandler			*explorer;
+		FileExplorer			*explorer;
 		Location					*location;
 		Server  					*server;
 
@@ -32,7 +32,7 @@ class Post
 
 	public:
 		void						reset();
-		void						setWorkers(RessourceHandler &explorer, Location &location, Server &server);
+		void						setWorkers(FileExplorer &explorer, Location &location, Server &server);
 		void						executePost(BasicString &data);
 
 		Post(Request &request, t_response_phase &phase);
