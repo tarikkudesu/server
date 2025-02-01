@@ -18,10 +18,10 @@ SRC		=	srcs/main.cpp \
 OBJ		=	$(SRC:.cpp=.o)
 NAME	=	webserv
 
-all: mkdir $(NAME)
+all: $(NAME)
 
 $(NAME): $(OBJ)
-	@c++ -Wall -Wextra -Werror -std=c++98 $(OBJ) -o $(NAME) -g -fsanitize=address
+	@c++ -Wall -Wextra -Werror -std=c++98 $(OBJ) -o $(NAME)
 
 %.o: %.cpp	srcs/Request/Connection.hpp \
 			srcs/Request/Headers.hpp \
@@ -39,20 +39,12 @@ $(NAME): $(OBJ)
 			srcs/utilities/BasicString.hpp \
 			srcs/utilities/WSU.hpp \
 			srcs/webserv.hpp 
-	@c++ -Wall -Wextra -Werror -std=c++98 -c $< -o $@ -g -fsanitize=address
-
-mkdir:
-	@mkdir -p .temp
-	@mkdir -p .logs
-
-rmdir:
-	@rm -rf .temp
-	@rm -rf .logs
+	@c++ -Wall -Wextra -Werror -std=c++98 -c $< -o $@
 
 clean:
 	@rm -f $(OBJ)
 
-fclean: clean rmdir
+fclean: clean
 	@rm -f $(NAME)
 
 re: fclean all
