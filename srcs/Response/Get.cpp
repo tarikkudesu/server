@@ -72,14 +72,14 @@ void Get::getInPhase()
 void Get::duringGetPhase(BasicString &body)
 {
     wsu::info("During GET phase");
-    char buffer[100];
-    wsu::ft_bzero(buffer, 100);
+    char buffer[READ_SIZE];
+    wsu::ft_bzero(buffer, READ_SIZE);
     __file.read(buffer, sizeof(buffer));
-    String k(buffer, __file.gcount());
+    String data(buffer, __file.gcount());
     if (__file.eof())
         __phase = CLOSE_FILE;
     if (__file.gcount() > 0)
-        body = k;
+        body = data;
 }
 void Get::setWorkers(FileExplorer &explorer, Location &location, Server &server)
 {
