@@ -29,7 +29,6 @@ Post &Post::operator=(const Post &assign)
         this->location = assign.location;
         this->server = assign.server;
         this->__phase = assign.__phase;
-        this->__boundary = assign.__boundary;
         this->__form = assign.__form;
     }
     return *this;
@@ -48,17 +47,14 @@ void Post::reset()
 {
     if (__fs.is_open())
         __fs.close();
-    __responsePhase = PREPARING_RESPONSE;
-    __boundary.clear();
+    __phase = MP_INIT;
+    __responsePhase = RESPONSE_DONE;
+    request.__headers.__boundary.clear();
     __form.clear();
 }
 void Post::writeDataIntoFile(BasicString &data)
 {
-    if (!(__fs << data))
-    {
-        reset();
-        throw wsu::Close();
-    }
+    __fs.write(data.getBuff(), data.length());
 }
 void Post::createFile(std::vector<String> &headers)
 {
@@ -67,55 +63,57 @@ void Post::createFile(std::vector<String> &headers)
         size_t pos = it->find("Content-Disposition: form-data");
         if (pos != String::npos)
         {
-            size_t filenamePos = it->find("filename\"", pos);
+            size_t filenamePos = it->find("filename=\"", pos);
             if (filenamePos != String::npos)
             {
-                size_t startPos = filenamePos + 9;
+                size_t startPos = filenamePos + 10;
                 size_t endPos = it->find("\"", startPos);
                 if (endPos != String::npos)
                 {
-                    std::string fileName = it->substr(startPos, endPos - startPos);
-                    __fs.open(fileName);
+                    std::string fileName = wsu::joinPaths(explorer->__fullPath, it->substr(startPos, endPos - startPos));
+                    __fs.open(fileName.c_str());
                     if (!__fs.is_open())
                         throw ErrorResponse(403, *location, "Could not create file on the server");
+                    std::cout << fileName << " is created\n";
                     return;
                 }
                 else
-                    throw ErrorResponse(400, *location, "Malformed Content-Disposition header.");
+                    throw ErrorResponse(400, *location, "Malformed Content-Disposition header. 1");
             }
             else
-                throw ErrorResponse(400, *location, "Malformed Content-Disposition header.");
+                throw ErrorResponse(400, *location, "Malformed Content-Disposition header. 2");
         }
     }
-    throw ErrorResponse(400, *location, "Malformed Content-Disposition header.");
+    throw ErrorResponse(400, *location, "Malformed Content-Disposition header. 3");
 }
 void Post::mpBody(BasicString &data)
 {
-    wsu::info("Post form data body");
-    size_t end = data.find(LINE_BREAK "--" + this->__boundary + "--" LINE_BREAK);
-    size_t pos = data.find(LINE_BREAK "--" + this->__boundary + LINE_BREAK);
+    wsu::info("Post multipart data body");
+    size_t end = data.find(LINE_BREAK "--" + this->request.__headers.__boundary + "--" LINE_BREAK);
+    size_t pos = data.find(LINE_BREAK "--" + this->request.__headers.__boundary + LINE_BREAK);
     if (pos == String::npos && end == String::npos)
     {
-        size_t len = this->__boundary.length() + 8;
+        size_t len = this->request.__headers.__boundary.length() + 6;
         if (data.length() <= len)
             throw wsu::persist();
         BasicString tmp = data.substr(0, data.length() - len);
+        data.erase(0, tmp.length());
+        request.__bodySize += tmp.length();
         writeDataIntoFile(tmp);
-        data.erase(0, data.length());
-        request.__bodySize += data.length();
     }
     else if (pos != String::npos)
     {
-        size_t len = this->__boundary.length() + 6;
+        size_t len = this->request.__headers.__boundary.length() + 4;
         BasicString tmp = data.substr(0, pos);
         writeDataIntoFile(tmp);
         data.erase(0, pos + len);
         request.__bodySize += pos + len;
         __phase = MP_HEADERS;
+        __fs.close();
     }
     else if (end != String::npos)
     {
-        size_t len = this->__boundary.length() + 8;
+        size_t len = this->request.__headers.__boundary.length() + 6;
         BasicString tmp = data.substr(0, end);
         writeDataIntoFile(tmp);
         data.erase(0, end + len);
@@ -145,55 +143,35 @@ void Post::mpHeaders(BasicString &data)
         if (p == 0 || p == String::npos)
             break;
         headers.push_back(data.substr(0, p).to_string());
+        std::cout << RED << headers.back() << "\n" << RESET;
         request.__bodySize += p + 2;
         data.erase(0, p + 2);
     } while (true);
     data.erase(0, 2);
-    createFile(headers);
     request.__bodySize += 2;
-}
-void Post::setBoundry()
-{
-    t_svec elements = wsu::splitByChar(request.__headers.__contentType, ';');
-    for (t_svec::iterator it = elements.begin(); it != elements.end(); it++)
-    {
-        wsu::trimSpaces(*it);
-        t_svec kv = wsu::splitByChar(*it, '=');
-        if (kv.size() != 2)
-            continue;
-        if (kv.at(0) == "boundary")
-            __boundary = kv.at(1);
-    }
-    if (__boundary.empty())
-        throw ErrorResponse(400, *location, "No boundry");
+    createFile(headers);
 }
 void Post::mpInit(BasicString &data)
 {
-    wsu::info("Post form data init");
-    setBoundry();
-    size_t pos1 = data.find("--" + __boundary + LINE_BREAK);
-    size_t pos2 = data.find("--" + __boundary + "--" LINE_BREAK);
-    if (pos1 == String::npos && pos2 == String::npos)
+    wsu::info("Post multipart data init");
+    size_t pos1 = data.find("--" + request.__headers.__boundary + LINE_BREAK);
+    size_t pos2 = data.find("--" + request.__headers.__boundary + "--" LINE_BREAK);
+    if (pos1 == String::npos && pos2 == String::npos && data.length() < request.__headers.__boundary.length() + 6)
         throw wsu::persist();
     if (pos2 == 0)
     {
-        data.erase(0, __boundary.length() + 6);
+        data.erase(0, request.__headers.__boundary.length() + 6);
         throw ErrorResponse(400, *location, "No files were uploaded");
     }
-    if (pos1 == String::npos)
-        throw wsu::persist();
-    else if (pos1 != 0)
-    {
-        data.erase(0, __boundary.length() + 6);
+    if (pos1 != 0)
         throw ErrorResponse(400, *location, "Multipart/data-from: boundry mismatch");
-    }
-    data.erase(0, __boundary.length() + 4);
+    data.erase(0, request.__headers.__boundary.length() + 4);
     __phase = MP_HEADERS;
 }
 void Post::processMultiPartBody(BasicString &data)
 {
-    wsu::info("Post form data");
-    do
+    wsu::info("Post multipart data");
+    try
     {
         if (__phase == MP_INIT)
             mpInit(data);
@@ -201,7 +179,33 @@ void Post::processMultiPartBody(BasicString &data)
             mpHeaders(data);
         if (__phase == MP_BODY)
             mpBody(data);
-    } while (__responsePhase != RESPONSE_DONE);
+    }
+    catch (ErrorResponse &e)
+    {
+        this->request.__headers.__connectionType = CLOSE;
+        data.clear();
+        throw e;
+    }
+}
+void Post::processFormData(BasicString &data)
+{
+    wsu::info("Post form data");
+    __form.join(data);
+    if (__form.length() > FORM_MAX_SIZE)
+        throw ErrorResponse(415, *location, "Content-Type not supported");
+    if (location->__authenticate.size())
+    {
+        String cook;
+        if (!server->authentified(__form.to_string()))
+        {
+            cook = server->addUserInDb(__form.to_string());
+        }
+        else
+            cook = server->getCookie(__form.to_string());
+        throw ErrorResponse(location->__authenticate[0], cook);
+    }
+    else
+        __responsePhase = CGI_PROCESS;
 }
 /***********************************************************************************************
  *                                           METHODS                                           *
@@ -211,31 +215,11 @@ void Post::processData(BasicString &data)
     if (request.__bodySize > location->__clientBodyBufferSize)
     {
         data.clear();
-        std::cout << "------------------------------ " << request.__bodySize << "\n";
         throw ErrorResponse(413, *location, "Request body too large.");
     }
-    if (request.__headers.__contentType == FORM_DATA)
-    {
-        wsu::info("Post form data");
-        __form.join(data);
-        if (__form.length() > FORM_MAX_SIZE)
-            throw ErrorResponse(415, *location, "Content-Type not supported");
-        if (location->__authenticate.size())
-        {
-            String cook;
-            if (!server->authentified(__form.to_string()))
-            {
-                cook = server->addUserInDb(__form.to_string());
-            }
-            else
-                cook = server->getCookie(__form.to_string());
-            throw ErrorResponse(location->__authenticate[0], cook);
-        }
-        else
-            __responsePhase = CGI_PROCESS;
-        //verify the logic later
-    }
-    else if (request.__headers.__contentType == MULTIPART_DATA_FORM) // no exactly, you need to get the boundry
+    if (request.__headers.__contentType == FORM)
+        processFormData(data);
+    else if (request.__headers.__contentType == MULTIPART)
         processMultiPartBody(data);
     else
         throw ErrorResponse(415, *location, "Content-Type not supported");
@@ -270,7 +254,7 @@ void Post::processCunkedBody(BasicString &data)
             request.__bodySize += pos + 2;
             if (chunkSize == 0)
             {
-                __responsePhase = PREPARING_RESPONSE;
+                __responsePhase = RESPONSE_DONE;
                 return;
             }
         }
@@ -301,20 +285,23 @@ void Post::processDefinedBody(BasicString &data)
     {
         BasicString tmp = data.substr(0, request.__headers.__contentLength);
         request.__headers.__contentLength -= tmp.length();
+        request.__bodySize += tmp.length();
         data.erase(0, tmp.length());
         processData(tmp);
-        request.__bodySize += tmp.length();
     }
     else
     {
         BasicString tmp = data;
-        processData(tmp);
         request.__bodySize += data.length();
         request.__headers.__contentLength -= data.length();
+        processData(tmp);
         data.clear();
     }
     if (request.__headers.__contentLength == 0)
-        __responsePhase = PREPARING_RESPONSE;
+    {
+        std::cout << "Done yaaaaaaaaaaaaaaaaaaaa\n";
+        __responsePhase = RESPONSE_DONE;
+    }
 }
 /***********************************************************************************************
  *                                           METHODS                                           *

@@ -10,16 +10,17 @@ class Post
 		Request 					&request;
 		t_response_phase			&__responsePhase;
 
-		FileExplorer			*explorer;
+		FileExplorer				*explorer;
 		Location					*location;
-		Server  					*server;
+		Server						*server;
 
 		t_multipartsection			__phase;
-		String						__boundary;
 		BasicString 				__form;
 		std::ofstream				__fs;
+		std::ofstream				__tmp;
 
 		void						processMultiPartBody(BasicString &data);
+		void						processFormData(BasicString &data);
 		void						processDefinedBody(BasicString &data);
 		void						processCunkedBody(BasicString &data);
 		void						writeDataIntoFile(BasicString &data);
@@ -28,7 +29,6 @@ class Post
 		void						mpHeaders(BasicString &data);
 		void						mpInit(BasicString &data);
 		void						mpBody(BasicString &data);
-		void						setBoundry();
 
 	public:
 		void						reset();
