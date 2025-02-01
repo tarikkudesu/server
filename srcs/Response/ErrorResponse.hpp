@@ -12,7 +12,6 @@ class ErrorResponse
 		String								__Body;
 		String								__headers;
 		Location							*__location;
-		String								__StatusLine;
 		String 								__indication;
 		String 								__redirection;
 		String								__reasonPhrase;
@@ -25,6 +24,8 @@ class ErrorResponse
 		ErrorResponse();
 
 	public:
+		String								__StatusLine;
+
 		BasicString							getResponse() const;
 		void								print() const;
 
