@@ -21,7 +21,7 @@ Location::Location(const String &dir, const String &conf, const String &root) : 
 																				__line(conf),
 																				__root(root),
 																				__autoindex(false),
-																				__clientBodyBufferSize(-1)
+																				__clientBodyBufferSize(8000)
 {
 	wsu::debug("Location double para constructor : " + dir);
 	parse();

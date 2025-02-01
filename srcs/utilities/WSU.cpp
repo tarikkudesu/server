@@ -394,15 +394,6 @@ bool wsu::containsPath(const String &path, const String &subPath)
 	}
 	return true;
 }
-String wsu::getParentPath(const String &path)
-{
-	if (path.empty())
-		return "";
-	t_svec vPath = wsu::splitByChar(path, '/');
-	if (!vPath.empty())
-		return *(vPath.end() - 1);
-	return "";
-}
 String wsu::joinPaths(const String &path1, const String &path2)
 {
 	if (path1.empty() && path2.empty())
@@ -566,7 +557,7 @@ String wsu::buildListingBody(String path, const t_svec &list)
 		if (it->empty() || String::npos == it->find_first_not_of(" \t\n\r\v\f") || *it == "." || *it == "..")
 			continue;
 		String listing = anchor;
-		String link = wsu::joinPaths(wsu::getParentPath(path), *it);
+		String link = wsu::joinPaths(path, *it);
 		wsu::replaceString(listing, "LINK", link);
 		wsu::replaceString(listing, "NAME", *it);
 		ss << listing;

@@ -7,7 +7,7 @@ class Cgi
 {
 	private:
 		Request&				__request;
-		FileExplorer&		__explorer;
+		FileExplorer&		    __explorer;
 		Location&				__location;
         BasicString             __reqBody;
 		std::time_t				__start;

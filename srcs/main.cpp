@@ -24,10 +24,10 @@ void signalHandler(int signal)
 {
 	if (signal == SIGINT || signal == SIGPIPE)
 	{
-		void *array[10];
-		size_t size = backtrace(array, 10);
-		fprintf(stderr, "Error: signal %d:\n", signal);
-		backtrace_symbols_fd(array, size, STDERR_FILENO);
+		// void *array[10];
+		// size_t size = backtrace(array, 10);
+		// fprintf(stderr, "Error: signal %d:\n", signal);
+		// backtrace_symbols_fd(array, size, STDERR_FILENO);
 		exit(1);
 		std::cout << "exiting\n";
 		Core::up = false;

@@ -25,15 +25,14 @@ class Response
 		bool							checkCgi();
 		void							getPhase();
 		void							autoindex();
-		void							setHeader();
 		void							getProcess();
 		void							deleteFile();
 		void							deletePhase();
 		void							preparePhase();
-		void							buildResponse();
 		void							__check_methods();
 		bool							shouldAuthenticate();
 		void							postPhase(BasicString &data);
+		void							buildResponse(int code, size_t length);
 
 	public:
 		BasicString 					getResponse();

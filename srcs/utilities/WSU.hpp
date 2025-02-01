@@ -64,7 +64,6 @@ public:
 	static struct pollfd *data(t_events &events);
 	static String resolvePath(const String &path);
     static String readFielContent(String fileName);
-	static String getParentPath(const String &path);
 	static String getContentType(const String &uri);
     static ssize_t getFileSize(const String &filename);
 	static std::vector<String> splitBySpaces(const String &input);

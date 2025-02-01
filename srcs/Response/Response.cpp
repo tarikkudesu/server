@@ -66,27 +66,26 @@ bool Response::shouldAuthenticate()
 {
     return !__location->__authenticate.empty();
 }
-void Response::buildResponse()
+void Response::buildResponse(int code, size_t length)
 {
-    code = 200;
-    reasonPhrase = "OK";
     __body.clear();
-    setHeader();
+    String reasonPhrase;
+    std::map<int16_t, String>::iterator it = wsu::__errCode.find(code);
+    if (it != wsu::__errCode.end())
+        reasonPhrase = it->second;
+    else
+        reasonPhrase = "OK";
     __body.join(PROTOCOLE_V " " + wsu::intToString(code) + " " + reasonPhrase + LINE_BREAK);
-    for (std::map<String, String>::iterator it = headers.begin(); it != headers.end(); ++it)
-        __body.join(it->first + ": " + it->second + "\r\n");
-    __body.join(String("\r\n"));
-}
-void Response::setHeader()
-{
-    headers["Accept-Ranges"] = "none";
-    headers["Connection"] = "keep-alive";
-    headers["Content-Length"] = wsu::intToString(wsu::getFileSize(explorer.__fullPath));
-    headers["Content-Type"] = wsu::getContentType(explorer.__fullPath) + "; charset=UTF-8";
-    headers["server"] = "webserv/1.0";
-    headers["date"] = wsu::buildIMFDate();
+    __body.join("Content-Type: " + wsu::getContentType(explorer.__fullPath) + "; charset=UTF-8" + LINE_BREAK);
+    __body.join("date: " + wsu::buildIMFDate() + LINE_BREAK);
+    __body.join(String("Accept-Ranges: none") + LINE_BREAK);
+    __body.join(String("server: webserv/1.0") + LINE_BREAK);
+    __body.join(String("Connection: keep-alive") + LINE_BREAK);
+    if (length)
+        __body.join("Content-Length: " + wsu::intToString(length) + LINE_BREAK);
     // if (!request->__headers.__cookie.empty())
-    // 	headers["cookie"] = "token=" + __request.__headers.__cookie + "; expires=Thu, 31 Dec 2025 12:00:00 UTC;";
+    //     headers["cookie"] = "token=" + __request.__headers.__cookie + "; expires=Thu, 31 Dec 2025 12:00:00 UTC;";
+    __body.join(String(LINE_BREAK));
 }
 bool Response::checkCgi()
 {
@@ -118,19 +117,20 @@ void Response::deletePhase()
 {
     wsu::info("Delete phase");
     deleteFile();
-    buildResponse();
+    buildResponse(204, 0);
     __responsePhase = RESPONSE_DONE;
 }
 void Response::cgiPhase()
 {
     wsu::info("CGI phase");
     Cgi cgi(explorer, __request, *__location, __body);
-    __body = cgi.getBody();
-    buildResponse();
+    buildResponse(200, __body.length());
+    __body.join(cgi.getBody());
     __responsePhase = RESPONSE_DONE;
 }
 void Response::autoindex()
 {
+    wsu::info("autoindex");
     t_svec directories;
     DIR *dir = opendir(explorer.__fullPath.c_str());
     if (!dir)
@@ -142,8 +142,9 @@ void Response::autoindex()
         directories.push_back(" ");
     }
     closedir(dir);
-    String body = wsu::buildListingBody(explorer.__fullPath, directories);
-    buildResponse();
+    String body = wsu::buildListingBody(__request.__URI, directories);
+    buildResponse(200, body.length());
+    __body.join(body);
     __responsePhase = RESPONSE_DONE;
 }
 void Response::getProcess()
@@ -151,7 +152,7 @@ void Response::getProcess()
     if (__getPhase == GET_INIT)
     {
         wsu::info("preparing Get");
-        buildResponse();
+        buildResponse(200, wsu::getFileSize(explorer.__fullPath));
         __get.setWorkers(explorer, *__location, *__server);
         __getPhase = GET_EXECUTE;
     }
@@ -170,7 +171,6 @@ void Response::getPhase()
         __responsePhase = CGI_PROCESS;
     else
     {
-        wsu::info("GET in phase");
         if (explorer.__type == FILE_)
             getProcess();
         else if (__location->__autoindex)
@@ -186,7 +186,7 @@ void Response::postPhase(BasicString &data)
     __post.executePost(data);
     if (__responsePhase == RESPONSE_DONE)
     {
-        buildResponse();
+        buildResponse(201, 0);
         reset();
     }
 }
@@ -201,7 +201,6 @@ void Response::preparePhase()
     if (it == __location->__allowMethods.end())
         throw ErrorResponse(405, *__location, wsu::methodToString(__request.__method) + " : method not allowed in this location");
     __check_methods();
-    std::cout << explorer;
 }
 void Response::processData(BasicString &data)
 {
