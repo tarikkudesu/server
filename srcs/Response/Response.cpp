@@ -43,7 +43,6 @@ void Response::reset()
 {
     __get.reset();
     __post.reset();
-    __body.clear();
     __getPhase = GET_INIT;
     __responsePhase = PREPARING_RESPONSE;
     __connectionPhase = PROCESSING_REQUEST;
@@ -188,7 +187,6 @@ void Response::postPhase(BasicString &data)
     {
         String r = "<h2>Success!</h2>";
         buildResponse(201, r.length());
-        std::cout << __body << "\n";
         __body.join(r);
         reset();
     }
