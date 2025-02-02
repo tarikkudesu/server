@@ -29,23 +29,18 @@ class Server
 	public:
 		bool							__valid; // temporary usage
 		std::vector< int >				__ports; // temporary usage
-		std::map<String, String>		__tokenDB;
 		std::vector< Location >			__locations;
 		t_svec							__serverNames;
 
-
 		bool							amITheServerYouAreLookingFor( const String &sN );
 		Location						&identifyLocation( const String &URI );
-		bool							authentified(const String &id) const;
 		String							addUserInDb(const String &userInfo);
-		String							getCookie(const String& id) const;
-		bool							userInDb(String& user) const;
+		String							userInDb(String& user, int i) const;
 		int								getServerSocket() const;
 		String							serverIdentity() const;
 		const String					&getServerHost() const;
 		int								getServerPort() const;
 		void							setPort(int port);
-		void							LoadUsers();
 		void							setup();
 
 

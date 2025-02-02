@@ -37,7 +37,6 @@ Server &Server::operator=(const Server &assign)
 		__port = assign.__port;
 		__host = assign.__host;
 		__ports = assign.__ports;
-		__tokenDB = assign.__tokenDB;
 		__locations = assign.__locations;
 		__directives = assign.__directives;
 		__serverNames = assign.__serverNames;
@@ -59,48 +58,30 @@ String	  Server::addUserInDb(const String &userInfo)
 {
 	String cookie("");
 	std::ofstream file( ("essentials/serversDB/" + serverIdentity() + ".csv").c_str() ,std::ios::app);
+	if (file.is_open())
 	{
 		cookie = wsu::generateTokenId();
-        this->__tokenDB.insert(std::make_pair(cookie, userInfo));
 		file << cookie + " " +userInfo << "\n";
 		file.close();
 	}
 	return cookie;
 }
-String	Server::getCookie(const String& id) const
+
+String	Server::userInDb(String& user, int i) const
 {
-	std::map<String, String>::const_iterator element = this->__tokenDB.find(id);
-	if (element == __tokenDB.end())
+	std::ifstream file(("essentials/serversDB/" + serverIdentity() + ".csv").c_str());
+	if (!file.is_open())
 		return "";
-	return element->second;
-}
-bool	Server::userInDb(String& user) const
-{
-	for (std::map<String, String>::const_iterator it = this->__tokenDB.begin(); it != __tokenDB.end(); it++)
-	{
-		if (it->second.compare(user))
-			return true;
-	}
-	return false;
-}
-bool Server::authentified(const String &id) const
-{
-	return __tokenDB.find(id) != __tokenDB.end();
-}
-void Server::LoadUsers()
-{
 	String line;
-	std::ifstream __sessionFile(("essentials/serversDB/" + this->serverIdentity() + ".csv").c_str());
-	if (!__sessionFile.is_open())
-		return ;
-	while (std::getline(__sessionFile, line))
+	while (std::getline(file, line))
 	{
-		std::vector<String> vect = wsu::splitByChar(line, ' ');
-		if (vect.size() == 2)
-			__tokenDB.insert(std::make_pair(vect.at(0), vect.at(1)));
+		t_svec tokens = wsu::splitByChar(line, ' ');
+		if (tokens.size() == 2 && tokens[i] == user)
+			return tokens[0];
 	}
-	__sessionFile.close();
+	return "";
 }
+
 /****************************************************************************
  *								 MINI METHODS								*
  ****************************************************************************/
@@ -193,7 +174,6 @@ void Server::setup()
 		throw std::runtime_error(serverIdentity() + ": non functional: failed to bind socket");
 	if (-1 == listen(this->__sd, 10))
 		throw std::runtime_error(serverIdentity() + ": non functional: failed to listen for connections");
-	LoadUsers();
 }
 /**************************************************************************************************************
  *											 PROCCESSING DIRECTIVES 										  *
@@ -414,8 +394,6 @@ std::ostream &operator<<(std::ostream &o, const Server &ser)
 	for (t_svec::const_iterator it = ser.__serverNames.begin(); it != ser.__serverNames.end(); it++)
 		std::cout << *it << " ";
 	std::cout << "\n";
-	for (std::map<String, String>::const_iterator it = ser.__tokenDB.begin(); it != ser.__tokenDB.end(); it++)
-		std::cout << "\t" << it->first << " " << it->second << "\n";
 	for (std::vector<Location>::const_iterator it = ser.__locations.begin(); it != ser.__locations.end(); it++)
 		std::cout << *it;
 	std::cout << "\n";
