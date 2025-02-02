@@ -69,6 +69,8 @@ typedef std::map<String, String>::iterator mapIterator;
 #define REQUEST_HEADERS_MAX_SIZE 8192
 #define REQUEST_HEADER_FEILD_MAX_SIZE 4096
 
+#define SUCCESS_PAGE "essentials/success.html"
+
 #define FORM_DATA "application/x-www-form-urlencoded"
 #define MULTIPART_DATA_FORM "multipart/form-data"
 
