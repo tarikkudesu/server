@@ -49,10 +49,10 @@ void Post::reset()
 {
     if (__fs.is_open())
         __fs.close();
-    __phase = MP_INIT;
-    __responsePhase = RESPONSE_DONE;
-    request.__headers.__boundary.clear();
     __form.clear();
+    __data.clear(); // skeptical about it
+    __phase = MP_INIT;
+    request.__headers.__boundary.clear();
 }
 BasicString &Post::getForm()
 {
@@ -91,7 +91,6 @@ void Post::createFile(std::vector<String> &headers)
         else
             throw ErrorResponse(400, *location, "Malformed Content-Disposition header.2");
     }
-    throw ErrorResponse(400, *location, "Malformed Content-Disposition header.3");
 }
 
 void Post::mpBody()
@@ -123,7 +122,6 @@ void Post::mpBody()
         BasicString tmp = __data.substr(0, end);
         writeDataIntoFile(tmp);
         __data.erase(0, end + len);
-        __responsePhase = RESPONSE_DONE;
         reset();
     }
 }
@@ -183,17 +181,6 @@ void Post::processFormData()
     __form.join(__data);
     if (__form.length() > FORM_MAX_SIZE)
         throw ErrorResponse(415, *location, "Oversized Form");
-    if (location->__authenticate.size())
-    {
-        if (!server->authentified(__form.to_string()))
-            request.__headers.__cookie = server->addUserInDb(__form.to_string());
-        else
-            request.__headers.__cookie = server->getCookie(__form.to_string());
-        explorer->changeRequestedFile(location->__authenticate[0]);
-        __responsePhase = GET_PROCESS;
-    }
-    else
-        __responsePhase = CGI_PROCESS;
 }
 /***********************************************************************************************
  *                                           METHODS                                           *
@@ -221,7 +208,7 @@ void Post::processData(BasicString &data)
     catch (ErrorResponse &e)
     {
         this->request.__headers.__connectionType = CLOSE;
-        __data.clear();
+        this->__responsePhase = RESPONSE_DONE;
         reset();
         throw e;
     }

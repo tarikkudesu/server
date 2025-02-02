@@ -19,20 +19,21 @@ class Response
 		Location						*__location;
 
 
-		void						    processDefinedBody(BasicString &data);
-		void						    processCunkedBody(BasicString &data);
-        bool                            authenticated();
 		void							reset();
 		void							cgiPhase();
+		void							postDone();
 		bool							checkCgi();
 		void							getPhase();
 		void							autoindex();
 		void							getProcess();
 		void							deletePhase();
 		void							preparePhase();
+        bool                            authenticated();
 		void							__check_methods();
 		bool							shouldAuthenticate();
 		void							postPhase(BasicString &data);
+		void						    processCunkedBody(BasicString &data);
+		void						    processDefinedBody(BasicString &data);
 		void							buildResponse(int code, size_t length);
 
 	public:

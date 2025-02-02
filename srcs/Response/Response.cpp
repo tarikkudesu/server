@@ -55,13 +55,14 @@ void Response::reset()
  *								 METHODS							   *
  ***********************************************************************/
 
+
 BasicString Response::getResponse()
 {
     return __body;
 }
 bool Response::shouldAuthenticate()
 {
-	if (__location->__authenticate.size() == 2)
+    if (__location->__authenticate.size() == 2)
         return explorer.__fullPath.compare(__location->__authenticate[0]);
     return false;
 }
@@ -118,6 +119,24 @@ void Response::setupWorkers(Server &server, Location &location)
  *                                  BODY PROCESSING                                  *
  *************************************************************************************/
 
+void Response::postDone()
+{
+    if (__location->__authenticate.size() == 2)
+    {
+        String form = __post.getForm().to_string();
+        wsu::decode(form);
+        if (!__server->authentified(form))
+            __request.__headers.__cookie = "token=" + __server->addUserInDb(form);
+        else
+            __request.__headers.__cookie = "token=" +__server->getCookie(form);
+        explorer.changeRequestedFile(__location->__authenticate[0]);
+        std::cout << "new cookie " << __request.__headers.__cookie << "\n";
+        __responsePhase = GET_PROCESS;
+    }
+    else
+        __responsePhase = CGI_PROCESS;
+    __post.reset();
+}
 void Response::processCunkedBody(BasicString &data)
 {
     wsu::info("Post chunked body");
@@ -143,10 +162,7 @@ void Response::processCunkedBody(BasicString &data)
             data.erase(0, pos + 2);
             __request.__bodySize += pos + 2;
             if (chunkSize == 0)
-            {
-                __responsePhase = RESPONSE_DONE;
-                return;
-            }
+                return postDone();
         }
         if (chunkSize < data.length())
         {
@@ -188,7 +204,7 @@ void Response::processDefinedBody(BasicString &data)
         data.clear();
     }
     if (__request.__headers.__contentLength == 0)
-        __responsePhase = RESPONSE_DONE;
+        postDone();
 }
 /*************************************************************************************
  *                                        GET                                        *
@@ -230,12 +246,14 @@ void Response::getProcess()
 {
     if (__getPhase == GET_INIT)
     {
-        __get.setWorkers(explorer, *__location, *__server);
-        if (__location->__authenticate.size() == 2)
+        if (__location->__authenticate.size() == 2 &&
+            wsu::samePath(explorer.__fullPath, wsu::joinPaths(__location->__root, __location->__authenticate[0])))
         {
-            if (explorer.__fullPath == wsu::joinPaths(__location->__root, __location->__authenticate[0]) && !authenticated())
-                explorer.changeRequestedFile(__location->__authenticate[1]);
+
+            if (!authenticated())
+                throw ErrorResponse(301, __location->__authenticate[1], *__location);
         }
+        __get.setWorkers(explorer, *__location, *__server);
         buildResponse(200, wsu::getFileSize(explorer.__fullPath));
         __getPhase = GET_EXECUTE;
     }
@@ -297,12 +315,6 @@ void Response::postPhase(BasicString &data)
             processCunkedBody(data);
         else
             throw ErrorResponse(400, *__location, "Missing Content-Length or Transfer-Encoding");
-        if (__responsePhase == RESPONSE_DONE)
-        {
-            String r = "<h2>Success!</h2>";
-            buildResponse(201, r.length());
-            __body.join(r);
-        }
     }
 }
 
