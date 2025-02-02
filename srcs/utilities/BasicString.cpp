@@ -34,7 +34,8 @@ BasicString::BasicString(const BasicString &copy) : __buff(NULL), __size(0)
 
 BasicString::~BasicString()
 {
-	delete[] __buff;
+    if (__size)
+        delete[] __buff;
 }
 bool BasicString::empty() const
 {
