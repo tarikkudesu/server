@@ -43,7 +43,8 @@ bool BasicString::empty() const
 }
 void BasicString::clear()
 {
-	delete[] __buff;
+    if (__size)
+        delete[] __buff;
 	__buff = NULL;
 	__size = 0;
 }
