@@ -13,6 +13,7 @@ class Response
 		Get								__get;
 		Post							__post;
 		BasicString 					__body;
+		String							__cookie;
 		FileExplorer					explorer;
 		Server							*__server;
 		Request							&__request;

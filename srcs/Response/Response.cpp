@@ -46,6 +46,7 @@ void Response::reset()
 {
     __get.reset();
     __post.reset();
+	__cookie.clear();
     __getPhase = GET_INIT;
     __postPhase = POST_INIT;
     __responsePhase = PREPARING_RESPONSE;
@@ -69,7 +70,7 @@ BasicString Response::getResponse()
 bool Response::shouldAuthenticate()
 {
     if (__location->__authenticate.size() == 2)
-        return explorer.__fullPath.compare(__location->__authenticate[0]);
+        return explorer.__fullPath == wsu::joinPaths(__location->__root, __location->__authenticate[0]);
     return false;
 }
 void Response::buildResponse(int code, size_t length)
@@ -89,9 +90,9 @@ void Response::buildResponse(int code, size_t length)
     __body.join(String("Connection: keep-alive") + LINE_BREAK);
     if (length)
         __body.join("Content-Length: " + wsu::intToString(length) + LINE_BREAK);
-    if (!__request.__headers.__cookie.empty())
-        __body.join("Set-Cookie: token=" + __request.__headers.__cookie + "; expires=Thu, 31 Dec 2025 12:00:00 UTC;");
-    __body.join(String(LINE_BREAK));
+    if (!__cookie.empty())
+		__body.join("Set-Cookie: token=" + __cookie + "; path=/; expires=Thu, 31 Dec 2025 12:00:00 UTC;" LINE_BREAK), __cookie.clear();
+	__body.join(String(LINE_BREAK));
 }
 bool Response::checkCgi()
 {
@@ -127,16 +128,14 @@ void Response::setupWorkers(Server &server, Location &location)
 
 void Response::postDone()
 {
-    if (__location->__authenticate.size() == 2)
+	String form = __post.getForm().to_string();
+	form = wsu::decode(form);
+    if (shouldAuthenticate())
     {
-        String form = __post.getForm().to_string();
-        wsu::decode(form);
-        if (!__server->authentified(form))
-            __request.__headers.__cookie = "token=" + __server->addUserInDb(form);
-        else
-            __request.__headers.__cookie = "token=" +__server->getCookie(form);
-        explorer.changeRequestedFile(__location->__authenticate[0]);
-        std::cout << "new cookie " << __request.__headers.__cookie << "\n";
+		__cookie = __server->userInDb(form, 1);
+		if (__cookie.empty())
+			__cookie = __server->addUserInDb(form);
+		explorer.changeRequestedFile(__location->__authenticate[0]);
         __responsePhase = GET_PROCESS;
     }
     else
@@ -237,13 +236,15 @@ void Response::autoindex()
 }
 bool Response::authenticated()
 {
+	if (__cookie != "")
+		return true;
     if (__request.__headers.__cookie.empty())
         return false;
     t_svec cookies = wsu::splitByChar(__request.__headers.__cookie, ';');
     for (t_svec::iterator it = cookies.begin(); it != cookies.end(); it++)
     {
         t_svec cook = wsu::splitByChar(*it, '=');
-        if (cook.size() == 2 && __server->authentified(cook[1]))
+        if (cook.size() == 2 && !__server->userInDb(cook[1], 0).empty())
             return true;
     }
     return false;
@@ -252,13 +253,9 @@ void Response::getProcess()
 {
     if (__getPhase == GET_INIT)
     {
-        if (__location->__authenticate.size() == 2 &&
-            wsu::samePath(explorer.__fullPath, wsu::joinPaths(__location->__root, __location->__authenticate[0])))
-        {
 
-            if (!authenticated())
-                throw ErrorResponse(301, __location->__authenticate[1], *__location);
-        }
+		if (shouldAuthenticate() && !authenticated())
+			explorer.changeRequestedFile(__location->__authenticate[1]);
         __get.setWorkers(explorer, *__location, *__server);
         buildResponse(200, wsu::getFileSize(explorer.__fullPath));
         __getPhase = GET_EXECUTE;
