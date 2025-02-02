@@ -2,6 +2,7 @@
 
 Response::Response(t_connection_phase &phase, Request &request) : __connectionPhase(phase),
                                                                   __responsePhase(PREPARING_RESPONSE),
+                                                                  __postPhase(POST_INIT),
                                                                   __getPhase(GET_INIT),
                                                                   __get(request, __responsePhase),
                                                                   __post(request, __responsePhase),
@@ -11,6 +12,7 @@ Response::Response(t_connection_phase &phase, Request &request) : __connectionPh
 // a implementer
 Response::Response(const Response &copy) : __connectionPhase(copy.__connectionPhase),
                                            __responsePhase(copy.__responsePhase),
+                                           __postPhase(copy.__postPhase),
                                            __getPhase(copy.__getPhase),
                                            __get(copy.__get),
                                            __post(copy.__post),
@@ -26,16 +28,17 @@ Response &Response::operator=(const Response &assign)
 {
     if (this != &assign)
     {
-        this->__connectionPhase = assign.__connectionPhase;
-        this->__responsePhase = assign.__responsePhase;
-        this->__getPhase = assign.__getPhase;
-        this->__body = assign.__body;
         this->__get = assign.__get;
+        this->__body = assign.__body;
         this->__post = assign.__post;
         this->explorer = assign.explorer;
         this->__server = assign.__server;
         this->__request = assign.__request;
         this->__location = assign.__location;
+        this->__getPhase = assign.__getPhase;
+        this->__postPhase = assign.__postPhase;
+        this->__responsePhase = assign.__responsePhase;
+        this->__connectionPhase = assign.__connectionPhase;
     }
     return *this;
 }
@@ -44,6 +47,7 @@ void Response::reset()
     __get.reset();
     __post.reset();
     __getPhase = GET_INIT;
+    __postPhase = POST_INIT;
     __responsePhase = PREPARING_RESPONSE;
     __connectionPhase = PROCESSING_REQUEST;
 }
@@ -55,14 +59,11 @@ BasicString Response::getResponse()
 {
     return __body;
 }
-void Response::deleteFile(void)
-{
-    if (unlink(explorer.__fullPath.c_str()) != 0)
-        throw ErrorResponse(500, *__location, "unlink");
-}
 bool Response::shouldAuthenticate()
 {
-    return !__location->__authenticate.empty();
+	if (__location->__authenticate.size() == 2)
+        return explorer.__fullPath.compare(__location->__authenticate[0]);
+    return false;
 }
 void Response::buildResponse(int code, size_t length)
 {
@@ -81,8 +82,8 @@ void Response::buildResponse(int code, size_t length)
     __body.join(String("Connection: keep-alive") + LINE_BREAK);
     if (length)
         __body.join("Content-Length: " + wsu::intToString(length) + LINE_BREAK);
-    // if (!request->__headers.__cookie.empty())
-    //     headers["cookie"] = "token=" + __request.__headers.__cookie + "; expires=Thu, 31 Dec 2025 12:00:00 UTC;";
+    if (!__request.__headers.__cookie.empty())
+        __body.join("Set-Cookie: token=" + __request.__headers.__cookie + "; expires=Thu, 31 Dec 2025 12:00:00 UTC;");
     __body.join(String(LINE_BREAK));
 }
 bool Response::checkCgi()
@@ -106,11 +107,93 @@ void Response::__check_methods()
     else
         throw ErrorResponse(405, *__location, "Server does not implement this method");
 }
+
 void Response::setupWorkers(Server &server, Location &location)
 {
     this->__server = &server;
     this->__location = &location;
 }
+
+/*************************************************************************************
+ *                                  BODY PROCESSING                                  *
+ *************************************************************************************/
+
+void Response::processCunkedBody(BasicString &data)
+{
+    wsu::info("Post chunked body");
+    static size_t chunkSize;
+    do
+    {
+        if (chunkSize == 0)
+        {
+            size_t pos = data.find(LINE_BREAK);
+            if (pos == String::npos && data.length() > REQUEST_MAX_SIZE)
+            {
+                data.clear();
+                __request.__headers.__connectionType = CLOSE;
+                throw ErrorResponse(400, *__location, "Oversized chunk value");
+            }
+            else if (pos == String::npos)
+                throw wsu::persist();
+            BasicString hex = data.substr(0, pos);
+            size_t extPos = hex.find(";");
+            if (extPos != String::npos)
+                hex = hex.substr(0, extPos);
+            chunkSize = wsu::hexToInt(hex.to_string());
+            data.erase(0, pos + 2);
+            __request.__bodySize += pos + 2;
+            if (chunkSize == 0)
+            {
+                __responsePhase = RESPONSE_DONE;
+                return;
+            }
+        }
+        if (chunkSize < data.length())
+        {
+            BasicString tmp = data.substr(0, chunkSize);
+            __post.processData(tmp);
+            data.erase(0, chunkSize);
+            __request.__bodySize += chunkSize;
+            chunkSize -= data.length();
+        }
+        else
+        {
+            BasicString tmp = data;
+            __post.processData(tmp);
+            size_t len = data.length();
+            __request.__bodySize += len;
+            chunkSize -= len;
+            data.clear();
+            break;
+        }
+    } while (true);
+}
+void Response::processDefinedBody(BasicString &data)
+{
+    wsu::info("Post defined body");
+    if (__request.__headers.__contentLength < data.length())
+    {
+        BasicString tmp = data.substr(0, __request.__headers.__contentLength);
+        __request.__headers.__contentLength -= tmp.length();
+        __request.__bodySize += tmp.length();
+        data.erase(0, tmp.length());
+        __post.processData(tmp);
+    }
+    else
+    {
+        BasicString tmp = data;
+        __request.__bodySize += data.length();
+        __request.__headers.__contentLength -= data.length();
+        __post.processData(tmp);
+        data.clear();
+    }
+    if (__request.__headers.__contentLength == 0)
+        __responsePhase = RESPONSE_DONE;
+}
+/*************************************************************************************
+ *                                        GET                                        *
+ *************************************************************************************/
+
 void Response::autoindex()
 {
     wsu::info("autoindex");
@@ -130,8 +213,23 @@ void Response::autoindex()
     __body.join(body);
     __responsePhase = RESPONSE_DONE;
 }
+bool Response::authenticated()
+{
+    if (shouldAuthenticate() && __request.__headers.__cookie.empty())
+        return false;
+    t_svec cookies = wsu::splitByChar(__request.__headers.__cookie, ';');
+    for (t_svec::iterator it = cookies.begin(); it != cookies.end(); it++)
+    {
+        t_svec cook = wsu::splitByChar(*it, '=');
+        if (cook.size() == 2 && __server->authentified(cook[1]))
+            return true;
+    }
+    return false;
+}
 void Response::getProcess()
 {
+	// if (shouldAuthenticate() && !authenticated())
+	// 	explorer.changeRequestedFile(__location->__authenticate[1]);
     if (__getPhase == GET_INIT)
     {
         buildResponse(200, wsu::getFileSize(explorer.__fullPath));
@@ -139,15 +237,31 @@ void Response::getProcess()
         __getPhase = GET_EXECUTE;
     }
     else
-    {
         __get.executeGet(__body);
-        if (__responsePhase == RESPONSE_DONE)
-            __getPhase = GET_INIT;
-    }
 }
+
 /******************************************************************************
  *                                   PHASES                                   *
  ******************************************************************************/
+
+void Response::deletePhase()
+{
+    wsu::info("Delete phase");
+    if (unlink(explorer.__fullPath.c_str()) != 0)
+        throw ErrorResponse(500, *__location, "unlink");
+    buildResponse(204, 0);
+    __responsePhase = RESPONSE_DONE;
+}
+
+void Response::cgiPhase()
+{
+    wsu::info("CGI phase");
+    Cgi cgi(explorer, __request, *__location, __body);
+    buildResponse(200, cgi.getBody().length());
+    __body.join(cgi.getBody());
+    __responsePhase = RESPONSE_DONE;
+}
+
 void Response::getPhase()
 {
     wsu::info("Get phase");
@@ -160,35 +274,32 @@ void Response::getPhase()
         else if (__location->__autoindex)
             autoindex();
         else
-            throw ErrorResponse(403, "Forbidden");
+            throw ErrorResponse(403, "not a file not autoindex");
     }
 }
-void Response::deletePhase()
-{
-    wsu::info("Delete phase");
-    deleteFile();
-    buildResponse(204, 0);
-    __responsePhase = RESPONSE_DONE;
-}
-void Response::cgiPhase()
-{
-    wsu::info("CGI phase");
-    Cgi cgi(explorer, __request, *__location, __body);
-    buildResponse(200, cgi.getBody().length());
-    __body.join(cgi.getBody());
-    __responsePhase = RESPONSE_DONE;
-}
+
 void Response::postPhase(BasicString &data)
 {
     wsu::info("post phase");
-    __post.setWorkers(explorer, *__location, *__server);
-    __post.executePost(data);
-    if (__responsePhase == RESPONSE_DONE)
+    if (__postPhase == POST_INIT)
     {
-        String r = "<h2>Success!</h2>";
-        buildResponse(201, r.length());
-        __body.join(r);
-        reset();
+        __post.setWorkers(explorer, *__location, *__server);
+        __postPhase = POST_EXECUTE;
+    }
+    else
+    {
+        if (__request.__headers.__transferType == DEFINED)
+            processDefinedBody(data);
+        else if (__request.__headers.__transferType == CHUNKED)
+            processCunkedBody(data);
+        else
+            throw ErrorResponse(400, *__location, "Missing Content-Length or Transfer-Encoding");
+        if (__responsePhase == RESPONSE_DONE)
+        {
+            String r = "<h2>Success!</h2>";
+            buildResponse(201, r.length());
+            __body.join(r);
+        }
     }
 }
 
@@ -204,6 +315,7 @@ void Response::preparePhase()
         throw ErrorResponse(405, *__location, wsu::methodToString(__request.__method) + " : method not allowed in this location");
     __check_methods();
 }
+
 void Response::processData(BasicString &data)
 {
     wsu::info("processing response");

@@ -15,25 +15,23 @@ class Post
 		Server						*server;
 
 		t_multipartsection			__phase;
-		BasicString 				__form;
+		BasicString					__data;
+		BasicString					__form;
 		std::ofstream				__fs;
-		std::ofstream				__tmp;
 
-		void						processMultiPartBody(BasicString &data);
-		void						processFormData(BasicString &data);
-		void						processDefinedBody(BasicString &data);
-		void						processCunkedBody(BasicString &data);
+		void						processMultiPartBody();
+		void						processFormData();
 		void						writeDataIntoFile(BasicString &data);
 		void						createFile(std::vector<String> &h);
-		void						processData(BasicString &data);
-		void						mpHeaders(BasicString &data);
-		void						mpInit(BasicString &data);
-		void						mpBody(BasicString &data);
+		void						mpHeaders();
+		void						mpInit();
+		void						mpBody();
 
 	public:
 		void						reset();
 		void						setWorkers(FileExplorer &explorer, Location &location, Server &server);
-		void						executePost(BasicString &data);
+		void						processData(BasicString &data);
+		BasicString 				&getForm();
 
 		Post(Request &request, t_response_phase &phase);
 		Post(const Post &copy);

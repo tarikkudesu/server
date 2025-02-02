@@ -8,6 +8,7 @@ class Response
 	private:
 		t_connection_phase				&__connectionPhase;
 		t_response_phase				__responsePhase;
+		t_post_phase					__postPhase;
 		t_get_phase						__getPhase;
 		Get								__get;
 		Post							__post;
@@ -17,13 +18,16 @@ class Response
 		Request							&__request;
 		Location						*__location;
 
+
+		void						    processDefinedBody(BasicString &data);
+		void						    processCunkedBody(BasicString &data);
+        bool                            authenticated();
 		void							reset();
 		void							cgiPhase();
 		bool							checkCgi();
 		void							getPhase();
 		void							autoindex();
 		void							getProcess();
-		void							deleteFile();
 		void							deletePhase();
 		void							preparePhase();
 		void							__check_methods();
