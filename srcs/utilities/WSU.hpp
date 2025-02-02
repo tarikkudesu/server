@@ -59,7 +59,6 @@ public:
     static String methodToString(t_method t);
 	static void toUpperString(String &input);
 	static void toLowerString(String &input);
-	static String generateTimeBasedFileName();
 	static long stringToInt(const String &str);
 	static struct pollfd *data(t_events &events);
 	static String resolvePath(const String &path);

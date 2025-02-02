@@ -213,11 +213,6 @@ ssize_t wsu::getFileSize(const String &filename)
         return st.st_size;
     return -1;
 }
-String wsu::generateTimeBasedFileName()
-{
-	static unsigned long cpt;
-	return "./.temp/." + wsu::intToString(std::time(NULL) + cpt++) + ".tmp"; // change path Later
-}
 bool wsu::endWith(const std::string &file, const char *extension)
 {
 	int fileLen = file.length();
