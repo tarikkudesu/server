@@ -1,18 +1,18 @@
 #include "Connection.hpp"
 
 Connection::Connection() : __sd(-1),
+						   __phase(PROCESSING_REQUEST),
 						   __request(__phase),
 						   __response(__phase, __request),
-						   __serversP(NULL),
-						   __phase(PROCESSING_REQUEST)
+						   __serversP(NULL)
 {
 	wsu::debug("Connection default constructor");
 }
 Connection::Connection(int sd) : __sd(sd),
+								 __phase(PROCESSING_REQUEST),
 								 __request(__phase),
 								 __response(__phase, __request),
-								 __serversP(NULL),
-								 __phase(PROCESSING_REQUEST)
+								 __serversP(NULL)
 {
 	wsu::debug("Connection single para constructor");
 }

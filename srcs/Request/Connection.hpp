@@ -11,10 +11,10 @@ class Connection
 	private :
 		int								__sd;
 		BasicString						__data;
+		t_connection_phase				__phase;
 		Request							__request;
 		Response						__response;
 		t_Server						*__serversP;
-		t_connection_phase				__phase;
 
 		Server							*identifyServer();
 		void							processRequest();
