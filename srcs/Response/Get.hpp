@@ -17,7 +17,6 @@ class Get
 
 		void							readFile(void);
 		void							autoIndexing(void);
-		bool							authenticated();
 		void							getInPhase();
 		void							duringGetPhase(BasicString &body);
 

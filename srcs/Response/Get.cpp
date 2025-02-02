@@ -43,26 +43,8 @@ void Get::reset()
     __phase = OPEN_FILE;
     __responsePhase = RESPONSE_DONE;
 }
-bool Get::authenticated()
-{
-    if (request.__headers.__cookie.empty())
-        return false;
-    t_svec cookies = wsu::splitByChar(request.__headers.__cookie, ';');
-    for (t_svec::iterator it = cookies.begin(); it != cookies.end(); it++)
-    {
-        t_svec cook = wsu::splitByChar(*it, '=');
-        if (cook.size() == 2 && server->authentified(cook[1]))
-            return true;
-    }
-    return false;
-}
 void Get::getInPhase()
 {
-    if (location->__authenticate.size())
-    {
-        if (explorer->__fullPath.compare(location->__authenticate[0]) && !authenticated())
-            explorer->changeRequestedFile(location->__authenticate[1]);
-    }
     this->__file.open(explorer->__fullPath.c_str(), std::ios::binary);
     if (!__file.is_open())
         throw ErrorResponse(403, *location, "could not open file");

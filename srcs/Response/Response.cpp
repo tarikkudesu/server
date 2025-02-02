@@ -215,7 +215,7 @@ void Response::autoindex()
 }
 bool Response::authenticated()
 {
-    if (shouldAuthenticate() && __request.__headers.__cookie.empty())
+    if (__request.__headers.__cookie.empty())
         return false;
     t_svec cookies = wsu::splitByChar(__request.__headers.__cookie, ';');
     for (t_svec::iterator it = cookies.begin(); it != cookies.end(); it++)
@@ -228,12 +228,15 @@ bool Response::authenticated()
 }
 void Response::getProcess()
 {
-	// if (shouldAuthenticate() && !authenticated())
-	// 	explorer.changeRequestedFile(__location->__authenticate[1]);
     if (__getPhase == GET_INIT)
     {
-        buildResponse(200, wsu::getFileSize(explorer.__fullPath));
         __get.setWorkers(explorer, *__location, *__server);
+        if (__location->__authenticate.size() == 2)
+        {
+            if (explorer.__fullPath == wsu::joinPaths(__location->__root, __location->__authenticate[0]) && !authenticated())
+                explorer.changeRequestedFile(__location->__authenticate[1]);
+        }
+        buildResponse(200, wsu::getFileSize(explorer.__fullPath));
         __getPhase = GET_EXECUTE;
     }
     else
