@@ -6,7 +6,7 @@ void f()
 	int fd = open(".log", O_WRONLY | O_CREAT | O_TRUNC, 0666);
 	if (-1 == fd)
 	{
-		wsu::terr(String(" .logs/sds.log cannot be opened"));
+		wsu::terr(String(" .log.log cannot be opened"));
 		exit(EXIT_FAILURE);
 	}
 	dup2(fd, STDOUT_FILENO);

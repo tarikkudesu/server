@@ -3,7 +3,7 @@
 
 .temp
 .uploads
-.logs
+.log
 tester
 webserv
 cgi_tester
