@@ -36,7 +36,7 @@ class Connection
 		void							setServers( t_Server &servers );
 		void							processData();
 		int								getSock();
-        bool                            close();
+		bool							close();
 
 
 		Connection( int sd );

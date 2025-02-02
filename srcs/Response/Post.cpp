@@ -61,6 +61,8 @@ BasicString &Post::getForm()
 void Post::writeDataIntoFile(BasicString &data)
 {
     __fs.write(data.getBuff(), data.length());
+    if (__fs.fail())
+        throw wsu::Close();
 }
 void Post::createFile(std::vector<String> &headers)
 {
@@ -81,15 +83,14 @@ void Post::createFile(std::vector<String> &headers)
                     return;
                 __fs.open(wsu::joinPaths(explorer->__fullPath, file).c_str());
                 if (!__fs.is_open())
-                    throw ErrorResponse(403, *location, "Could not create file on the server1");
-                std::cout << "Succesfully extracted\n";
+                    throw wsu::Close();
                 return;
             }
             else
-                throw ErrorResponse(400, *location, "Malformed Content-Disposition header.2");
+                throw wsu::Close();
         }
         else
-            throw ErrorResponse(400, *location, "Malformed Content-Disposition header.2");
+            throw wsu::Close();
     }
 }
 
@@ -100,7 +101,7 @@ void Post::mpBody()
     size_t pos = __data.find(LINE_BREAK "--" + this->request.__headers.__boundary + LINE_BREAK);
     if (pos == String::npos && end == String::npos)
     {
-        size_t len = this->request.__headers.__boundary.length() + 6;
+        size_t len = this->request.__headers.__boundary.length() + 8;
         if (__data.length() <= len)
             throw wsu::persist();
         BasicString tmp = __data.substr(0, __data.length() - len);
@@ -109,7 +110,7 @@ void Post::mpBody()
     }
     else if (pos != String::npos)
     {
-        size_t len = this->request.__headers.__boundary.length() + 4;
+        size_t len = this->request.__headers.__boundary.length() + 6;
         BasicString tmp = __data.substr(0, pos);
         writeDataIntoFile(tmp);
         __data.erase(0, pos + len);
@@ -118,11 +119,11 @@ void Post::mpBody()
     }
     else if (end != String::npos)
     {
-        size_t len = this->request.__headers.__boundary.length() + 6;
+        size_t len = this->request.__headers.__boundary.length() + 8;
         BasicString tmp = __data.substr(0, end);
         writeDataIntoFile(tmp);
         __data.erase(0, end + len);
-        reset();
+        __phase = MP_INIT;
     }
 }
 void Post::mpHeaders()
@@ -130,7 +131,7 @@ void Post::mpHeaders()
     wsu::info("Post form data headers");
     size_t pos = __data.find(D_LINE_BREAK);
     if (pos == String::npos && __data.length() > REQUEST_MAX_SIZE)
-        throw ErrorResponse(400, *location, "Oversized headers");
+        throw wsu::Close();
     else if (pos == String::npos)
         throw wsu::persist();
     std::vector<String> headers;
@@ -141,8 +142,6 @@ void Post::mpHeaders()
         if (p == 0 || p == String::npos)
             break;
         headers.push_back(__data.substr(0, p).to_string());
-        std::cout << RED << headers.back() << "\n"
-                  << RESET;
         __data.erase(0, p + 2);
     } while (true);
     __data.erase(0, 2);
@@ -161,7 +160,7 @@ void Post::mpInit()
         throw ErrorResponse(400, *location, "No files were uploaded");
     }
     if (pos1 != 0)
-        throw ErrorResponse(400, *location, "Multipart/data-from: boundry mismatch");
+        throw wsu::Close();
     __data.erase(0, request.__headers.__boundary.length() + 4);
     __phase = MP_HEADERS;
 }
@@ -180,7 +179,7 @@ void Post::processFormData()
     wsu::info("Post form data");
     __form.join(__data);
     if (__form.length() > FORM_MAX_SIZE)
-        throw ErrorResponse(415, *location, "Oversized Form");
+        throw wsu::Close();
 }
 /***********************************************************************************************
  *                                           METHODS                                           *
@@ -197,17 +196,16 @@ void Post::processData(BasicString &data)
     try
     {
         if (request.__bodySize > location->__clientBodyBufferSize)
-            throw ErrorResponse(413, *location, "Request body too large.");
+            throw wsu::Close();
         if (request.__headers.__contentType == FORM)
             processFormData();
         else if (request.__headers.__contentType == MULTIPART)
             processMultiPartBody();
         else
-            throw ErrorResponse(415, *location, "Content-Type not supported");
+            throw wsu::Close();
     }
     catch (ErrorResponse &e)
     {
-        this->request.__headers.__connectionType = CLOSE;
         this->__responsePhase = RESPONSE_DONE;
         reset();
         throw e;

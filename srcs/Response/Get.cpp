@@ -40,11 +40,13 @@ void Get::reset()
     wsu::info("GET out phase");
     if (__file.is_open())
         __file.close();
+    this->__bodySize = 0;
     __phase = OPEN_FILE;
     __responsePhase = RESPONSE_DONE;
 }
 void Get::getInPhase()
 {
+    this->__bodySize = wsu::getFileSize(explorer->__fullPath);
     this->__file.open(explorer->__fullPath.c_str(), std::ios::binary);
     if (!__file.is_open())
         throw ErrorResponse(403, *location, "could not open file");
@@ -57,11 +59,10 @@ void Get::duringGetPhase(BasicString &body)
     char buffer[READ_SIZE];
     wsu::ft_bzero(buffer, READ_SIZE);
     __file.read(buffer, sizeof(buffer));
-    String data(buffer, __file.gcount());
-    if (__file.eof())
+    body = BasicString(buffer, __file.gcount());
+    if (this->__bodySize == 0)
         __phase = CLOSE_FILE;
-    if (__file.gcount() > 0)
-        body = data;
+    this->__bodySize -= __file.gcount();
 }
 void Get::setWorkers(FileExplorer &explorer, Location &location, Server &server)
 {

@@ -14,6 +14,7 @@ class Get
 		Server							*server;
 
 		std::ifstream					__file;
+		size_t							__bodySize;
 
 		void							readFile(void);
 		void							autoIndexing(void);

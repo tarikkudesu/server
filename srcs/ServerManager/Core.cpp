@@ -223,14 +223,7 @@ void Core::readDataFromSocket(int sd)
         t_Connections::iterator iter = Core::__connections.find(sd);
         if (iter != Core::__connections.end())
         {
-            try
-            {
-                iter->second->addData(BasicString(buff, bytesRead));
-            }
-            catch (wsu::Close &e)
-            {
-                removeConnection(sd);
-            }
+            iter->second->addData(BasicString(buff, bytesRead));
         }
     }
     else
@@ -315,6 +308,23 @@ void Core::proccessPollEvent(int sd, int &retV)
  *                                      MAIN LOOP                                      *
  ***************************************************************************************/
 
+void Core::mainProcess()
+{
+    std::vector<int> rC;
+    for (t_Connections::iterator it = __connections.begin(); it != __connections.end(); it++)
+    {
+        try
+        {
+            it->second->processData();
+        }
+        catch (std::exception &e)
+        {
+            rC.push_back(it->second->getSock());
+        }
+    }
+    for (std::vector<int>::iterator it = rC.begin(); it != rC.end(); it++)
+        Core::removeConnection(*it);
+}
 void Core::mainLoop()
 {
     int retV = 0;
@@ -328,21 +338,13 @@ void Core::mainLoop()
             retV = poll(Core::__events, Core::__sockets.size(), timeout);
             if (retV != 0)
             {
-                try
+                for (int sd = 0; sd < Core::__sockNum && retV; sd++)
                 {
-                    for (int sd = 0; sd < Core::__sockNum && retV; sd++)
-                    {
-                        if (wsu::__criticalOverLoad == true)
-                            retV = Core::__sockNum;
-                        proccessPollEvent(sd, retV);
-                    }
-                    for (t_Connections::iterator it = __connections.begin(); it != __connections.end(); it++)
-                        it->second->processData();
+                    if (wsu::__criticalOverLoad == true)
+                        retV = Core::__sockNum;
+                    Core::proccessPollEvent(sd, retV);
                 }
-                catch (std::exception &e)
-                {
-                    wsu::terr(e.what());
-                }
+                Core::mainProcess();
             }
             delete[] Core::__events;
             Core::__sockNum = Core::__sockets.size();

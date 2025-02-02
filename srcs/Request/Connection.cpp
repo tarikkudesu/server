@@ -108,15 +108,8 @@ void Connection::processData()
 	{
 		this->__responseQueue.push(e.getResponse());
 		__phase = PROCESSING_REQUEST;
-		std::cout << "Response is an Error " + e.__StatusLine;
 	}
 	catch (wsu::persist &e)
 	{
-		wsu::error("presist");
-	}
-	catch (std::exception &e)
-	{
-		wsu::fatal("error");
-		__phase = PROCESSING_REQUEST;
 	}
 }
