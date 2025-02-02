@@ -37,11 +37,7 @@ void FileExplorer::loadType(const char *path)
 }
 void	FileExplorer::changeRequestedFile(String file)
 {
-	size_t pos = __fullPath.find_last_of("/");
-	if (pos == String::npos)
-		return ;
-	__fullPath.erase(pos + 1);
-	__fullPath = wsu::joinPaths(__fullPath, file);
+	__fullPath = wsu::joinPaths(__location->__root, file);
 }
 void FileExplorer::loadPathExploring(const String& uri)
 {

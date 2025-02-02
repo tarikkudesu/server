@@ -142,6 +142,11 @@ typedef enum e_get_phase {
     GET_EXECUTE,
 } t_get_phase;
 
+typedef enum e_post_phase {
+    POST_INIT,
+    POST_EXECUTE,
+} t_post_phase;
+
 typedef enum e_content_type {
     FORM,
     MULTIPART,

@@ -9,7 +9,7 @@ class Get
 		Request							&request;
 		t_response_phase				&__responsePhase;
 
-		FileExplorer				*explorer;
+		FileExplorer				    *explorer;
 		Location						*location;
 		Server							*server;
 
@@ -22,7 +22,7 @@ class Get
 		void							duringGetPhase(BasicString &body);
 
 	public:
-		t_get_file_operation 			__phase;
+		t_get_file_operation			__phase;
 
 		void							reset();
 		void							setWorkers(FileExplorer &explorer, Location &location, Server &server);
