@@ -245,10 +245,10 @@ String wsu::logDate()
 	std::strftime(buffer, sizeof(buffer), "[%d/%b/%Y:%H:%M:%S]", tm);
 	return String(buffer);
 }
-String wsu::buildIMFDate()
+String wsu::buildIMFDate(size_t elapsed)
 {
 	char buffer[30];
-	std::time_t t = std::time(NULL);
+	std::time_t t = std::time(NULL) + elapsed;
 	std::tm *tm = std::gmtime(&t);
 	std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", tm);
 	return String(buffer);

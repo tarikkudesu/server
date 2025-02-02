@@ -125,7 +125,7 @@ void ErrorResponse::buildHeaderFeilds()
 	this->__headers += "Content-Length: " + wsu::intToString(this->__Body.length()) + "\r\n";
 	this->__headers += "Content-Type: text/html; charset=UTF-8\r\n";
 	this->__headers += "Server: Webserv\r\n";
-	this->__headers += "Date: " + wsu::buildIMFDate() + "\r\n";
+	this->__headers += "Date: " + wsu::buildIMFDate(0) + "\r\n";
 	if (!this->__redirection.empty())
 		this->__headers += "Location: " + this->__redirection + "\r\n";
 	this->__headers += "\r\n";

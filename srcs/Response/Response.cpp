@@ -55,6 +55,12 @@ void Response::reset()
  *								 METHODS							   *
  ***********************************************************************/
 
+// if (__responsePhase == RESPONSE_DONE)
+// {
+//     String r = "<h2>Success!</h2>";
+//     buildResponse(201, r.length());
+//     __body.join(r);
+// }
 
 BasicString Response::getResponse()
 {
@@ -77,7 +83,7 @@ void Response::buildResponse(int code, size_t length)
         reasonPhrase = "OK";
     __body.join(PROTOCOLE_V " " + wsu::intToString(code) + " " + reasonPhrase + LINE_BREAK);
     __body.join("Content-Type: " + wsu::getContentType(explorer.__fullPath) + "; charset=UTF-8" + LINE_BREAK);
-    __body.join("date: " + wsu::buildIMFDate() + LINE_BREAK);
+    __body.join("date: " + wsu::buildIMFDate(0) + LINE_BREAK);
     __body.join(String("Accept-Ranges: none") + LINE_BREAK);
     __body.join(String("server: webserv/1.0") + LINE_BREAK);
     __body.join(String("Connection: keep-alive") + LINE_BREAK);

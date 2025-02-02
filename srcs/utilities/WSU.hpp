@@ -48,7 +48,6 @@ public:
 	static void loadErrPages();
 	static void loadMimeTypes();
 	static void loadErrorCodes();
-	static String buildIMFDate();
     static String generateTokenId();
 	static void trimSpaces(String &str);
 	static String decode(String& encoded);
@@ -59,6 +58,7 @@ public:
     static String methodToString(t_method t);
 	static void toUpperString(String &input);
 	static void toLowerString(String &input);
+	static String buildIMFDate(size_t elapsed);
 	static long stringToInt(const String &str);
 	static struct pollfd *data(t_events &events);
 	static String resolvePath(const String &path);
