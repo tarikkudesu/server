@@ -12,11 +12,13 @@ Cgi::Cgi(FileExplorer &explorer, Request &request, Location &location, BasicStri
                                                                                             __start(std::time(NULL)),
                                                                                             __body("")
 {
+	wsu::debug("Cgi default constructor");
     cgiProcess();
 }
 
 Cgi::~Cgi()
 {
+	wsu::debug("Cgi destructor");
     clear();
 }
 

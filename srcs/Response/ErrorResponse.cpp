@@ -4,26 +4,31 @@ ErrorResponse::ErrorResponse(int code, String indication) : __code(code),
 															__location(NULL),
 															__indication(indication)
 {
+	wsu::debug("ErrorResponse default constructor");
 	this->constructErrorPage();
 }
 ErrorResponse::ErrorResponse(int code, Location &location, String indication) : __code(code),
 																				__location(&location),
 																				__indication(indication)
 {
+	wsu::debug("ErrorResponse para constructor");
 	this->constructErrorPage();
 }
 ErrorResponse::ErrorResponse(int code, String redirection, Location &location) : __code(code),
 																				__location(&location),
 																				__redirection(redirection)
 {
+	wsu::debug("ErrorResponse para constructor");
 	this->constructErrorPage();
 }
 ErrorResponse::ErrorResponse(const ErrorResponse &copy)
 {
+	wsu::debug("ErrorResponse copy constructor");
 	*this = copy;
 }
 ErrorResponse &ErrorResponse::operator=(const ErrorResponse &assign)
 {
+	wsu::debug("ErrorResponse copy assignement operator");
     if (this != &assign)
     {
         this->__page = assign.__page;
@@ -40,6 +45,7 @@ ErrorResponse &ErrorResponse::operator=(const ErrorResponse &assign)
 }
 ErrorResponse::~ErrorResponse()
 {
+	wsu::debug("ErrorResponse destructor");
 }
 /****************************************************************************
  *                               MINI METHODS                               *

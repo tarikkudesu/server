@@ -8,7 +8,7 @@ ServerManager::ServerManager()
 
 ServerManager::ServerManager(const String &configutation_file) : __config(configutation_file)
 {
-	wsu::debug("ServerManager single para constructor");
+	wsu::debug("ServerManager para constructor");
 	wsu::info("configuration file: " + configutation_file);
 }
 

@@ -86,6 +86,7 @@ void wsu::logs(std::vector<String> &args)
             wsu::__warn = true;
             wsu::__error = true;
             wsu::__fatal = true;
+            wsu::__debug = true;
         }
         else if (it == args.end() - 1)
             ;

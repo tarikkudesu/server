@@ -7,6 +7,7 @@ Get::Get(Request &request, t_response_phase &phase) : request(request),
                                                       server(NULL),
                                                       __phase(OPEN_FILE)
 {
+	wsu::debug("Get default constructor");
 }
 Get::Get(const Get &copy) : request(copy.request),
                             __responsePhase(copy.__responsePhase),
@@ -15,10 +16,12 @@ Get::Get(const Get &copy) : request(copy.request),
                             server(copy.server),
                             __phase(copy.__phase)
 {
+	wsu::debug("Get copy constructor");
     *this = copy;
 }
 Get &Get::operator=(const Get &assign)
 {
+	wsu::debug("Get copy assignement operator");
     if (this != &assign)
     {
         this->request = assign.request;
@@ -32,6 +35,7 @@ Get &Get::operator=(const Get &assign)
 }
 Get::~Get()
 {
+	wsu::debug("Get destructor");
     reset();
 }
 

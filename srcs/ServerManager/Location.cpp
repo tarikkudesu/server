@@ -11,7 +11,7 @@ Location::Location(const String &conf, const String &root) : b__r(true),
 															 __autoindex(false),
 															 __clientBodyBufferSize(8000)
 {
-	wsu::debug("Location single para constructor");
+	wsu::debug("Location para constructor");
 	parse();
 }
 Location::Location(const String &dir, const String &conf, const String &root) : b__r(false),
@@ -21,7 +21,7 @@ Location::Location(const String &dir, const String &conf, const String &root) : 
 																				__autoindex(false),
 																				__clientBodyBufferSize(8000)
 {
-	wsu::debug("Location double para constructor : " + dir);
+	wsu::debug("Location para constructor : ");
 	parse();
 }
 Location::Location(const Location &copy) : __path(copy.__path)
@@ -49,10 +49,10 @@ Location &Location::operator=(const Location &assign)
 }
 Location::~Location()
 {
+	wsu::debug("Location destructor");
 	__directives.clear();
 	__errorPages.clear();
 	__allowMethods.clear();
-	wsu::debug("Location destructor");
 }
 
 /**************************************************************************************************************

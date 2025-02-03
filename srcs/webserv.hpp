@@ -35,10 +35,9 @@
 #include <sys/types.h>
 #include <cstdlib>
 
-
 typedef std::string String;
-typedef std::vector<pollfd> t_events;
 typedef std::vector<String> t_svec;
+typedef std::vector<pollfd> t_events;
 typedef std::map<String, String>::iterator mapIterator;
 
 #define RED "\033[1;31m"
@@ -55,7 +54,7 @@ typedef std::map<String, String>::iterator mapIterator;
 #define CGI_TIMEOUT 15
 #define CLIENT_TIMEOUT 15
 
-#define MAX_EVENTS 4096
+#define MAX_EVENTS 1
 
 #define READ_SIZE 8192
 #define FORM_MAX_SIZE 1024

@@ -8,6 +8,7 @@ Response::Response(t_connection_phase &phase, Request &request) : __connectionPh
 																  __post(request, __responsePhase),
 																  __request(request)
 {
+	wsu::debug("Response default constructor");
 }
 Response::Response(const Response &copy) : __connectionPhase(copy.__connectionPhase),
 										   __responsePhase(copy.__responsePhase),
@@ -17,13 +18,12 @@ Response::Response(const Response &copy) : __connectionPhase(copy.__connectionPh
 										   __post(copy.__post),
 										   __request(copy.__request)
 {
+	wsu::debug("Response copy constructor");
 	*this = copy;
-}
-Response::~Response()
-{
 }
 Response &Response::operator=(const Response &assign)
 {
+	wsu::debug("Response copy assignement operator");
 	if (this != &assign)
 	{
 		this->__get = assign.__get;
@@ -39,6 +39,10 @@ Response &Response::operator=(const Response &assign)
 		this->__connectionPhase = assign.__connectionPhase;
 	}
 	return *this;
+}
+Response::~Response()
+{
+	wsu::debug("Response destructor");
 }
 /***********************************************************************
  *								 METHODS							   *
@@ -330,7 +334,6 @@ void Response::preparePhase()
 	if (it == __location->__allowMethods.end())
 		throw ErrorResponse(405, *__location, wsu::methodToString(__request.__method) + " : method not allowed in this location");
 	__check_methods();
-    std::cout << __explorer;
 }
 
 void Response::processData(BasicString &data)

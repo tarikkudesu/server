@@ -5,13 +5,16 @@ Request::Request(t_connection_phase &phase) : __connectionPhase(phase),
                                               __bodySize(0),
                                               __requestPhase(REQUEST_INIT)
 {
+	wsu::debug("Request default constructor");
 }
 Request::Request(const Request &copy) : __connectionPhase(copy.__connectionPhase)
 {
+	wsu::debug("Request copy constructor");
     *this = copy;
 }
 Request &Request::operator=(const Request &assign)
 {
+	wsu::debug("Request copy assignement operator");
     if (this != &assign)
     {
         this->__URI = assign.__URI;
@@ -31,6 +34,7 @@ Request &Request::operator=(const Request &assign)
 }
 Request::~Request()
 {
+	wsu::debug("Request destructor");
 }
 
 /****************************************************************************

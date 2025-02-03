@@ -5,13 +5,16 @@ Headers::Headers() : __contentType(OTHER),
                      __connectionType(KEEP_ALIVE),
                      __transferType(NONE)
 {
+	wsu::debug("Headers default constructor");
 }
 Headers::Headers(const Headers &copy)
 {
+	wsu::debug("Headers copy constructor");
     *this = copy;
 }
 Headers &Headers::operator=(const Headers &assign)
 {
+	wsu::debug("Headers copy assignement operator");
     if (this != &assign)
     {
         this->__host = assign.__host;
@@ -27,6 +30,7 @@ Headers &Headers::operator=(const Headers &assign)
 }
 Headers::~Headers()
 {
+	wsu::debug("Headers destructor");
 }
 /***********************************************************************************************
  *                                           METHODS                                           *

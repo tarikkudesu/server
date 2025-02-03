@@ -2,16 +2,19 @@
 
 FileExplorer::FileExplorer()
 {
+	wsu::debug("FileExplorer default constructor");
 }
 
 FileExplorer::FileExplorer(const FileExplorer &copy) : __type(copy.__type),
                                                                    __fullPath(copy.__fullPath),
                                                                    __location(copy.__location)
 {
+	wsu::debug("FileExplorer copy constructor");
     *this = copy;
 }
 FileExplorer &FileExplorer::operator=(const FileExplorer &assign)
 {
+	wsu::debug("FileExplorer copy assignement operator");
     if (this != &assign)
     {
         __type = assign.__type;
@@ -22,6 +25,7 @@ FileExplorer &FileExplorer::operator=(const FileExplorer &assign)
 }
 FileExplorer::~FileExplorer()
 {
+	wsu::debug("FileExplorer destructor");
 }
 void FileExplorer::loadType(const char *path)
 {

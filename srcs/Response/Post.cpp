@@ -8,6 +8,7 @@ Post::Post(Request &request, t_response_phase &phase) : request(request),
                                                         __startTime(std::time(NULL)),
                                                         __phase(MP_INIT)
 {
+	wsu::debug("Post default constructor");
 }
 
 Post::Post(const Post &copy) : request(copy.request),
@@ -18,11 +19,13 @@ Post::Post(const Post &copy) : request(copy.request),
                                __phase(copy.__phase),
                                __data(copy.__data)
 {
+	wsu::debug("Post copy constructor");
     *this = copy;
 }
 
 Post &Post::operator=(const Post &assign)
 {
+	wsu::debug("Post copy assignement operator");
     if (this != &assign)
     {
         this->__data = assign.__data;
@@ -39,6 +42,7 @@ Post &Post::operator=(const Post &assign)
 
 Post::~Post()
 {
+	wsu::debug("Post destructor");
     reset();
 }
 
