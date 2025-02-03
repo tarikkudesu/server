@@ -6,18 +6,6 @@ ErrorResponse::ErrorResponse(int code, String indication) : __code(code),
 {
 	this->constructErrorPage();
 }
-
-ErrorResponse::ErrorResponse(String redirection, String setCookie)
-{
-		this->__code = 200;
-		this->__reasonPhrase = "Ok";
-		buildStatusLine();
-		this->__Body = readFielContent(redirection);
-		if (!setCookie.empty())
-			this->__headers = "Set-Cookie: token=" + setCookie + "; expires=Thu, 31 Feb 2025 12:00:00 UTC;";
-		buildHeaderFeilds();
-}
-
 ErrorResponse::ErrorResponse(int code, Location &location, String indication) : __code(code),
 																				__location(&location),
 																				__indication(indication)
@@ -62,27 +50,9 @@ BasicString ErrorResponse::getResponse() const
 	return this->__StatusLine + this->__headers + this->__Body;
 }
 
-
 /*****************************************************************************
  *                                  METHODS                                  *
  *****************************************************************************/
-
-
-String ErrorResponse::readFielContent(String fileName)
-{
-	char    buffer[1024];
-    String userInfo;
-    std::ifstream file(fileName.c_str());
-	
-    while (!file.eof())
-    {
-        file.read(buffer, 1024);
-        userInfo.append(buffer);
-        wsu::ft_bzero(buffer, 1024);
-    }
-	return userInfo;
-}
-
 
 void ErrorResponse::buildResponseBody()
 {
@@ -118,6 +88,10 @@ void ErrorResponse::buildResponseBody()
 		wsu::replaceString(this->__Body, "MESSAGE", this->__indication);
 	}
 }
+void ErrorResponse::buildStatusLine()
+{
+	this->__StatusLine = PROTOCOLE_V " " + wsu::intToString(this->__code) + " " + this->__reasonPhrase + "\r\n";
+}
 void ErrorResponse::buildHeaderFeilds()
 {
 	this->__headers += "Accept-Ranges: none\r\n";
@@ -129,10 +103,6 @@ void ErrorResponse::buildHeaderFeilds()
 	if (!this->__redirection.empty())
 		this->__headers += "Location: " + this->__redirection + "\r\n";
 	this->__headers += "\r\n";
-}
-void ErrorResponse::buildStatusLine()
-{
-	this->__StatusLine = PROTOCOLE_V " " + wsu::intToString(this->__code) + " " + this->__reasonPhrase + "\r\n";
 }
 void ErrorResponse::constructErrorPage()
 {

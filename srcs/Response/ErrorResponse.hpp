@@ -20,7 +20,6 @@ class ErrorResponse
 		void								buildHeaderFeilds();
 		void								buildResponseBody();
 		void								constructErrorPage();
-		String								readFielContent(String fileName);
 		ErrorResponse();
 
 	public:
@@ -31,7 +30,6 @@ class ErrorResponse
 
 		ErrorResponse( const ErrorResponse &copy );
 		ErrorResponse( int code, String indication );
-		ErrorResponse(String redirection, String setCookie);
 		ErrorResponse( int code, Location &location, String indication );
 		ErrorResponse( int code, String redirection , Location &location);
 		ErrorResponse	&operator=( const ErrorResponse &assign );
