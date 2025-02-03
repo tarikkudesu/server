@@ -132,6 +132,13 @@ void Request::validateRequestLine()
 }
 void Request::parseRequest()
 {
+    size_t h = __data.find(D_LINE_BREAK);
+    size_t s = __data.find(LINE_BREAK);
+    h -= (s + 2);
+    __requestLine = __data.substr(0, s).to_string();
+    __data.erase(0, s + 2);
+    __requestHeaders = __data.substr(0, h + 2).to_string();
+    __data.erase(0, h + 4);
     validateRequestLine();
     validateHeaders();
     __headers.parseHeaders(__headerFeilds);
@@ -140,6 +147,8 @@ void Request::processData(BasicString &data)
 {
     wsu::info("processing request");
     size_t h = data.find(D_LINE_BREAK);
+    if (__data.empty())
+        __start = std::time(NULL);
     if (h == String::npos)
     {
         __data.join(data);
@@ -153,14 +162,9 @@ void Request::processData(BasicString &data)
             __data.clear();
             throw ErrorResponse(408, "timeout");
         }
-        data.clear();
         throw wsu::persist();
     }
-    size_t s = data.find(LINE_BREAK);
-    h -= (s + 2);
-    __requestLine = data.substr(0, s).to_string();
-    data.erase(0, s + 2);
-    __requestHeaders = data.substr(0, h + 2).to_string();
+    __data.join(data.substr(0, h + 4));
     data.erase(0, h + 4);
     parseRequest();
     this->__phase = IDENTIFY_WORKERS;
