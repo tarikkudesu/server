@@ -1,7 +1,8 @@
 #include "Request.hpp"
 
-Request::Request(t_connection_phase &phase) : __phase(phase),
-                                                __bodySize(0)
+Request::Request(t_connection_phase &phase) : __start(std::time(NULL)),
+                                              __phase(phase),
+                                              __bodySize(0)
 {
 }
 Request::Request(const Request &copy) : __phase(copy.__phase)
@@ -13,11 +14,16 @@ Request &Request::operator=(const Request &assign)
     if (this != &assign)
     {
         this->__URI = assign.__URI;
+        this->__start = assign.__start;
         this->__method = assign.__method;
         this->__headers = assign.__headers;
+        this->__bodySize = assign.__bodySize;
+        this->__fragement = assign.__fragement;
         this->__protocole = assign.__protocole;
         this->__queryString = assign.__queryString;
+        this->__requestLine = assign.__requestLine;
         this->__headerFeilds = assign.__headerFeilds;
+        this->__requestHeaders = assign.__requestHeaders;
     }
     return *this;
 }
@@ -32,15 +38,15 @@ Request::~Request()
 void Request::clear()
 {
     this->__URI.clear();
-    __requestLine.clear();
+    this->__bodySize = 0;
     this->__headers.clear();
-    __requestHeaders.clear();
     this->__fragement.clear();
     this->__protocole.clear();
+    this->__requestLine.clear();
     this->__queryString.clear();
     this->__headerFeilds.clear();
     this->__headerFeilds.clear();
-    this->__bodySize = 0;
+    this->__requestHeaders.clear();
 }
 
 /*****************************************************************************
@@ -132,18 +138,25 @@ void Request::parseRequest()
 }
 void Request::processData(BasicString &data)
 {
-    wsu::info("process request");
-    size_t s = data.find(LINE_BREAK);
+    wsu::info("processing request");
     size_t h = data.find(D_LINE_BREAK);
-    if (s == String::npos || h == String::npos)
+    if (h == String::npos)
     {
-        if (data.length() > REQUEST_MAX_SIZE)
+        __data.join(data);
+        if (__data.length() > REQUEST_MAX_SIZE)
         {
-            data.clear();
+            __data.clear();
             throw ErrorResponse(400, "Oversized request");
         }
+        if (std::time(NULL) - this->__start > CLIENT_TIMEOUT)
+        {
+            __data.clear();
+            throw ErrorResponse(408, "timeout");
+        }
+        data.clear();
         throw wsu::persist();
     }
+    size_t s = data.find(LINE_BREAK);
     h -= (s + 2);
     __requestLine = data.substr(0, s).to_string();
     data.erase(0, s + 2);

@@ -6,6 +6,8 @@
 class Request
 {
 	private:
+        BasicString                     __data;
+		std::time_t						__start;
 		t_connection_phase				&__phase;
 		String							__requestLine;
 		String							__requestHeaders;
