@@ -61,7 +61,6 @@ public:
 	static String buildIMFDate(size_t elapsed);
 	static long stringToInt(const String &str);
 	static struct pollfd *data(t_events &events);
-	static String resolvePath(const String &path);
     static String readFielContent(String fileName);
 	static String getContentType(const String &uri);
     static ssize_t getFileSize(const String &filename);

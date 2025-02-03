@@ -131,7 +131,7 @@ void Response::postDone()
 	}
 	else if (__request.__headers.__contentType == MULTIPART)
 	{
-		String b = wsu::readFielContent(SUCCESS_PAGE);
+		String b = wsu::readFielContent(SUCCESS_PAGE_PATH);
 		buildResponse(200, b.length());
 		__body.join(b);
 		__responsePhase = RESPONSE_DONE;
@@ -330,6 +330,7 @@ void Response::preparePhase()
 	if (it == __location->__allowMethods.end())
 		throw ErrorResponse(405, *__location, wsu::methodToString(__request.__method) + " : method not allowed in this location");
 	__check_methods();
+    std::cout << __explorer;
 }
 
 void Response::processData(BasicString &data)

@@ -56,6 +56,7 @@ void FileExplorer::loadPathExploring(const String& uri)
                 return;
             }
         }
+            std::cout << "crazy man : " << __fullPath << std::endl;
     }
 }
 void FileExplorer::prepareRessource(Location& location, const String& uri)
