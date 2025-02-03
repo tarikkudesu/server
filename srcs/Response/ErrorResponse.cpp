@@ -60,7 +60,6 @@ void ErrorResponse::buildResponseBody()
 		return ;
 	try
 	{
-        throw std::runtime_error("");
 		if (this->__page.empty())
 			throw std::runtime_error("");
 		std::fstream fS;

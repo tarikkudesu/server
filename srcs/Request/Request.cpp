@@ -177,7 +177,7 @@ void Request::requestExecute(BasicString &data)
 }
 void Request::processData(BasicString &data)
 {
-    wsu::info("processing request");
+    wsu::debug("processing request");
     if (__requestPhase == REQUEST_INIT)
         requestInit();
     else if (__requestPhase == REQUEST_EXECUTE)

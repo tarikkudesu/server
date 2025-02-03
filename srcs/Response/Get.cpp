@@ -37,7 +37,7 @@ Get::~Get()
 
 void Get::reset()
 {
-    wsu::info("GET out phase");
+    wsu::debug("GET out phase");
     if (__file.is_open())
         __file.close();
     this->__bodySize = 0;
@@ -50,12 +50,11 @@ void Get::getInPhase()
     this->__file.open(explorer->__fullPath.c_str(), std::ios::binary);
     if (!__file.is_open())
         throw ErrorResponse(403, *location, "could not open file");
-    wsu::info("opened file : " + explorer->__fullPath);
     __phase = READ_FILE;
 }
 void Get::duringGetPhase(BasicString &body)
 {
-    wsu::info("During GET phase");
+    wsu::debug("During GET phase");
     char buffer[READ_SIZE];
     wsu::ft_bzero(buffer, READ_SIZE);
     __file.read(buffer, sizeof(buffer));
@@ -73,10 +72,7 @@ void Get::setWorkers(FileExplorer &explorer, Location &location, Server &server)
 void Get::executeGet(BasicString &body)
 {
     if (!explorer || !location || !server)
-    {
-        wsu::fatal("no objects to be referenced");
-        return;
-    }
+        return wsu::fatal("no objects to be referenced");
     try
     {
         if (__phase == OPEN_FILE)

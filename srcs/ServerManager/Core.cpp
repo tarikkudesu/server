@@ -62,7 +62,7 @@ void Core::clear()
 }
 void Core::removeConnection(int sd)
 {
-    wsu::info("closing connection");
+    wsu::info("closing connection " + wsu::intToString(sd));
     t_Connections::iterator it = Core::__connections.find(sd);
     if (it != Core::__connections.end())
     {
@@ -74,14 +74,14 @@ void Core::removeConnection(int sd)
 }
 void Core::addConnection(int sd)
 {
-    wsu::info("creating connection");
+    wsu::info("creating connection " + wsu::intToString(sd));
     Core::__connections[sd] = new Connection(sd);
     Core::__connections[sd]->setServers(Core::__servers);
     addSocket(sd, CONNECTION);
 }
 void Core::removeServer(int sd)
 {
-    wsu::info("removing connection");
+    wsu::info("removing server " + wsu::intToString(sd));
     t_Server::iterator it = Core::__servers.find(sd);
     if (it != Core::__servers.end())
     {
@@ -93,7 +93,7 @@ void Core::removeServer(int sd)
 }
 void Core::addServer(Server *server)
 {
-    wsu::info("creating connection");
+    wsu::info("creating server " + wsu::intToString(server->getServerSocket()));
     if (Core::__servers.size() >= MAX_EVENTS)
         throw std::runtime_error("critical server overload, " + server->getServerHost() + ":" + wsu::intToString(server->getServerPort()) + " non functional");
     Core::__servers[server->getServerSocket()] = server;
@@ -213,7 +213,6 @@ void Core::readDataFromSocket(int sd)
 {
     char buff[READ_SIZE + 1];
 
-    wsu::info("receiving data");
     ssize_t bytesRead = recv(sd, buff, READ_SIZE, 0);
     if (bytesRead == 0)
         removeConnection(sd);

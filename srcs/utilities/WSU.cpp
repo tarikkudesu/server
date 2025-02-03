@@ -427,7 +427,7 @@ String wsu::getContentType(const String &uri)
 }
 void wsu::loadErrorCodes()
 {
-    wsu::info("loading error codes");
+    wsu::debug("loading error codes");
     if (!wsu::__errCode.empty())
         return;
     std::fstream fs;
@@ -458,7 +458,7 @@ void wsu::loadErrorCodes()
 }
 void wsu::loadErrPages()
 {
-    wsu::info("loading default error pages");
+    wsu::debug("loading default error pages");
     if (!wsu::__defaultErrorPages.empty())
         return;
     std::fstream fs;
@@ -489,7 +489,7 @@ void wsu::loadErrPages()
 }
 void wsu::loadMimeTypes(void)
 {
-    wsu::info("loading mime types");
+    wsu::debug("loading mime types");
     if (!wsu::__mimeTypes.empty())
         return;
     std::ifstream fs;

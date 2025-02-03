@@ -284,7 +284,7 @@ void Server::proccessLocationBlock(String &line, size_t pos, String &parent)
 			throw std::runtime_error("duplicate location \"" + tokens.at(1) + "\"");
 	}
 	String conf = String(line.begin() + pos + 1, line.end() - 2);
-	wsu::info("location: " + tokens.at(1));
+	wsu::debug("location: " + tokens.at(1));
 	this->__locations.push_back(Location(tokens.at(1), conf, this->__root));
 	parseLocations(conf, tokens.at(1));
 }
@@ -368,7 +368,7 @@ void Server::addServerDirective(String &line, size_t end)
 		throw std::runtime_error("empty directive");
 	this->__directives.push_back(directive);
 	line.erase(0, end + 1);
-	wsu::info("directive: " + directive);
+	wsu::debug("directive: " + directive);
 }
 void Server::parseServerDirectives(String line)
 {

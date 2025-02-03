@@ -110,7 +110,6 @@ void ServerManager::readFile()
 			break;
 	} while (true);
 	fS.close();
-	wsu::info("reading file content");
 }
 void ServerManager::firstCheck()
 {
@@ -198,7 +197,7 @@ void ServerManager::setUpServers()
 			break;
 		setUpServer(pos);
 	} while (!this->__lines.empty());
-	wsu::info("syntax check");
+	wsu::info("syntax check: OK");
 }
 void ServerManager::checkOuterscope(String outerScope)
 {

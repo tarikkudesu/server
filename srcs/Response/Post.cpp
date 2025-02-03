@@ -99,7 +99,7 @@ void Post::createFile(std::vector<String> &headers)
 
 void Post::mpBody()
 {
-    wsu::info("Post multipart data body");
+    wsu::debug("Post multipart data body");
     size_t end = __data.find(LINE_BREAK "--" + this->request.__headers.__boundary + "--" LINE_BREAK);
     size_t pos = __data.find(LINE_BREAK "--" + this->request.__headers.__boundary + LINE_BREAK);
     if (pos == String::npos && end == String::npos)
@@ -131,7 +131,7 @@ void Post::mpBody()
 }
 void Post::mpHeaders()
 {
-    wsu::info("Post form data headers");
+    wsu::debug("Post form data headers");
     size_t pos = __data.find(D_LINE_BREAK);
     if (pos == String::npos && __data.length() > REQUEST_MAX_SIZE)
         throw wsu::Close();
@@ -152,7 +152,7 @@ void Post::mpHeaders()
 }
 void Post::mpInit()
 {
-    wsu::info("Post multipart data init");
+    wsu::debug("Post multipart data init");
     size_t pos1 = __data.find("--" + request.__headers.__boundary + LINE_BREAK);
     size_t pos2 = __data.find("--" + request.__headers.__boundary + "--" LINE_BREAK);
     if (pos1 == String::npos && pos2 == String::npos && __data.length() < request.__headers.__boundary.length() + 6)
@@ -169,7 +169,7 @@ void Post::mpInit()
 }
 void Post::processMultiPartBody()
 {
-    wsu::info("Post multipart data");
+    wsu::debug("Post multipart data");
     if (__phase == MP_INIT)
         mpInit();
     if (__phase == MP_HEADERS)
@@ -179,7 +179,7 @@ void Post::processMultiPartBody()
 }
 void Post::processFormData()
 {
-    wsu::info("Post form data");
+    wsu::debug("Post form data");
     __form.join(__data);
     if (__form.length() > FORM_MAX_SIZE)
         throw wsu::Close();

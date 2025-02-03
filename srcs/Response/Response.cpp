@@ -142,7 +142,7 @@ void Response::postDone()
 }
 void Response::processCunkedBody(BasicString &data)
 {
-	wsu::info("Post chunked body");
+	wsu::debug("Post chunked body");
 	static size_t chunkSize;
 	do
 	{
@@ -189,7 +189,7 @@ void Response::processCunkedBody(BasicString &data)
 }
 void Response::processDefinedBody(BasicString &data)
 {
-	wsu::info("Post defined body");
+	wsu::debug("Post defined body");
 	if (__request.__headers.__contentLength < data.length())
 	{
 		BasicString tmp = data.substr(0, __request.__headers.__contentLength);
@@ -215,7 +215,7 @@ void Response::processDefinedBody(BasicString &data)
  *************************************************************************************/
 void Response::autoindex()
 {
-	wsu::info("autoindex");
+	wsu::debug("autoindex");
 	t_svec directories;
 	DIR *dir = opendir(__explorer.__fullPath.c_str());
 	if (!dir)
@@ -268,7 +268,7 @@ void Response::getProcess()
 
 void Response::deletePhase()
 {
-	wsu::info("Delete phase");
+	wsu::debug("Delete phase");
 	if (unlink(__explorer.__fullPath.c_str()) != 0)
 		throw ErrorResponse(500, *__location, "unlink");
 	buildResponse(204, 0);
@@ -277,7 +277,7 @@ void Response::deletePhase()
 
 void Response::cgiPhase()
 {
-	wsu::info("CGI phase");
+	wsu::debug("CGI phase");
 	Cgi cgi(__explorer, __request, *__location, __body);
 	buildResponse(200, cgi.getBody().length());
 	__body.join(cgi.getBody());
@@ -286,7 +286,7 @@ void Response::cgiPhase()
 
 void Response::getPhase()
 {
-	wsu::info("Get phase");
+	wsu::debug("Get phase");
 	if (checkCgi())
 		__responsePhase = CGI_PROCESS;
 	else
@@ -302,7 +302,7 @@ void Response::getPhase()
 
 void Response::postPhase(BasicString &data)
 {
-	wsu::info("post phase");
+	wsu::debug("post phase");
 	if (__postPhase == POST_INIT)
 	{
 		__post.setWorkers(__explorer, *__location, *__server);
@@ -321,7 +321,7 @@ void Response::postPhase(BasicString &data)
 
 void Response::preparePhase()
 {
-	wsu::info("preparing response");
+	wsu::debug("preparing response");
 	__body.clear();
 	this->__explorer.prepareRessource(*__location, __request.__URI);
 	std::vector<t_method>::iterator it = __location->__allowMethods.begin();
