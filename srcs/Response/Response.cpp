@@ -1,7 +1,7 @@
 #include "Response.hpp"
 
 Response::Response(t_connection_phase &phase, Request &request) : __connectionPhase(phase),
-																  __responsePhase(PREPARING_RESPONSE),
+                                                                  __responsePhase(PREPARING_RESPONSE),
 																  __postPhase(POST_INIT),
 																  __getPhase(GET_INIT),
 																  __get(request, __responsePhase),
@@ -29,10 +29,10 @@ Response &Response::operator=(const Response &assign)
 		this->__get = assign.__get;
 		this->__body = assign.__body;
 		this->__post = assign.__post;
-		this->explorer = assign.explorer;
 		this->__server = assign.__server;
 		this->__request = assign.__request;
 		this->__location = assign.__location;
+		this->__explorer = assign.__explorer;
 		this->__getPhase = assign.__getPhase;
 		this->__postPhase = assign.__postPhase;
 		this->__responsePhase = assign.__responsePhase;
@@ -61,7 +61,7 @@ BasicString Response::getResponse()
 bool Response::shouldAuthenticate()
 {
 	if (__location->__authenticate.size() == 2)
-		return explorer.__fullPath == wsu::joinPaths(__location->__root, __location->__authenticate[0]);
+		return __explorer.__fullPath == wsu::joinPaths(__location->__root, __location->__authenticate[0]);
 	return false;
 }
 void Response::buildResponse(int code, size_t length)
@@ -74,7 +74,7 @@ void Response::buildResponse(int code, size_t length)
 	else
 		reasonPhrase = "OK";
 	__body.join(PROTOCOLE_V " " + wsu::intToString(code) + " " + reasonPhrase + LINE_BREAK);
-	__body.join("Content-Type: " + wsu::getContentType(explorer.__fullPath) + "; charset=UTF-8" + LINE_BREAK);
+	__body.join("Content-Type: " + wsu::getContentType(__explorer.__fullPath) + "; charset=UTF-8" + LINE_BREAK);
 	__body.join("date: " + wsu::buildIMFDate(0) + LINE_BREAK);
 	__body.join(String("Accept-Ranges: none") + LINE_BREAK);
 	__body.join(String("server: webserv/1.0") + LINE_BREAK);
@@ -89,9 +89,9 @@ bool Response::checkCgi()
 {
 	if (__location->__cgiPass.empty())
 		return 0;
-	if (explorer.__type == FOLDER)
+	if (__explorer.__type == FOLDER)
 		return 0;
-	if (!wsu::endWith(explorer.__fullPath, ".java") && !wsu::endWith(explorer.__fullPath, ".php"))
+	if (!wsu::endWith(__explorer.__fullPath, ".java") && !wsu::endWith(__explorer.__fullPath, ".php"))
 		return 0;
 	return 1;
 }
@@ -126,7 +126,7 @@ void Response::postDone()
 		__cookie = __server->userInDb(form, 1);
 		if (__cookie.empty())
 			__cookie = __server->addUserInDb(form);
-		explorer.changeRequestedFile(__location->__authenticate[0]);
+		__explorer.changeRequestedFile(__location->__authenticate[0]);
 		__responsePhase = GET_PROCESS;
 	}
 	else if (__request.__headers.__contentType == MULTIPART)
@@ -217,7 +217,7 @@ void Response::autoindex()
 {
 	wsu::info("autoindex");
 	t_svec directories;
-	DIR *dir = opendir(explorer.__fullPath.c_str());
+	DIR *dir = opendir(__explorer.__fullPath.c_str());
 	if (!dir)
 		throw ErrorResponse(500, *__location, "could not open directory");
 	struct dirent *entry;
@@ -253,9 +253,9 @@ void Response::getProcess()
 	{
 
 		if (shouldAuthenticate() && !authenticated())
-			explorer.changeRequestedFile(__location->__authenticate[1]);
-		__get.setWorkers(explorer, *__location, *__server);
-		buildResponse(200, wsu::getFileSize(explorer.__fullPath));
+			__explorer.changeRequestedFile(__location->__authenticate[1]);
+		__get.setWorkers(__explorer, *__location, *__server);
+		buildResponse(200, wsu::getFileSize(__explorer.__fullPath));
 		__getPhase = GET_EXECUTE;
 	}
 	else
@@ -269,7 +269,7 @@ void Response::getProcess()
 void Response::deletePhase()
 {
 	wsu::info("Delete phase");
-	if (unlink(explorer.__fullPath.c_str()) != 0)
+	if (unlink(__explorer.__fullPath.c_str()) != 0)
 		throw ErrorResponse(500, *__location, "unlink");
 	buildResponse(204, 0);
 	__responsePhase = RESPONSE_DONE;
@@ -278,7 +278,7 @@ void Response::deletePhase()
 void Response::cgiPhase()
 {
 	wsu::info("CGI phase");
-	Cgi cgi(explorer, __request, *__location, __body);
+	Cgi cgi(__explorer, __request, *__location, __body);
 	buildResponse(200, cgi.getBody().length());
 	__body.join(cgi.getBody());
 	__responsePhase = RESPONSE_DONE;
@@ -291,7 +291,7 @@ void Response::getPhase()
 		__responsePhase = CGI_PROCESS;
 	else
 	{
-		if (explorer.__type == FILE_)
+		if (__explorer.__type == FILE_)
 			getProcess();
 		else if (__location->__autoindex)
 			autoindex();
@@ -305,7 +305,7 @@ void Response::postPhase(BasicString &data)
 	wsu::info("post phase");
 	if (__postPhase == POST_INIT)
 	{
-		__post.setWorkers(explorer, *__location, *__server);
+		__post.setWorkers(__explorer, *__location, *__server);
 		__postPhase = POST_EXECUTE;
 	}
 	else
@@ -323,7 +323,7 @@ void Response::preparePhase()
 {
 	wsu::info("preparing response");
 	__body.clear();
-	this->explorer.prepareRessource(*__location, __request.__URI);
+	this->__explorer.prepareRessource(*__location, __request.__URI);
 	std::vector<t_method>::iterator it = __location->__allowMethods.begin();
 	for (; it != __location->__allowMethods.end() && *it != __request.__method; it++)
 		;

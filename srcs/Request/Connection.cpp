@@ -90,8 +90,8 @@ void Connection::addData(const BasicString &input)
 
 void Connection::processData()
 {
-	if (__phase == PROCESSING_REQUEST && __data.empty())
-		return ;
+    if (__phase == PROCESSING_REQUEST && __request.__requestPhase == REQUEST_INIT && __data.empty())
+        return ;
 	try
 	{
 		wsu::info("processing data");

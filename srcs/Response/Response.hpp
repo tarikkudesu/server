@@ -13,8 +13,8 @@ class Response
 		Get								__get;
 		Post							__post;
 		BasicString 					__body;
+		FileExplorer					__explorer;
 		String							__cookie;
-		FileExplorer					explorer;
 		Server							*__server;
 		Request							&__request;
 		Location						*__location;
@@ -38,6 +38,7 @@ class Response
 		void							buildResponse(int code, size_t length);
 
 	public:
+
 		BasicString 					getResponse();
 		void							setupWorkers(Server &server, Location &location);
 		void							processData(BasicString &data);

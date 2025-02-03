@@ -1,11 +1,12 @@
 #include "Request.hpp"
 
-Request::Request(t_connection_phase &phase) : __start(std::time(NULL)),
-                                              __phase(phase),
-                                              __bodySize(0)
+Request::Request(t_connection_phase &phase) : __connectionPhase(phase),
+                                              __startTime(std::time(NULL)),
+                                              __bodySize(0),
+                                              __requestPhase(REQUEST_INIT)
 {
 }
-Request::Request(const Request &copy) : __phase(copy.__phase)
+Request::Request(const Request &copy) : __connectionPhase(copy.__connectionPhase)
 {
     *this = copy;
 }
@@ -14,15 +15,16 @@ Request &Request::operator=(const Request &assign)
     if (this != &assign)
     {
         this->__URI = assign.__URI;
-        this->__start = assign.__start;
         this->__method = assign.__method;
         this->__headers = assign.__headers;
         this->__bodySize = assign.__bodySize;
         this->__fragement = assign.__fragement;
+        this->__startTime = assign.__startTime;
         this->__protocole = assign.__protocole;
         this->__queryString = assign.__queryString;
         this->__requestLine = assign.__requestLine;
         this->__headerFeilds = assign.__headerFeilds;
+        this->__requestPhase = assign.__requestPhase;
         this->__requestHeaders = assign.__requestHeaders;
     }
     return *this;
@@ -143,12 +145,14 @@ void Request::parseRequest()
     validateHeaders();
     __headers.parseHeaders(__headerFeilds);
 }
-void Request::processData(BasicString &data)
+void Request::requestInit()
 {
-    wsu::info("processing request");
+    __startTime = std::time(NULL);
+    __requestPhase = REQUEST_EXECUTE;
+}
+void Request::requestExecute(BasicString &data)
+{
     size_t h = data.find(D_LINE_BREAK);
-    if (__data.empty())
-        __start = std::time(NULL);
     if (h == String::npos)
     {
         __data.join(data);
@@ -157,17 +161,27 @@ void Request::processData(BasicString &data)
             __data.clear();
             throw ErrorResponse(400, "Oversized request");
         }
-        if (std::time(NULL) - this->__start > CLIENT_TIMEOUT)
+        if (std::time(NULL) - this->__startTime > CLIENT_TIMEOUT)
         {
             __data.clear();
             throw ErrorResponse(408, "timeout");
         }
+        data.clear();
         throw wsu::persist();
     }
     __data.join(data.substr(0, h + 4));
     data.erase(0, h + 4);
     parseRequest();
-    this->__phase = IDENTIFY_WORKERS;
+    this->__connectionPhase = IDENTIFY_WORKERS;
+    this->__requestPhase = REQUEST_INIT;
+}
+void Request::processData(BasicString &data)
+{
+    wsu::info("processing request");
+    if (__requestPhase == REQUEST_INIT)
+        requestInit();
+    else if (__requestPhase == REQUEST_EXECUTE)
+        requestExecute(data);
 }
 std::ostream &operator<<(std::ostream &o, const Request &req)
 {

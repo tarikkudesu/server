@@ -6,17 +6,19 @@
 class Request
 {
 	private:
-        BasicString                     __data;
-		std::time_t						__start;
-		t_connection_phase				&__phase;
+		t_connection_phase				&__connectionPhase;
+		BasicString 					__data;
+		std::time_t						__startTime;
 		String							__requestLine;
 		String							__requestHeaders;
 
 		void							clear();
 		void							validateURI();
+		void							requestInit();
 		void							parseRequest();
 		void							validateHeaders();
 		void							validateRequestLine();
+		void							requestExecute(BasicString &data);
 
 	public:
 		String							__URI;
@@ -27,6 +29,7 @@ class Request
 		String							__protocole;
 		String							__queryString;
 		std::map< String, String >		__headerFeilds;
+		t_request_phase 				__requestPhase;
 
 		void							processData(BasicString &data);
 

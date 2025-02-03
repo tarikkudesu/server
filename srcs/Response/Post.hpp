@@ -14,18 +14,19 @@ class Post
 		Location					*location;
 		Server						*server;
 
+        std::time_t                 __startTime;
 		t_multipartsection			__phase;
 		BasicString					__data;
 		BasicString					__form;
 		std::ofstream				__fs;
 
-		void						processMultiPartBody();
-		void						processFormData();
-		void						writeDataIntoFile(BasicString &data);
-		void						createFile(std::vector<String> &h);
-		void						mpHeaders();
 		void						mpInit();
 		void						mpBody();
+		void						mpHeaders();
+		void						processFormData();
+		void						processMultiPartBody();
+		void						createFile(std::vector<String> &h);
+		void						writeDataIntoFile(BasicString &data);
 
 	public:
 		void						reset();

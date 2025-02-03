@@ -52,8 +52,8 @@ typedef std::map<String, String>::iterator mapIterator;
 #define JAVABIN "/usr/bin/java"
 #define PYTHONBIN "/usr/bin/php"
 
-#define TIMEOUT 6
-#define CLIENT_TIMEOUT 120
+#define CGI_TIMEOUT 15
+#define CLIENT_TIMEOUT 15
 
 #define MAX_EVENTS 4096
 
@@ -118,6 +118,11 @@ typedef enum e_connection_phase {
     IDENTIFY_WORKERS,
     PROCESSING_RESPONSE,
 } t_connection_phase;
+
+typedef enum e_request_phase {
+    REQUEST_INIT,
+    REQUEST_EXECUTE,
+} t_request_phase;
 
 typedef enum e_response_phase {
     PREPARING_RESPONSE,

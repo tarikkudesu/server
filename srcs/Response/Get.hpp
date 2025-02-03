@@ -8,21 +8,21 @@ class Get
 	private:
 		Request							&request;
 		t_response_phase				&__responsePhase;
-
+        
 		FileExplorer				    *explorer;
 		Location						*location;
 		Server							*server;
 
-		std::ifstream					__file;
 		size_t							__bodySize;
+		t_get_file_operation			__phase;
+		std::ifstream					__file;
 
+		void							getInPhase();
 		void							readFile(void);
 		void							autoIndexing(void);
-		void							getInPhase();
 		void							duringGetPhase(BasicString &body);
 
 	public:
-		t_get_file_operation			__phase;
 
 		void							reset();
 		void							setWorkers(FileExplorer &explorer, Location &location, Server &server);

@@ -5,6 +5,7 @@ Post::Post(Request &request, t_response_phase &phase) : request(request),
                                                         explorer(NULL),
                                                         location(NULL),
                                                         server(NULL),
+                                                        __startTime(std::time(NULL)),
                                                         __phase(MP_INIT)
 {
 }
@@ -60,9 +61,11 @@ BasicString &Post::getForm()
 }
 void Post::writeDataIntoFile(BasicString &data)
 {
-    __fs.write(data.getBuff(), data.length());
-    if (__fs.fail())
-        throw wsu::Close();
+    if (!data.empty())
+    {
+        __fs.write(data.getBuff(), data.length());
+        __startTime = std::time(NULL);
+    }
 }
 void Post::createFile(std::vector<String> &headers)
 {
@@ -197,6 +200,8 @@ void Post::processData(BasicString &data)
     {
         if (request.__bodySize > location->__clientBodyBufferSize)
             throw wsu::Close();
+        if (std::time(NULL) - __startTime > CLIENT_TIMEOUT)
+            throw ErrorResponse(408, *location, "timeout");
         if (request.__headers.__contentType == FORM)
             processFormData();
         else if (request.__headers.__contentType == MULTIPART)

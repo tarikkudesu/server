@@ -113,7 +113,7 @@ void Cgi::cgiProcess(void)
         close(pip[0]), execute(__explorer.__fullPath.c_str(), pip[1]);
 
     close(pip[1]);
-    while (!(child = waitpid(pid, &status, WNOHANG)) && (std::time(NULL) - __start) < TIMEOUT)
+    while (!(child = waitpid(pid, &status, WNOHANG)) && (std::time(NULL) - __start) < CGI_TIMEOUT)
         ;
     if (!child)
         kill(pid, SIGKILL), throw ErrorResponse(408, __location, "Request Time-out");
