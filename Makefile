@@ -18,7 +18,7 @@ SRC		=	srcs/main.cpp \
 OBJ		=	$(SRC:.cpp=.o)
 NAME	=	webserv
 
-all: $(NAME)
+all: mkdir $(NAME)
 
 $(NAME): $(OBJ)
 	@c++ -Wall -Wextra -Werror -std=c++98 $(OBJ) -o $(NAME)
@@ -41,6 +41,9 @@ $(NAME): $(OBJ)
 			srcs/webserv.hpp 
 	@c++ -Wall -Wextra -Werror -std=c++98 -c $< -o $@
 
+mkdir:
+	@mkdir -p essentials/serversDB
+
 clean:
 	@rm -f $(OBJ)
 
@@ -49,4 +52,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: clean
+.PHONY: clean mkdir
