@@ -1,0 +1,225 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.hidden {
+    display: none;
+}
+
+body {
+    overflow: hidden;
+    background-color: black;
+    user-select: none;
+}
+
+#loading {
+    opacity: 0.92;
+    position: absolute;
+    bottom: 0px; left: 0px;
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
+
+canvas {
+    position: absolute;
+    top: 0px; left: 0px;
+}
+
+#colorize {
+    position: absolute;
+    top: 0px; left: 0px;
+    width: 100%; height: 100%;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+#indicator-container {
+    position: fixed;
+    top: 67px; left: 50%;
+    height: 16px;
+    width: 80%;
+    transform: translateX(-50%);
+    border: none;
+    border-radius: 8px;
+    background-color: rgb(45, 45, 45);
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+}
+
+#indicator {
+    position: fixed;
+    top: 3px; left: 50%;
+    height: 10px;
+    width: 10%;
+    transform: translateX(-50%);
+    border: none;
+    border-radius: 8px;
+    background-color: rgb(255, 255, 255);
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+}
+
+
+
+#player {
+    width: 150px;
+    height: 150px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 10;
+    user-select: none;
+}
+
+#pause {
+    position: fixed;
+    top: 50px; left: 50px;
+    height: 50px; width: 50px;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+#pause:hover {
+    position: fixed;
+    top: 50px; left: 50px;
+    height: 50px; width: 50px;
+    opacity: 1;
+}
+
+#info {
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    align-items: center;
+    justify-content: end;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 70%;
+    height: 70%;
+    border: none;
+    padding: 80px;
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -ms-border-radius: 20px;
+    -o-border-radius: 20px;
+}
+
+#gameover {
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    align-items: center;
+    justify-content: end;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 70%;
+    height: 50%;
+    border: none;
+    padding: 80px;
+    border-radius: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -ms-border-radius: 20px;
+    -o-border-radius: 20px;
+}
+
+.resume {
+    opacity: 1;
+    color: black;
+    background-color: white;
+    text-align: top;
+    padding: 15px 40px 15px 40px;
+    border-radius: 7px;
+    border: none;
+    font-family: Helvetica, Arial;
+    font-weight: 600;
+    font-size: 17px;
+    cursor: pointer;
+    transition: 0.3s;
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    -ms-border-radius: 7px;
+    -o-border-radius: 7px;
+    -webkit-transition: 0.3s;
+    -moz-transition: 0.3s;
+    -ms-transition: 0.3s;
+    -o-transition: 0.3s;
+}
+
+.resume:hover {
+    opacity: 0.7;
+}
+
+#creator {
+    font-size: 24px;
+    font-family: 'Merriweather', Arial;
+    color: white;
+    font-weight: 100;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#lost {
+    font-size: 70px;
+    font-family: Helvetica, Arial;
+    color: rgb(255, 0, 0);
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#desc {
+    font-size: 24px;
+    font-family: 'Merriweather', Arial;
+    color: white;
+    font-weight: 100;
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+#github {
+    border-radius: 7px;
+    opacity: 0.8;
+    height: 50px;
+    width: 50px;
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    -ms-border-radius: 7px;
+    -o-border-radius: 7px;
+}
+
+#github:hover {
+    opacity: 1;
+}
+
+#github:active {
+    opacity: 0.9;
+}

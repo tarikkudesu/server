@@ -1,0 +1,118 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow: hidden;
+    user-select: none;
+}
+
+#intro {
+    opacity: 0.92;
+    position: absolute;
+    top: 0px; left: 0px;
+    width: 100%; height: 100%;
+    object-fit: cover;
+}
+
+#profile {
+    position: absolute;
+    top: 50px;
+    left: 120px;
+    height: 53px;
+    width: 53px;
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgb(35, 90, 22);
+    border-radius: 25px;
+    cursor: pointer;
+    -webkit-border-radius: 25px;
+    -moz-border-radius: 25px;
+    -ms-border-radius: 25px;
+    -o-border-radius: 25px;
+}
+
+#github {
+    cursor: pointer;
+    opacity: 0.8;
+    position: absolute;
+    top: 50px; left: 50px;
+    height: 50px; width: 50px;
+}
+
+#github:hover {
+    opacity: 1;
+}
+
+#github:active {
+    opacity: 0.9;
+}
+
+#play {
+    position: absolute;
+    top: 86%;
+    left: 50%;
+    color: white;
+    background-color: black;
+    text-align: top;
+    padding: 15px 40px 15px 40px;
+    border-radius: 7px;
+    border: none;
+    font-family: Helvetica, Arial;
+    font-size: 17px;
+    transition: 0.3s;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    -ms-border-radius: 7px;
+    -o-border-radius: 7px;
+    -webkit-transition: 0.3s;
+    -moz-transition: 0.3s;
+    -ms-transition: 0.3s;
+    -o-transition: 0.3s;
+}
+
+#play:hover {
+    opacity: 0.8;
+}
+
+#play:active {
+    opacity: 1;
+}
+
+#author {
+    position: absolute;
+    top: 97%;
+    left: 50%;
+    text-align: center;
+    font-size: 16px;
+    color: rgb(33, 33, 33);
+    font-family: Helvetica, Arial;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+}
+
+#desc {
+    position: absolute;
+    top: 95%;
+    left: 50%;
+    text-align: center;
+    font-size: 16px;
+    color: rgb(33, 33, 33);
+    font-family: Helvetica, Arial;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+}

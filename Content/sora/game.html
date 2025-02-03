@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sora</title>
+    <link rel="stylesheet" href="style/game.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+        <div id="colorize"></div>
+        <img src="assets/pause.png" alt="pause" id="pause" class="hidden">
+        <div id="info">
+            <a id="creator">
+                <span style="font-weight: 800;">タリックです</span><br>
+                This web game was developed by a 42 student : Amehri Tarik.
+            </a>
+            <a id="desc">
+                Take flight as a fearless eagle on a daring adventure to find the portal in the sky, Dodge menacing 
+                tornados and harness the power of the wind to guide you towards your destination, 
+                Will you have what it takes to overcome the challenges and reach the farthest you can?
+            </a>
+            <button class="resume" id="resume">RESUME</button>
+            <a href="index.html"><button class="resume">EXIT</button></a>
+            <a href="https://github.com/tarikkudesu" target="_blank"><img src="assets/github.png" alt="github" id="github" draggable="false"></a>
+        </div>
+        <div id="gameover">
+            <a id="lost">You Lost</a>
+            <a href="index.html"><button class="resume">EXIT</button></a>
+            <a href="https://github.com/tarikkudesu" target="_blank"><img src="assets/github.png" alt="github" id="github" draggable="false"></a>
+        </div>
+        <img src="assets/player.png" id="player" draggable="false" class="hidden">
+        <div id="indicator-container" class="hidden">
+            <div id="indicator"></div>
+        </div>
+    </div>
+    <img src="assets/loading.png" id="loading">
+    <script src="js/game.js"></script>
+</body>
+</html>
