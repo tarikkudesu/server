@@ -65,6 +65,8 @@ void Request::validateHeaders()
             String value(hf.begin() + p + 2, hf.end());
             if (key.empty() || String::npos != key.find_first_not_of(H_KEY_CHAR_SET))
                 throw ErrorResponse(400, "invalid Header feild");
+            wsu::trimSpaces(key);
+            wsu::trimSpaces(value);
             this->__headerFeilds[key] = value;
             __requestHeaders.erase(0, pos + 2);
         }

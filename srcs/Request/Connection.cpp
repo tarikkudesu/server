@@ -64,7 +64,7 @@ Server *Connection::identifyServer()
 	}
 	for (t_serVect::iterator it = tmpMapP.begin(); it != tmpMapP.end(); it++)
 	{
-		if ((*it)->amITheServerYouAreLookingFor(this->__request.__headers.__host) == false)
+		if ((*it)->amITheServerYouAreLookingFor(this->__request.__headers.__host) == true)
 			tmpMapH.push_back(*it);
 	}
 	if (tmpMapH.empty())
