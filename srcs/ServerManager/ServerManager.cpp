@@ -28,8 +28,8 @@ ServerManager &ServerManager::operator=(const ServerManager &assign)
 }
 ServerManager::~ServerManager()
 {
-	wsu::debug("ServerManager destructor");
 	Core::clear();
+	wsu::debug("ServerManager destructor");
 }
 
 /*************************************************************************
@@ -37,6 +37,7 @@ ServerManager::~ServerManager()
  *************************************************************************/
 void ServerManager::checkHosts()
 {
+	wsu::info("resolving hosts");
 	for (t_serVect::iterator it = __serverTemplates.begin(); it != __serverTemplates.end(); it++)
 	{
 		Server *tmp = *it;
@@ -56,7 +57,6 @@ void ServerManager::checkHosts()
 			freeaddrinfo(result);
 		}
 	}
-	wsu::info("resolving hosts");
 }
 void ServerManager::initServers()
 {
@@ -69,14 +69,15 @@ void ServerManager::initServers()
 		for (std::vector<int>::iterator it = ports.begin(); it != ports.end(); it++)
 		{
 			Server *newServer = new Server(*tmp);
-			newServer->setPort(*it);
 			try
 			{
+				newServer->setPort(*it);
 				newServer->setup();
 				Core::addServer(newServer);
 			}
 			catch (std::exception &e)
 			{
+				delete newServer;
 				wsu::error(e.what());
 			}
 		}

@@ -31,30 +31,15 @@ Core::~Core()
 void Core::clear()
 {
     wsu::debug("clearing data");
-    if (Core::__connections.empty() == false)
-    {
-        for (t_Connections::iterator it = Core::__connections.begin(); it != Core::__connections.end(); it++)
-        {
-            Core::removeSocket(it->second->getSock());
-            delete it->second;
-        }
-    }
-    if (Core::__servers.empty() == false)
-    {
-        for (t_Server::iterator it = Core::__servers.begin(); it != Core::__servers.end(); it++)
-        {
-            Core::removeSocket(it->second->getServerSocket());
-            delete it->second;
-        }
-    }
-    if (Core::__sockets.empty() == false)
-    {
-        for (t_events::iterator it = Core::__sockets.begin(); it != Core::__sockets.end(); it++)
-        {
-            close(it->fd);
-        }
-        Core::__sockets.clear();
-    }
+    std::vector<int> tmpMapV, tmpMapC;
+    for (t_Server::iterator it = Core::__servers.begin(); it != Core::__servers.end(); it++)
+        tmpMapV.push_back(it->second->getServerSocket());
+    for (t_Connections::iterator it = Core::__connections.begin(); it != Core::__connections.end(); it++)
+        tmpMapC.push_back(it->second->getConnectionSocket());
+    for (std::vector<int>::iterator it = tmpMapV.begin(); it != tmpMapV.end(); it++)
+        Core::removeServer(*it);
+    for (std::vector<int>::iterator it = tmpMapC.begin(); it != tmpMapC.end(); it++)
+        Core::removeConnection(*it);
     Core::__sockNum = 0;
     Core::__servers.clear();
     Core::__sockets.clear();
@@ -62,7 +47,7 @@ void Core::clear()
 }
 void Core::removeConnection(int sd)
 {
-    wsu::info("closing connection " + wsu::intToString(sd));
+    wsu::info("removing connection " + wsu::intToString(sd));
     t_Connections::iterator it = Core::__connections.find(sd);
     if (it != Core::__connections.end())
     {
@@ -72,12 +57,13 @@ void Core::removeConnection(int sd)
         removeSocket(sd);
     }
 }
-void Core::addConnection(int sd)
+void Core::addConnection(Connection *connection)
 {
-    wsu::info("creating connection " + wsu::intToString(sd));
-    Core::__connections[sd] = new Connection(sd);
-    Core::__connections[sd]->setServers(Core::__servers);
-    addSocket(sd, CONNECTION);
+    wsu::info("creating connection " + wsu::intToString(connection->getConnectionSocket()));
+    if (Core::__sockNum >= MAX_EVENTS)
+        throw std::runtime_error("critical server overload, could not accept new client connection");
+    Core::__connections[connection->getConnectionSocket()] = connection;
+    addSocket(connection->getConnectionSocket(), CONNECTION);
 }
 void Core::removeServer(int sd)
 {
@@ -94,13 +80,14 @@ void Core::removeServer(int sd)
 void Core::addServer(Server *server)
 {
     wsu::info("creating server " + wsu::intToString(server->getServerSocket()));
-    if (Core::__servers.size() >= MAX_EVENTS)
+    if (Core::__sockNum >= MAX_EVENTS)
         throw std::runtime_error("critical server overload, " + server->getServerHost() + ":" + wsu::intToString(server->getServerPort()) + " non functional");
     Core::__servers[server->getServerSocket()] = server;
     addSocket(server->getServerSocket(), SERVER);
 }
 void Core::removeSocket(int sd)
 {
+    wsu::info("removing socket " + wsu::intToString(sd));
     for (t_events::iterator it = __sockets.begin(); it != __sockets.end(); it++)
     {
         if (sd == it->fd)
@@ -114,8 +101,8 @@ void Core::removeSocket(int sd)
 }
 void Core::addSocket(int sd, t_endian endian)
 {
+    wsu::info("creating socket " + wsu::intToString(sd));
     struct pollfd sockStruct;
-
     sockStruct.fd = sd;
     if (endian == SERVER)
         sockStruct.events = POLLIN;
@@ -123,6 +110,7 @@ void Core::addSocket(int sd, t_endian endian)
         sockStruct.events = POLLIN | POLLOUT | POLLHUP;
     wsu::setNonBlockingMode(sd);
     Core::__sockets.push_back(sockStruct);
+    Core::__sockNum++;
 }
 bool Core::isServerSocket(int sd)
 {
@@ -246,7 +234,18 @@ void Core::acceptNewConnection(int sd)
     newSock = accept(sd, NULL, NULL);
     if (newSock >= 0)
     {
-        addConnection(newSock);
+        Connection *newConnection = new Connection(sd);
+        try
+        {
+            newConnection->setSocket(newSock);
+            newConnection->setServers(Core::__servers);
+            Core::addConnection(newConnection);
+        }
+        catch (std::exception &e)
+        {
+            delete newConnection;
+            wsu::error(e.what());
+        }
     }
     else
     {
@@ -318,7 +317,7 @@ void Core::mainProcess()
         }
         catch (std::exception &e)
         {
-            rC.push_back(it->second->getSock());
+            rC.push_back(it->second->getConnectionSocket());
         }
     }
     for (std::vector<int>::iterator it = rC.begin(); it != rC.end(); it++)
@@ -329,9 +328,11 @@ void Core::mainLoop()
     int retV = 0;
     int timeout = 1000;
 
+    if (Core::__sockNum >= MAX_EVENTS)
+        Core::up = false;
     try
     {
-        while (up)
+        while (Core::up)
         {
             Core::__events = wsu::data(Core::__sockets);
             retV = poll(Core::__events, Core::__sockets.size(), timeout);

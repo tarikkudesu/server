@@ -39,11 +39,15 @@ Connection::~Connection()
     wsu::debug("Connection destructor");
 }
 
+void Connection::setSocket(int sd)
+{
+    this->__sd = sd;
+}
 void Connection::setServers(t_Server &servers)
 {
     this->__serversP = &servers;
 }
-int Connection::getSock()
+int Connection::getConnectionSocket()
 {
     return __sd;
 }

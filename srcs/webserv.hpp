@@ -54,7 +54,7 @@ typedef std::map<String, String>::iterator mapIterator;
 #define CGI_TIMEOUT 15
 #define CLIENT_TIMEOUT 15
 
-#define MAX_EVENTS 1
+#define MAX_EVENTS 1024
 
 #define READ_SIZE 8192
 #define FORM_MAX_SIZE 1024

@@ -36,10 +36,10 @@ class Core
 		static void					logServers();
 		static void					checkConflicts();
 		static void					removeServer( int sd );
-		static void					addConnection( int sd );
 		static bool					isServerSocket( int sd );
 		static void					removeConnection( int sd );
 		static void					addServer( Server *server );
+		static void					addConnection(Connection *connection);
 
 		static bool					up;
 		static void 				clear();

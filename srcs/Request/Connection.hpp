@@ -34,8 +34,9 @@ class Connection
 
 		void							addData(const BasicString &input);
 		void							setServers( t_Server &servers );
+		int								getConnectionSocket();
+		void							setSocket( int sd );
 		void							processData();
-		int								getSock();
 		bool							close();
 
 
