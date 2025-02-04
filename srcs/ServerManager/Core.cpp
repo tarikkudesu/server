@@ -308,7 +308,7 @@ void Core::proccessPollEvent(int sd, int &retV)
 
 void Core::mainProcess()
 {
-    std::vector<int> rC;
+    std::vector<int> closeConnection;
     for (t_Connections::iterator it = __connections.begin(); it != __connections.end(); it++)
     {
         try
@@ -317,10 +317,10 @@ void Core::mainProcess()
         }
         catch (std::exception &e)
         {
-            rC.push_back(it->second->getConnectionSocket());
+            closeConnection.push_back(it->second->getConnectionSocket());
         }
     }
-    for (std::vector<int>::iterator it = rC.begin(); it != rC.end(); it++)
+    for (std::vector<int>::iterator it = closeConnection.begin(); it != closeConnection.end(); it++)
         Core::removeConnection(*it);
 }
 void Core::mainLoop()

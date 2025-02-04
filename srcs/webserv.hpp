@@ -125,7 +125,7 @@ typedef enum e_connection_phase {
 
 typedef enum e_request_phase {
     REQUEST_INIT,
-    REQUEST_EXECUTE,
+    REQUEST_PARSE,
 } t_request_phase;
 
 typedef enum e_response_phase {

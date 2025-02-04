@@ -152,7 +152,7 @@ void Request::parseRequest()
 void Request::requestInit()
 {
     __startTime = std::time(NULL);
-    __requestPhase = REQUEST_EXECUTE;
+    __requestPhase = REQUEST_PARSE;
 }
 void Request::requestExecute(BasicString &data)
 {
@@ -184,7 +184,7 @@ void Request::processData(BasicString &data)
     wsu::debug("processing request");
     if (__requestPhase == REQUEST_INIT)
         requestInit();
-    else if (__requestPhase == REQUEST_EXECUTE)
+    else if (__requestPhase == REQUEST_PARSE)
         requestExecute(data);
 }
 std::ostream &operator<<(std::ostream &o, const Request &req)
