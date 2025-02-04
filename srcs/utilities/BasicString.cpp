@@ -138,11 +138,11 @@ size_t BasicString::find(const String &f) const
 	}
 	return String::npos;
 }
-std::ostream &operator<<(std::ostream &out, const BasicString &str)
+std::ostream &operator<<(std::ostream &o, const BasicString &str)
 {
 	char *buff = str.getBuff();
 	size_t size = str.length();
 	for (size_t i = 0; i < size; i++)
-		out << buff[i];
-	return out;
+		o << buff[i];
+	return o;
 }

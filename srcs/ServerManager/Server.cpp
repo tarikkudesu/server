@@ -394,13 +394,13 @@ void Server::parseServerDirectives(String line)
 
 std::ostream &operator<<(std::ostream &o, const Server &ser)
 {
-    std::cout << "server: " << ser.serverIdentity() << "\n";
-    std::cout << "\tserver_name: ";
+    o << "server: " << ser.serverIdentity() << "\n";
+    o << "\tserver_name: ";
     for (t_svec::const_iterator it = ser.__serverNames.begin(); it != ser.__serverNames.end(); it++)
-        std::cout << *it << " ";
-    std::cout << "\n";
+        o << *it << " ";
+    o << "\n";
     for (std::vector<Location>::const_iterator it = ser.__locations.begin(); it != ser.__locations.end(); it++)
-        std::cout << *it;
-    std::cout << "\n";
+        o << *it;
+    o << "\n";
     return o;
 }

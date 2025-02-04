@@ -29,6 +29,6 @@ public:
 	~BasicString();
 };
 
-std::ostream &operator<<(std::ostream &out, const BasicString &str);
+std::ostream &operator<<(std::ostream &o, const BasicString &str);
 
 #endif

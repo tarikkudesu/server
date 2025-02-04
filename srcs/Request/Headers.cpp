@@ -170,13 +170,13 @@ void Headers::parseHeaders(std::map<String, String> &headers)
     cookie(headers);
 }
 
-std::ostream &operator<<(std::ostream &os, const Headers &obj)
+std::ostream &operator<<(std::ostream &o, const Headers &obj)
 {
-    os << "\t\tPort: " << obj.__port << std::endl;
-    os << "\t\tHost: " << obj.__host << std::endl;
-    os << "\t\tContent-Type: " << obj.__contentType << std::endl;
-    os << "\t\tContent-Length: " << obj.__contentLength << std::endl;
-    os << "\t\tTransfer-Encoding: " << obj.__transferEncoding << "\n";
-    os << "\t\tCookie: " << obj.__cookie << std::endl;
-    return os;
+    o << "\t\tPort: " << obj.__port << std::endl;
+    o << "\t\tHost: " << obj.__host << std::endl;
+    o << "\t\tContent-Type: " << obj.__contentType << std::endl;
+    o << "\t\tContent-Length: " << obj.__contentLength << std::endl;
+    o << "\t\tTransfer-Encoding: " << obj.__transferEncoding << "\n";
+    o << "\t\tCookie: " << obj.__cookie << std::endl;
+    return o;
 }

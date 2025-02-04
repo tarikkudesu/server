@@ -102,7 +102,7 @@ void ErrorResponse::buildHeaderFeilds()
 	this->__headers += "Accept-Ranges: none\r\n";
 	this->__headers += "Connection: keep-alive\r\n";
 	this->__headers += "Content-Length: " + wsu::intToString(this->__Body.length()) + "\r\n";
-	this->__headers += "Content-Type: text/html; charset=UTF-8\r\n";
+	this->__headers += "Content-Type: " + wsu::getContentType(this->__page) + "; charset=UTF-8\r\n";
 	this->__headers += "Server: Webserv\r\n";
 	this->__headers += "Date: " + wsu::buildIMFDate(0) + "\r\n";
 	if (!this->__redirection.empty())
@@ -147,14 +147,8 @@ String ErrorResponse::__errPage = "<!DOCTYPE html><html lang=\"en\"><head><meta 
 								  "</h2><p style=\"font-size: 16px; font-family: sans-serif; text-align: center; padding: 0px 0px 30px 0px; margin: 0px; color: rgb(90, 139, 223);\">\n"
 								  "MESSAGE\n</p></div></body></html>";
 
-void ErrorResponse::print() const
-{
-	std::cout << GREEN << "*******************************************************************\n";
-	std::cout << GREEN << this->__StatusLine + this->__headers + this->__Body << "\n";
-	std::cout << "*****************************Response******************************\n"<< RESET;
-}
 std::ostream &operator<<(std::ostream &o, const ErrorResponse &r)
 {
-	r.print();
+	o << r.getResponse() << "\n";
 	return o;
 }

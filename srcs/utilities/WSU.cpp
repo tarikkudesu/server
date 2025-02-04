@@ -130,12 +130,12 @@ void wsu::warn(String __log_message)
 void wsu::error(String __log_message)
 {
     if (wsu::__error)
-        std::cout << BLUE << wsu::logDate() << RED << " [ERROR] " << RESET << __log_message << std::endl;
+        std::cerr << BLUE << wsu::logDate() << RED << " [ERROR] " << RESET << __log_message << std::endl;
 }
 void wsu::fatal(String __log_message)
 {
     if (wsu::__fatal)
-        std::cout << BLUE << wsu::logDate() << RED << " [FATAL] " << RESET << __log_message << std::endl;
+        std::cerr << BLUE << wsu::logDate() << RED << " [FATAL] " << RESET << __log_message << std::endl;
 }
 void wsu::running(String __log_message)
 {

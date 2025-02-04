@@ -189,14 +189,13 @@ void Request::processData(BasicString &data)
 }
 std::ostream &operator<<(std::ostream &o, const Request &req)
 {
-    std::cout << "Request: \n";
-    std::cout << "\tprotocole: " << req.__protocole << "\n";
-    std::cout << "\tmethod: " << wsu::methodToString(req.__method) << "\n";
-    std::cout << "\tURI: " << req.__URI << "\n";
-    std::cout << "\tquery: " << req.__queryString << "\n";
-    std::cout << "\tContent:Length: " << req.__headers.__contentLength << "\n";
-    std::cout << "\tFragement: " << req.__fragement << "\n";
-    std::cout << "\theaders: \n";
-    std::cout << req.__headers << "\n";
+    o << "Request: \n";
+    o << "\tprotocole: " << req.__protocole << "\n";
+    o << "\tmethod: " << wsu::methodToString(req.__method) << "\n";
+    o << "\tURI: " << req.__URI << "\n";
+    o << "\tquery: " << req.__queryString << "\n";
+    o << "\tFragement: " << req.__fragement << "\n";
+    o << "\theaders: \n";
+    o << req.__headers << "\n";
     return o;
 }

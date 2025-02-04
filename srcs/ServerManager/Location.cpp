@@ -267,34 +267,34 @@ void Location::parse()
 }
 std::ostream &operator<<(std::ostream &o, const Location &loc)
 {
-	std::cout << "\tlocation: " << loc.__path << "\n";
-	std::cout << "\t\troot: [" << loc.__root << "]\n";
-	std::cout << "\t\tindex: ";
+	o << "\tlocation: " << loc.__path << "\n";
+	o << "\t\troot: [" << loc.__root << "]\n";
+	o << "\t\tindex: ";
 	for (t_svec::const_iterator it = loc.__index.begin(); it != loc.__index.end(); it++)
 	{
-		std::cout << *it << " ";
+		o << *it << " ";
 	}
-	std::cout << "\n";
-	std::cout << "\t\tautoindex: ";
-	loc.__autoindex ? std::cout << "on\n" : std::cout << "off\n";
-	std::cout << "\t\tcgi_pass: " << loc.__cgiPass << "\n";
-	std::cout << "\t\treturn: " << loc.__return << "\n";
-	std::cout << "\t\tallow_methods: \n";
-	std::cout << "\t\tauthenticate: ";
+	o << "\n";
+	o << "\t\tautoindex: ";
+	loc.__autoindex ? o << "on\n" : o << "off\n";
+	o << "\t\tcgi_pass: " << loc.__cgiPass << "\n";
+	o << "\t\treturn: " << loc.__return << "\n";
+	o << "\t\tallow_methods: \n";
+	o << "\t\tauthenticate: ";
     for (t_svec::const_iterator it = loc.__authenticate.begin(); it != loc.__authenticate.end(); it++)
-        std::cout << *it << " ";
-    std::cout << "\n";
+        o << *it << " ";
+    o << "\n";
 	for (std::vector<t_method>::const_iterator it = loc.__allowMethods.begin(); it != loc.__allowMethods.end(); it++)
 	{
-		std::cout << "\t\t" << wsu::methodToString(*it) << " ";
+		o << "\t\t" << wsu::methodToString(*it) << " ";
 	}
-	std::cout << "\n";
-	std::cout << "\t\terror_pages: ";
+	o << "\n";
+	o << "\t\terror_pages: ";
 	for (std::map<int16_t, String>::const_iterator it = loc.__errorPages.begin(); it != loc.__errorPages.end(); it++)
 	{
-		std::cout << it->second << " ";
+		o << it->second << " ";
 	}
-	std::cout << "\n";
-	std::cout << "\t\tclient_body_buffer_size: " << loc.__clientBodyBufferSize << "\n";
+	o << "\n";
+	o << "\t\tclient_body_buffer_size: " << loc.__clientBodyBufferSize << "\n";
 	return o;
 }

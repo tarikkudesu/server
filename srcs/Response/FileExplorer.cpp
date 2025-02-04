@@ -60,7 +60,6 @@ void FileExplorer::loadPathExploring(const String& uri)
                 return;
             }
         }
-            std::cout << "crazy man : " << __fullPath << std::endl;
     }
 }
 void FileExplorer::prepareRessource(Location& location, const String& uri)
@@ -76,11 +75,11 @@ void FileExplorer::prepareRessource(Location& location, const String& uri)
 
 std::ostream &operator<<(std::ostream &o, FileExplorer const &r)
 {
-    std::cout << "fullPath: " << r.__fullPath << "\n";
-    std::cout << "type: ";
+    o << "fullPath: " << r.__fullPath << "\n";
+    o << "type: ";
     if (r.__type == FOLDER)
-        std::cout << "FOLDER\n";
+        o << "FOLDER\n";
     else
-        std::cout << "FILE\n";
+        o << "FILE\n";
     return o;
 }
