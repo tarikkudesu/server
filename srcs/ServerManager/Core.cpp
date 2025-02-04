@@ -126,7 +126,7 @@ bool Core::isServerSocket(int sd)
 void Core::logServers()
 {
     if (Core::__servers.empty())
-        throw std::runtime_error("config file does not identify any server");
+        throw std::runtime_error("config file does not identify any functional server");
     t_Server::iterator it = Core::__servers.begin();
     for (; it != Core::__servers.end(); it++)
     {

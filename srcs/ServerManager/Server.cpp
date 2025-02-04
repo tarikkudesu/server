@@ -174,11 +174,10 @@ void Server::setup()
         if (-1 == listen(this->__sd, 10))
             throw std::runtime_error(serverIdentity() + ": non functional: failed to listen for connections");
     }
-    catch (std::exception &e)
+    catch (std::runtime_error &e)
     {
         close(this->__sd);
-        wsu::error(e.what());
-        throw std::runtime_error(serverIdentity() + ": non functional");
+        throw e;
     }
 }
 /**************************************************************************************************************
