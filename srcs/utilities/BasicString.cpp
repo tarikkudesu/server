@@ -34,7 +34,7 @@ BasicString::BasicString(const BasicString &copy) : __buff(NULL), __size(0)
 
 BasicString::~BasicString()
 {
-    if (__size)
+    if (__buff)
         delete[] __buff;
 }
 bool BasicString::empty() const
@@ -43,7 +43,7 @@ bool BasicString::empty() const
 }
 void BasicString::clear()
 {
-    if (__size)
+    if (__buff)
         delete[] __buff;
 	__buff = NULL;
 	__size = 0;
@@ -53,6 +53,7 @@ BasicString &BasicString::operator=(const BasicString &assign)
 	if (this != &assign)
 	{
 		delete[] __buff;
+        __buff = NULL;
 		__size = assign.__size;
 		if (__size != 0)
 		{
@@ -99,25 +100,15 @@ size_t BasicString::length() const
 }
 BasicString BasicString::duplicate() const
 {
-	char *new_buff = new char[__size];
-	for (size_t i = 0; i < __size; i++)
-		new_buff[i] = __buff[i];
-	BasicString tmp(new_buff, __size);
-	delete[] new_buff;
-	return tmp;
+    return BasicString(__buff, __size);
 }
 BasicString BasicString::substr(size_t start, size_t length)
 {
-	if (start >= __size)
-		return BasicString(NULL, 0);
-	if (start + length > __size)
-		length = __size - start;
-	char *new_buff = new char[length];
-	for (size_t i = 0; i < length; i++)
-		new_buff[i] = __buff[start + i];
-	BasicString tmp(new_buff, length);
-	delete[] new_buff;
-	return tmp;
+    if (start >= __size)
+        return BasicString(NULL, 0);
+    if (start + length > __size)
+        length = __size - start;
+    return BasicString(__buff + start, length);
 }
 std::string BasicString::to_string() const
 {
