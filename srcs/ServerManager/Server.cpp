@@ -20,7 +20,7 @@ Server::Server(String line) : __sd(-1),
     if (__ports.size() == 0)
         __ports.push_back(8080);
     if (__host.empty())
-        __host = "0.0.0.0";
+        __host = DEFAULT_HOST;
     __directives.clear();
 }
 Server::Server(const Server &copy)
@@ -166,13 +166,13 @@ void Server::setup()
                 freeaddrinfo(result);
             }
             else
-                throw std::runtime_error(serverIdentity() + ": non functional: couldn't resolve server host name: " + this->__host);
+                throw std::runtime_error(serverIdentity() + " non functional: couldn't resolve server host name: " + this->__host);
         }
         addr.sin_port = htons(this->__port);
         if (-1 == bind(this->__sd, (struct sockaddr *)&addr, sizeof(addr)))
-            throw std::runtime_error(serverIdentity() + ": non functional: failed to bind socket");
+            throw std::runtime_error(serverIdentity() + " non functional: failed to bind socket");
         if (-1 == listen(this->__sd, 10))
-            throw std::runtime_error(serverIdentity() + ": non functional: failed to listen for connections");
+            throw std::runtime_error(serverIdentity() + " non functional: failed to listen for connections");
     }
     catch (std::runtime_error &e)
     {
@@ -248,6 +248,7 @@ void Server::proccessToken(t_svec &tokens)
     if (key != "host" &&
         key != "root" &&
         key != "index" &&
+        key != "alias" &&
         key != "listen" &&
         key != "return" &&
         key != "cgi_pass" &&
@@ -340,12 +341,10 @@ void Server::proccessServerDirectives()
     {
         t_svec tokens = wsu::splitBySpaces(*it);
         if (!tokens.empty())
-        {
             proccessToken(tokens);
-        }
     }
     if (this->__root.empty())
-        this->__root = "./Content/";
+        this->__root = DEFAULT_SERVER_PATH;
 }
 void Server::skipLocationBlock(String &line, size_t pos)
 {

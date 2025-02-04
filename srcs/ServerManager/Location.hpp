@@ -15,6 +15,7 @@ class Location
 		void								proccessAutoindexDirective( t_svec &tokens );
 		void								proccessCgiPassDirective( t_svec &tokens );
 		void								proccessReturnDirective( t_svec &tokens );
+		void								proccessAliasDirective( t_svec &tokens );
 		void								proccessIndexDirective( t_svec &tokens );
 		void								proccessRootDirective( t_svec &tokens );
 		void								proccessToken( t_svec &tokens );
@@ -26,9 +27,10 @@ class Location
 		Location();
 
 	public:
-		const String						__path;
+		String      						__path;
 		String								__line; // temporary usage
 		String								__root;
+		String								__alias;
 		t_svec								__index;
 		String								__return;
 		String								__cgiPass;

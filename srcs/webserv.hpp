@@ -63,6 +63,8 @@ typedef std::map<String, String>::iterator mapIterator;
 #define REQUEST_HEADERS_MAX_SIZE 8192
 #define REQUEST_HEADER_FEILD_MAX_SIZE 4096
 
+#define DEFAULT_HOST "0.0.0.0"
+#define DEFAULT_SERVER_PATH "./Content/"
 #define ERROR_PAGES_DIR_PATH "/essentials/pages"
 #define SUCCESS_PAGE_PATH "essentials/success.html"
 #define MIME_TYPES_DB_PATH "essentials/serversDB/mimetypes.csv"

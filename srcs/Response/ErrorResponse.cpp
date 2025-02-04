@@ -76,8 +76,6 @@ void ErrorResponse::buildResponseBody()
 		do
 		{
 			std::getline(fS, line, '\n');
-			if (fS.fail())
-				throw std::runtime_error("");
 			this->__Body += line;
 			if (fS.eof())
 				break;

@@ -35,29 +35,7 @@ ServerManager::~ServerManager()
 /*************************************************************************
  *                             SERVER PARSER                             *
  *************************************************************************/
-void ServerManager::checkHosts()
-{
-	wsu::info("resolving hosts");
-	for (t_serVect::iterator it = __serverTemplates.begin(); it != __serverTemplates.end(); it++)
-	{
-		Server *tmp = *it;
-		if (!tmp->__valid)
-			continue;
-		const String &host = tmp->getServerHost();
-		{
-			struct addrinfo hint;
-			struct addrinfo *result;
-			memset(&hint, 0, sizeof(hint));
-			hint.ai_family = AF_INET;
-			hint.ai_socktype = SOCK_STREAM;
-			hint.ai_protocol = IPPROTO_TCP;
-			int status = getaddrinfo(host.c_str(), NULL, &hint, &result);
-			if (status != 0)
-				throw std::runtime_error("getaddrinfo: couldn't resolve server host name: " + host);
-			freeaddrinfo(result);
-		}
-	}
-}
+
 void ServerManager::initServers()
 {
 	for (t_serVect::iterator it = __serverTemplates.begin(); it != __serverTemplates.end(); it++)
@@ -217,7 +195,6 @@ void ServerManager::setUpWebserv()
 		reduceSpaces();
 		checkBraces();
 		setUpServers();
-		checkHosts();
 		initServers();
 		Core::checkConflicts();
 		Core::logServers();

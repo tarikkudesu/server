@@ -27,7 +27,7 @@
 ### client_body_buffer_size:
     - context: server
     - syntax: client_body_buffer_size size;
-    - multiple directives: no
+    - multiple directives: overrided
     - multiple values: no
     - default: 8k
     - required: no
@@ -67,7 +67,7 @@
 ### autoindex:
     - context: location
     - syntax: autoindex on | off
-    - multiple directives: no
+    - multiple directives: overrided
     - multiple values: no
     - default: off
     - required: no
@@ -75,7 +75,15 @@
 ### return :
     - context: location
     - syntax: return url
-    - multiple directives: yes
+    - multiple directives: overrided
+    - multiple values: no
+    - default: -
+    - required: no
+
+### alias :
+    - context: location
+    - syntax: return url
+    - multiple directives: no
     - multiple values: no
     - default: -
     - required: no
@@ -83,7 +91,7 @@
 ### cgi_extension :
     - context: location
     - syntax: cgi_extension path
-    - multiple directives: yes
+    - multiple directives: overrided
     - multiple values: no
     - default: -
     - required: no

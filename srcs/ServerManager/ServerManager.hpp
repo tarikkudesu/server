@@ -15,7 +15,6 @@ class ServerManager
 		t_serVect					__serverTemplates;
 
 		void						readFile();
-		void						checkHosts();
 		void						firstCheck();
 		void						checkBraces();
 		void						initServers();

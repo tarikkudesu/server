@@ -34,16 +34,18 @@ Location &Location::operator=(const Location &assign)
 	wsu::debug("Location copy assignement operator");
 	if (this != &assign)
 	{
-		b__r = assign.b__r;
-		__root = assign.__root;
-		__index = assign.__index;
-		__return = assign.__return;
-		__cgiPass = assign.__cgiPass;
-		__autoindex = assign.__autoindex;
-		__errorPages = assign.__errorPages;
-		__allowMethods = assign.__allowMethods;
-		__authenticate = assign.__authenticate;
-		__clientBodyBufferSize = assign.__clientBodyBufferSize;
+        this->__path = assign.__path;
+        this->__root = assign.__root;
+        this->__alias = assign.__alias;
+        this->__index = assign.__index;
+        this->__return = assign.__return;
+        this->__cgiPass = assign.__cgiPass;
+        this->__autoindex = assign.__autoindex;
+        this->__directives = assign.__directives;
+        this->__errorPages = assign.__errorPages;
+        this->__allowMethods = assign.__allowMethods;
+        this->__authenticate = assign.__authenticate;
+        this->__clientBodyBufferSize = assign.__clientBodyBufferSize;
 	}
 	return *this;
 }
@@ -59,6 +61,14 @@ Location::~Location()
  *											 PROCCESSING DIRECTIVES 										  *
  **************************************************************************************************************/
 
+void Location::proccessAliasDirective(t_svec &tokens)
+{
+	if (tokens.size() != 2)
+		throw std::runtime_error(tokens.at(0) + " invalid number of arguments");
+	if (!this->__alias.empty())
+		throw std::runtime_error(tokens.at(0) + " directive is duplicate");
+	this->__alias = tokens.at(1);
+}
 void Location::proccessRootDirective(t_svec &tokens)
 {
 	if (tokens.size() != 2)
@@ -121,12 +131,16 @@ void Location::proccessReturnDirective(t_svec &tokens)
 {
 	if (tokens.size() != 2)
 		throw std::runtime_error(tokens.at(0) + " invalid number of arguments");
+	if (!this->__return.empty())
+		throw std::runtime_error(tokens.at(0) + " directive is duplicate");
 	this->__return = tokens.at(1);
 }
 void Location::proccessCgiPassDirective(t_svec &tokens)
 {
 	if (tokens.size() != 2)
 		throw std::runtime_error(tokens.at(0) + " invalid number of arguments");
+	if (!this->__cgiPass.empty())
+		throw std::runtime_error(tokens.at(0) + " directive is duplicate");
 	this->__cgiPass = tokens.at(1);
 }
 void Location::proccessClientBodyBufferSizeToken(t_svec &tokens)
@@ -145,6 +159,7 @@ void Location::proccessToken(t_svec &tokens)
 	if (key != "host" &&
 		key != "root" &&
 		key != "index" &&
+		key != "alias" &&
 		key != "listen" &&
 		key != "return" &&
 		key != "cgi_pass" &&
@@ -157,6 +172,7 @@ void Location::proccessToken(t_svec &tokens)
 		throw std::runtime_error(key + ": unknown directive");
 	if (b__r == false &&
 		key != "root" &&
+		key != "alias" &&
 		key != "index" &&
 		key != "return" &&
 		key != "cgi_pass" &&
@@ -170,6 +186,8 @@ void Location::proccessToken(t_svec &tokens)
 		proccessRootDirective(tokens);
 	else if (key == "index")
 		proccessIndexDirective(tokens);
+	else if (key == "alias")
+		proccessAliasDirective(tokens);
 	else if (key == "return")
 		proccessReturnDirective(tokens);
 	else if (key == "autoindex")
@@ -271,29 +289,24 @@ std::ostream &operator<<(std::ostream &o, const Location &loc)
 	o << "\t\troot: [" << loc.__root << "]\n";
 	o << "\t\tindex: ";
 	for (t_svec::const_iterator it = loc.__index.begin(); it != loc.__index.end(); it++)
-	{
 		o << *it << " ";
-	}
 	o << "\n";
 	o << "\t\tautoindex: ";
 	loc.__autoindex ? o << "on\n" : o << "off\n";
 	o << "\t\tcgi_pass: " << loc.__cgiPass << "\n";
 	o << "\t\treturn: " << loc.__return << "\n";
+	o << "\t\talias: " << loc.__alias << "\n";
 	o << "\t\tallow_methods: \n";
 	o << "\t\tauthenticate: ";
     for (t_svec::const_iterator it = loc.__authenticate.begin(); it != loc.__authenticate.end(); it++)
         o << *it << " ";
     o << "\n";
 	for (std::vector<t_method>::const_iterator it = loc.__allowMethods.begin(); it != loc.__allowMethods.end(); it++)
-	{
 		o << "\t\t" << wsu::methodToString(*it) << " ";
-	}
 	o << "\n";
 	o << "\t\terror_pages: ";
 	for (std::map<int16_t, String>::const_iterator it = loc.__errorPages.begin(); it != loc.__errorPages.end(); it++)
-	{
 		o << it->second << " ";
-	}
 	o << "\n";
 	o << "\t\tclient_body_buffer_size: " << loc.__clientBodyBufferSize << "\n";
 	return o;
