@@ -12,6 +12,7 @@ class FileExplorer
 		String			__fullPath;
 		Location		*__location;
 
+        String          setAlias(String uri);
 		void			changeRequestedFile(String file);
 		void			loadPathExploring(const String& uri);
 		void			prepareRessource(Location& location, const String& uri);

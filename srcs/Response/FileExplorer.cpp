@@ -43,8 +43,22 @@ void	FileExplorer::changeRequestedFile(String file)
 {
 	__fullPath = wsu::joinPaths(__location->__root, file);
 }
+String FileExplorer::setAlias(String uri)
+{
+    if (__location->__alias.empty())
+        return uri;
+    String newUri = uri;
+    size_t endPos = uri.find("/", 1);
+    if (endPos != String::npos)
+    {
+        String newStr = uri.substr(endPos);
+        newUri = __location->__alias + newStr;
+    }
+    return newUri;
+}
 void FileExplorer::loadPathExploring(const String& uri)
 {
+    String newUri = setAlias(uri);
     __fullPath = wsu::joinPaths(__location->__root, uri);
     loadType(__fullPath.c_str());
     if (__type == FOLDER)

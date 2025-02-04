@@ -95,9 +95,9 @@ bool Response::checkCgi()
 		return 0;
 	if (__explorer.__type == FOLDER)
 		return 0;
-	if (!wsu::endWith(__explorer.__fullPath, ".java") && !wsu::endWith(__explorer.__fullPath, ".php"))
-		return 0;
-	return 1;
+	if (wsu::endWith(__explorer.__fullPath, ".java") || wsu::endWith(__explorer.__fullPath, ".php"))
+		return 1;
+	return 0;
 }
 void Response::__check_methods()
 {
@@ -136,7 +136,7 @@ void Response::postDone()
 	else if (__request.__headers.__contentType == MULTIPART)
 	{
 		String b = wsu::readFielContent(SUCCESS_PAGE_PATH);
-		buildResponse(200, b.length());
+		buildResponse(201, b.length());
 		__body.join(b);
 		__responsePhase = RESPONSE_DONE;
 	}
@@ -273,7 +273,7 @@ void Response::deletePhase()
 {
 	wsu::debug("Delete phase");
 	if (unlink(__explorer.__fullPath.c_str()) != 0)
-		throw ErrorResponse(500, *__location, "unlink");
+		throw ErrorResponse(500, *__location, "unlink syscall");
 	buildResponse(204, 0);
 	__responsePhase = RESPONSE_DONE;
 }
