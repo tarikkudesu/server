@@ -83,8 +83,7 @@ void Response::buildResponse(int code, size_t length)
 	__body.join(String("Accept-Ranges: none") + LINE_BREAK);
 	__body.join(String("server: webserv/1.0") + LINE_BREAK);
 	__body.join(String("Connection: keep-alive") + LINE_BREAK);
-	if (length)
-		__body.join("Content-Length: " + wsu::intToString(length) + LINE_BREAK);
+    __body.join("Content-Length: " + wsu::intToString(length) + LINE_BREAK);
 	if (!__cookie.empty())
 		__body.join("Set-Cookie: token=" + __cookie + "; path=/; expires=Thu, 31 Dec 2025 12:00:00 UTC;" LINE_BREAK), __cookie.clear();
 	__body.join(String(LINE_BREAK));
@@ -283,6 +282,7 @@ void Response::cgiPhase()
 	wsu::debug("CGI phase");
 	Cgi cgi(__explorer, __request, *__location, __post.getForm());
 	buildResponse(200, cgi.getBody().length());
+    std::cout << __body << "\n";
 	__body.join(cgi.getBody());
 	__responsePhase = RESPONSE_DONE;
 }
