@@ -205,7 +205,7 @@ void Post::processData(BasicString &data)
         if (request.__bodySize > location->__clientBodyBufferSize)
             throw wsu::Close();
         if (std::time(NULL) - __startTime > CLIENT_TIMEOUT)
-            throw ErrorResponse(408, *location, "timeout");
+            throw ErrorResponse(408, *location, "Post timeout");
         if (request.__headers.__contentType == FORM)
             processFormData();
         else if (request.__headers.__contentType == MULTIPART)

@@ -168,7 +168,7 @@ void Request::requestExecute(BasicString &data)
         if (std::time(NULL) - this->__startTime > CLIENT_TIMEOUT)
         {
             __data.clear();
-            throw ErrorResponse(408, "timeout");
+            throw ErrorResponse(408, "request timeout");
         }
         data.clear();
         throw wsu::persist();

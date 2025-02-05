@@ -66,7 +66,7 @@ typedef std::map<String, String>::iterator mapIterator;
 #define DEFAULT_HOST "0.0.0.0"
 #define DEFAULT_SERVER_PATH "./Content/"
 #define ERROR_PAGES_DIR_PATH "/essentials/pages"
-#define SUCCESS_PAGE_PATH "essentials/success.html"
+#define SUCCESS_PAGE_PATH "essentials/pages/success.html"
 #define MIME_TYPES_DB_PATH "essentials/serversDB/mimetypes.csv"
 #define ERROR_CODES_DB_PATH "essentials/serversDB/errorcodes.csv"
 #define ERROR_PAGES_DB_PATH "essentials/serversDB/errorpages.csv"

@@ -321,7 +321,10 @@ void Core::mainProcess()
         }
     }
     for (std::vector<int>::iterator it = closeConnection.begin(); it != closeConnection.end(); it++)
+    {
+        wsu::warn("closing connection due to invalid client data transfer");
         Core::removeConnection(*it);
+    }
 }
 void Core::mainLoop()
 {

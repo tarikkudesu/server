@@ -58,6 +58,7 @@ public:
     static String methodToString(t_method t);
 	static void toUpperString(String &input);
 	static void toLowerString(String &input);
+    static String generateTimeBasedFileName();
 	static String buildIMFDate(size_t elapsed);
 	static long stringToInt(const String &str);
 	static struct pollfd *data(t_events &events);

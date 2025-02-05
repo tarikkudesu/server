@@ -82,7 +82,10 @@ void Response::buildResponse(int code, size_t length)
 	__body.join("date: " + wsu::buildIMFDate(0) + LINE_BREAK);
 	__body.join(String("Accept-Ranges: none") + LINE_BREAK);
 	__body.join(String("server: webserv/1.0") + LINE_BREAK);
-	__body.join(String("Connection: keep-alive") + LINE_BREAK);
+    if (__request.__headers.__connectionType == CLOSE)
+        __body.join(String("Connection: close") + LINE_BREAK);
+    else
+        __body.join(String("Connection: keep-alive") + LINE_BREAK);
     __body.join("Content-Length: " + wsu::intToString(length) + LINE_BREAK);
 	if (!__cookie.empty())
 		__body.join("Set-Cookie: token=" + __cookie + "; path=/; expires=Thu, 31 Dec 2025 12:00:00 UTC;" LINE_BREAK), __cookie.clear();
@@ -282,7 +285,6 @@ void Response::cgiPhase()
 	wsu::debug("CGI phase");
 	Cgi cgi(__explorer, __request, *__location, __post.getForm());
 	buildResponse(200, cgi.getBody().length());
-    std::cout << __body << "\n";
 	__body.join(cgi.getBody());
 	__responsePhase = RESPONSE_DONE;
 }
@@ -326,13 +328,13 @@ void Response::preparePhase()
 {
 	wsu::debug("preparing response");
 	__body.clear();
+	__check_methods();
 	this->__explorer.prepareRessource(*__location, __request.__URI);
 	std::vector<t_method>::iterator it = __location->__allowMethods.begin();
 	for (; it != __location->__allowMethods.end() && *it != __request.__method; it++)
 		;
 	if (it == __location->__allowMethods.end())
 		throw ErrorResponse(405, *__location, wsu::methodToString(__request.__method) + " : method not allowed in this location");
-	__check_methods();
 }
 
 void Response::processData(BasicString &data)
@@ -355,6 +357,8 @@ void Response::processData(BasicString &data)
 	}
 	catch (ErrorResponse &e)
 	{
+		if (__responsePhase == POST_PROCESS)
+			throw wsu::Close();
 		reset();
 		throw e;
 	}
