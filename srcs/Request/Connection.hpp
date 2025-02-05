@@ -27,7 +27,10 @@ class Connection
 		void							processMultiPartBody();
 		void							mpBody( t_multipartsection &part );
 		void							mpHeaders( t_multipartsection &part );
+
 		Connection();
+		Connection( const Connection &copy );
+		Connection	&operator=( const Connection &assign );
 
 	public:
 		std::queue< BasicString >		__responseQueue;
@@ -41,8 +44,6 @@ class Connection
 
 
 		Connection( int sd );
-		Connection( const Connection &copy );
-		Connection	&operator=( const Connection &assign );
 		~Connection();
 };
 

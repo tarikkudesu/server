@@ -48,9 +48,6 @@ typedef std::map<String, String>::iterator mapIterator;
 #define YELLOW "\033[1;33m"
 #define MAGENTA "\033[1;35m"
 
-#define JAVABIN "/usr/bin/java"
-#define PYTHONBIN "/usr/bin/php"
-
 #define CGI_TIMEOUT 15
 #define CLIENT_TIMEOUT 15
 
@@ -154,6 +151,11 @@ typedef enum e_post_phase {
     POST_INIT,
     POST_EXECUTE,
 } t_post_phase;
+
+typedef enum e_cgi_phase {
+    CGI_INIT,
+    CGI_EXECUTE,
+} t_cgi_phase;
 
 typedef enum e_content_type {
     FORM,
