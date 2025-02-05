@@ -1,6 +1,7 @@
 #include "Core.hpp"
 
-bool Core::up = true;
+bool Core::up = false;
+int Core::__allocN = 0;
 int Core::__sockNum = 0;
 t_Server Core::__servers;
 t_events Core::__sockets;
@@ -125,8 +126,6 @@ bool Core::isServerSocket(int sd)
 
 void Core::logServers()
 {
-    if (Core::__servers.empty())
-        throw std::runtime_error("config file does not identify any functional server");
     t_Server::iterator it = Core::__servers.begin();
     for (; it != Core::__servers.end(); it++)
     {
@@ -229,6 +228,8 @@ void Core::acceptNewConnection(int sd)
 {
     int newSock;
 
+    if (Core::__sockNum >= MAX_EVENTS)
+        wsu::__criticalOverLoad = true;
     if (wsu::__criticalOverLoad == true)
         return;
     newSock = accept(sd, NULL, NULL);
@@ -329,28 +330,30 @@ void Core::mainProcess()
 void Core::mainLoop()
 {
     int retV = 0;
-    int timeout = 1000;
 
-    if (Core::__sockNum >= MAX_EVENTS)
-        Core::up = false;
+    if (Core::__sockNum < MAX_EVENTS)
+        Core::up = true;
+    if (Core::__sockNum == 0)
+        throw std::runtime_error("config file does not identify any functional server");
     try
     {
         while (Core::up)
         {
+            Core::__allocN = Core::__sockNum;
             Core::__events = wsu::data(Core::__sockets);
-            retV = poll(Core::__events, Core::__sockets.size(), timeout);
-            if (retV != 0)
+            retV = poll(Core::__events, Core::__allocN, POLL_TIMEOUT);
+            if (retV != 0 && retV != -1)
             {
-                for (int sd = 0; sd < Core::__sockNum && retV; sd++)
+                for (int sd = 0; sd < Core::__allocN && retV; sd++)
                 {
                     if (wsu::__criticalOverLoad == true)
-                        retV = Core::__sockNum;
+                        retV = Core::__allocN;
                     Core::proccessPollEvent(sd, retV);
                 }
                 Core::mainProcess();
             }
             delete[] Core::__events;
-            Core::__sockNum = Core::__sockets.size();
+            Core::__events = NULL;
         }
     }
     catch (std::exception &e)

@@ -12,6 +12,7 @@ typedef std::map< int, Connection* >		t_Connections;
 class Core
 {
 	private:
+		static int					__allocN;
 		static int					__sockNum;
 		static t_events				__sockets;
 		static t_Server				__servers;
