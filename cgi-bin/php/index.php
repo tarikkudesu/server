@@ -4,6 +4,9 @@ require_once("cgi-bin/php/Controller/response.php");
 
 try
 {
+	// echo "query string >>>".getenv("QUERY_STRING")."<<<";
+	// echo "</br>";
+	// echo "REQUEST_METHOD  >>>".getenv("REQUEST_METHOD")."<<<";
 	if ($_SERVER["REQUEST_METHOD"] == "GET")
 	{
 		setSuperGlobal($_GET);
@@ -14,8 +17,6 @@ try
 	}
 	else if ($_SERVER["REQUEST_METHOD"] == "POST")
 	{
-		echo "wa khdeeeeeem POST";
-		exit();
 		setSuperGlobal($_POST);
 		postAction();
 	}

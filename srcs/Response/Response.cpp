@@ -142,7 +142,6 @@ void Response::postDone()
 	}
 	else
 		__responsePhase = CGI_PROCESS;
-	__post.reset();
 }
 void Response::processCunkedBody(BasicString &data)
 {
@@ -282,7 +281,7 @@ void Response::deletePhase()
 void Response::cgiPhase()
 {
 	wsu::debug("CGI phase");
-	Cgi cgi(__explorer, __request, *__location, __body);
+	Cgi cgi(__explorer, __request, *__location, __post.getForm());
 	buildResponse(200, cgi.getBody().length());
 	__body.join(cgi.getBody());
 	__responsePhase = RESPONSE_DONE;
