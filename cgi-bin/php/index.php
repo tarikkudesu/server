@@ -14,6 +14,8 @@ try
 	}
 	else if ($_SERVER["REQUEST_METHOD"] == "POST")
 	{
+		echo "wa khdeeeeeem POST";
+		exit();
 		setSuperGlobal($_POST);
 		postAction();
 	}

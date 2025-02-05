@@ -18,6 +18,11 @@ function errorAction($e)
 	render("vError.php", $reasons);
 }
 
+function formAction()
+{
+	render("vForm.php");
+}
+
 function postAction()
 {
 	render("vPost.php", $_POST);
