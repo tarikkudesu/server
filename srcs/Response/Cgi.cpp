@@ -5,21 +5,48 @@ typedef std::map<String, String> Map;
 
 /*=---------------------constructors-----------------------*/
 
-Cgi::Cgi(FileExplorer &explorer, Request &request, Location &location, BasicString &body) : __request(request),
-                                                                                            __explorer(explorer),
+Cgi::Cgi(FileExplorer &explorer, Request &request, Location &location, BasicString &body) : __explorer(explorer),
                                                                                             __location(location),
+																							__request(request),
                                                                                             __reqBody(body),
                                                                                             __start(std::time(NULL)),
                                                                                             __body("")
 {
-	wsu::debug("Cgi default constructor");
+	wsu::debug("Cgi param constructor");
+	__file = wsu::generateTimeBasedFileName();
+	std::cout << __file << "\n";
+	__stream.open(__file.c_str());
+	if (!__stream.is_open())
+		throw ErrorResponse(500, __location, "can't open cgi stream");
     cgiProcess();
 }
 
 Cgi::~Cgi()
 {
 	wsu::debug("Cgi destructor");
+	__stream.close();
+	unlink(__file.c_str());
     clear();
+}
+
+Cgi& Cgi::operator=(const Cgi& cgi)
+{
+	if (this != &cgi)
+	{
+		this->__body = cgi.__body;
+		this->__file = cgi.__file;
+		this->__start = cgi.__start;
+		this->__request = cgi.__request;
+		this->__location = cgi.__location;
+	}	
+	return *this;
+}
+
+Cgi::Cgi(const Cgi& cgi) :	__explorer(cgi.__explorer),
+							__location(cgi.__location),
+							__request(cgi.__request)
+{
+	*this = cgi;
 }
 
 /*----------------------business logic------------------------*/
@@ -47,20 +74,23 @@ void Cgi::execute(const char *path, int fd)
     exit(1);
 }
 
-void Cgi::readFromFile(String &file)
+
+
+void Cgi::readFromFile()
 {
 	String buffer;
-	std::ifstream content(file.c_str());
-	if (!content.is_open())
+	std::ifstream file(__file);
+	if (!file.is_open())
         throw ErrorResponse(500, __location, "open fail");
-	while (std::getline(content, buffer))
+	while (std::getline(file, buffer))
 		__body.append(buffer);
-	content.close();
 }
 
 String Cgi::getQueryString()
 {
-    return __request.__method == POST ? __reqBody.to_string() : __request.__queryString;
+    String query = __request.__method == POST ? __reqBody.to_string() : __request.__queryString;
+	return wsu::decode(query);
+
 }
 
 void Cgi::setCgiEnvironement()
@@ -92,11 +122,9 @@ void Cgi::setCgiEnvironement()
 void Cgi::cgiProcess(void)
 {
     setCgiEnvironement();
-	String file = wsu::generateTokenId() + ".html";
-
     int child, status, pid;
 	
-	int fd = open(file.c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO);
+	int fd = open(__file.c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO);
 	if (fd < 0)
         throw ErrorResponse(500, __location, "open fail");
 
@@ -114,8 +142,7 @@ void Cgi::cgiProcess(void)
     if (WIFEXITED(pid) && WEXITSTATUS(status))
         throw ErrorResponse(500, __location, "wait error");
     close(fd);
-    readFromFile(file);
-	unlink(file.c_str());
+    readFromFile();
 }
 
 /*-----------------------getters----------------------------*/

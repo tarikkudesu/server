@@ -6,29 +6,31 @@
 class Cgi
 {
 	private:
-		Request&				__request;
 		FileExplorer&		    __explorer;
 		Location&				__location;
+		Request&				__request;
         BasicString             __reqBody;
+		std::ofstream			__stream;
 		std::time_t				__start;
 		String					__body;
+		String					__file;
 		char					**env;
 
 		void					execute(const char* path, int fd);
-		void					readFromFile(String& file);
-		void					setCgiEnvironement();
-		void					cgiProcess(void);
+		void					setCgiEnvironement( void );
+		String					getQueryString( void );
+		void					readFromFile( void );
+		void					cgiProcess( void );
 		void					clear( void );
-		String					getQueryString();
 
 
 	public:
-		String& 				 getBody();
+		String& 				getBody();
 
 		Cgi(FileExplorer &explorer, Request &request, Location &location, BasicString &body);
+		Cgi(const Cgi& cgi);
+		Cgi	&operator=(const Cgi& cgi);
 		~Cgi();
-		// Cgi(const Cgi &copy);
-		// Cgi &operator=(const Cgi &assign);
 };
 
 #endif

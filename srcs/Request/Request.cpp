@@ -151,6 +151,7 @@ void Request::parseRequest()
 }
 void Request::requestInit()
 {
+	clear();
     __startTime = std::time(NULL);
     __requestPhase = REQUEST_PARSE;
 }
