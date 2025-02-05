@@ -40,32 +40,22 @@ void Cgi::execute(const char *path, int fd)
         close(fd);
         exit(1);
     }
-    const char *argv[] = {"/usr/bin/php", path, NULL};
-    if (wsu::endWith(path, ".java"))
-        argv[0] = "/usr/bin/java";
+    const char *argv[] = {__location.__cgiPass.c_str(), path, NULL};
     execve(argv[0], (char *const *)argv, env);
     clear();
     close(fd);
     exit(1);
 }
 
-void Cgi::readFromPipe(int fd)
+void Cgi::readFromFile(String &file)
 {
-    char buffer[1024] = {0};
-    while (read(fd, buffer, 1023))
-    {
-        __body.append(buffer);
-        wsu::ft_bzero(buffer, 1024);
-    }
-    size_t pos = __body.find('\n');
-    __body = __body.substr(pos + 1);
-}
-
-const char *Cgi::getMethod()
-{
-    if (__request.__method == POST)
-        return "POST";
-    return "GET";
+	String buffer;
+	std::ifstream content(file.c_str());
+	if (!content.is_open())
+        throw ErrorResponse(500, __location, "open fail");
+	while (std::getline(content, buffer))
+		__body.append(buffer);
+	content.close();
 }
 
 String Cgi::getQueryString()
@@ -82,7 +72,7 @@ void Cgi::setCgiEnvironement()
     headers["SERVER_PROTOCOL"] = "HTTP/1.1";
     headers["SERVER_PORT"] = "9001"; //tmp header value
     headers["QUERY_STRING"] = getQueryString();
-    headers["REQUEST_METHOD"] = getMethod();
+    headers["REQUEST_METHOD"] = wsu::methodToString(__request.__method);
     headers["SCRIPT_NAME"] = "index.php";
     headers["SCRIPT_FILENAME"] = "cgi-bin/php/index.php";
     headers["REDIRECT_STATUS"] = "200";
@@ -102,27 +92,30 @@ void Cgi::setCgiEnvironement()
 void Cgi::cgiProcess(void)
 {
     setCgiEnvironement();
+	String file = wsu::generateTokenId() + ".html";
 
-    int child, status, pip[2], pid;
-    if (pipe(pip) < 0)
-        throw ErrorResponse(500, __location, "pipe error");
+    int child, status, pid;
+	
+	int fd = open(file.c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO);
+	if (fd < 0)
+        throw ErrorResponse(500, __location, "open fail");
 
-    pid = fork();
+ 	pid = fork();
     if (pid < 0)
         throw ErrorResponse(500, __location, "fork error");
 
     if (!pid)
-        close(pip[0]), execute(__explorer.__fullPath.c_str(), pip[1]);
+        execute(__explorer.__fullPath.c_str(), fd);
 
-    close(pip[1]);
     while (!(child = waitpid(pid, &status, WNOHANG)) && (std::time(NULL) - __start) < CGI_TIMEOUT)
         ;
     if (!child)
         kill(pid, SIGKILL), throw ErrorResponse(408, __location, "Request Time-out");
     if (WIFEXITED(pid) && WEXITSTATUS(status))
         throw ErrorResponse(500, __location, "wait error");
-    readFromPipe(pip[0]);
-    close(pip[0]);
+    close(fd);
+    readFromFile(file);
+	unlink(file.c_str());
 }
 
 /*-----------------------getters----------------------------*/

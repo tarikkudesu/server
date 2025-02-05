@@ -15,11 +15,10 @@ class Cgi
 		char					**env;
 
 		void					execute(const char* path, int fd);
-		void					readFromPipe(int fd);
+		void					readFromFile(String& file);
 		void					setCgiEnvironement();
 		void					cgiProcess(void);
 		void					clear( void );
-		const					char *getMethod();
 		String					getQueryString();
 
 
