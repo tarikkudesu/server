@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Team</title>
    <style>
+		body{
+			background-color: rgb(35, 40, 47);
+		}
 		.container {
 			max-width: 1200px;
 			margin: 80px auto;
@@ -38,14 +41,6 @@
 			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 		}
 
-		.member-image {
-			width: 150px;
-			height: 150px;
-			border-radius: 50%;
-			margin: 0 auto 20px;
-			border: 3px solid rgba(210, 215, 223, 0.26);
-			padding: 3px;
-		}
 
 		.member-name {
 			color: rgb(210, 215, 223);
