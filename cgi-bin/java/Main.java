@@ -5,24 +5,31 @@ import java.util.function.Consumer;
 import java.lang.annotation.Target;
 import java.nio.file.Paths;
 import java.nio.file.Files;
-import java.io.IOException;
 import java.util.stream.*;
 import java.util.*;
 
-@View(post= "post.html", index = "index.html", form="form.html")
+@Render(post= "post.html", index = "index.html", form="form.html")
+@JSP("cgi-bin/java/ressource/")
 public class Main
 {
 	String response;
-	View view;
+	Render render;
+	JSP jsp;
 	Consumer<String> consumer;
 	Map<String, String> queryString;
 
 	{
 		consumer = this::loadFile;
 		queryString = loadQueryString();
-		view = this.getClass().getDeclaredAnnotation(View.class);
+		jsp = this.getClass().getDeclaredAnnotation(JSP.class);
+		render = this.getClass().getDeclaredAnnotation(Render.class);
 	}
-	
+
+	public static void main(String [] args)
+	{
+		new Main();
+	}
+
 	public Main()
 	{
 		try
@@ -30,26 +37,27 @@ public class Main
 			if ("GET".equals(System.getenv("REQUEST_METHOD")))
 			{
 				if (!queryString.containsKey("action"))
-					consumer.accept(System.getenv("user.dir") + view.index());
+					consumer.accept(jsp.value() + render.index());
 				else if ("form".equals(queryString.get("action")))
-					consumer.accept(System.getenv("user.dir") + view.form());
+					consumer.accept(jsp.value() + render.form());
+				else if ("post".equals(queryString.get("action")))
+					throw new Exception("<h1 style=\"text-align:center;\">action not allowed on GET</h1>");
 				else
-					consumer.accept(System.getenv("user.dir") + view.index());
-				throw new Exception("");
+					throw new Exception("<h1 style=\"text-align:center;\">action not exist</h1>");
 			}
 			else if ("POST".equals(System.getenv("REQUEST_METHOD")))
-				consumer.accept(System.getenv("user.dir") + view.post());
+			{
+				consumer.accept(jsp.value() + render.post());
+				expand();
+			}
+			else
+				throw new Exception("<h1 style=\\\"text-align:center;\\\">only GET and POST are allowed</h1>");
 		}
 		catch (Exception e)
 		{
-			response = "<h1 style=\"text-align=center;\">action not exist</h1>";	
+			response = e.getMessage();	
 		}
 		System.out.println(response);
-	}
-
-	public static void main(String [] args)
-	{
-		new Main();
 	}
 	
 	void loadFile(String path)
@@ -59,11 +67,9 @@ public class Main
 		}
 		catch (Exception e)
 		{
-			response = "<h1 style=\"text-align=center;\">internal server error</h1>";	
+			response = "<h1 style=\"text-align:center;\">internal server error</h1>";	
 		}
 	}
-			
-
 
 	Map<String, String> loadQueryString()
 	{
@@ -78,16 +84,28 @@ public class Main
 					(existing, replacement) -> replacement));
 	}
 
+
+	void expand()
+	{
+		int i = 0;
+		for(String str : queryString.values())
+			response = response.replace("$" + ++i, str);
+	}
+
 }
-
-
-	
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@interface View
+@interface Render
 {
 	String post();
 	String form();
 	String index();
+}
+
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@interface JSP
+{
+	String value();
 }
