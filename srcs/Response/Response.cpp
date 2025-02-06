@@ -55,6 +55,7 @@ void Response::reset()
 {
 	__get.reset();
 	__post.reset();
+    __body.clear();
 	__cookie.clear();
 	__getPhase = GET_INIT;
 	__postPhase = POST_INIT;
@@ -268,7 +269,6 @@ void Response::getProcess()
 {
 	if (__getPhase == GET_INIT)
 	{
-
 		if (shouldAuthenticate() && !authenticated())
 			__explorer.changeRequestedFile(__location->__authenticate[1]);
 		__get.setWorkers(__explorer, *__location);
@@ -276,7 +276,10 @@ void Response::getProcess()
 		__getPhase = GET_EXECUTE;
 	}
 	else
+    {
+        wsu::debug("executing get");
 		__get.executeGet(__body);
+    }
 }
 
 /******************************************************************************
@@ -345,7 +348,7 @@ void Response::postPhase(BasicString &data)
 void Response::preparePhase()
 {
 	wsu::debug("preparing response");
-	__body.clear();
+	reset();
 	__check_methods();
 	this->__explorer.prepareRessource(*__location, __request.__URI);
 	std::vector<t_method>::iterator it = __location->__allowMethods.begin();
@@ -358,26 +361,16 @@ void Response::preparePhase()
 void Response::processData(BasicString &data)
 {
 	wsu::info("processing response");
-	try
-	{
-		if (__responsePhase == PREPARING_RESPONSE)
-			preparePhase();
-		if (__responsePhase == POST_PROCESS)
-			postPhase(data);
-		if (__responsePhase == GET_PROCESS)
-			getPhase();
-		if (__responsePhase == CGI_PROCESS)
-			cgiPhase();
-		if (__responsePhase == DELETE_PROCESS)
-			deletePhase();
-		if (__responsePhase == RESPONSE_DONE)
-			reset();
-	}
-	catch (ErrorResponse &e)
-	{
-		if (__responsePhase == POST_PROCESS)
-			throw wsu::Close();
+	if (__responsePhase == PREPARING_RESPONSE)
+		preparePhase();
+	if (__responsePhase == POST_PROCESS)
+		postPhase(data);
+	if (__responsePhase == GET_PROCESS)
+		getPhase();
+	if (__responsePhase == CGI_PROCESS)
+		cgiPhase();
+	if (__responsePhase == DELETE_PROCESS)
+		deletePhase();
+	if (__responsePhase == RESPONSE_DONE)
 		reset();
-		throw e;
-	}
 }

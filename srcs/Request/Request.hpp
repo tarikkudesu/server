@@ -12,7 +12,6 @@ class Request
 		String							__requestLine;
 		String							__requestHeaders;
 
-		void							clear();
 		void							validateURI();
 		void							requestInit();
 		void							parseRequest();
@@ -31,6 +30,7 @@ class Request
 		std::map< String, String >		__headerFeilds;
 		t_request_phase 				__requestPhase;
 
+		void							reset();
 		void							processData(BasicString &data);
 
 		Request(t_connection_phase &phase);

@@ -41,7 +41,7 @@ Request::~Request()
  *                               MINI METHODS                               *
  ****************************************************************************/
 
-void Request::clear()
+void Request::reset()
 {
     this->__URI.clear();
     this->__bodySize = 0;
@@ -151,7 +151,7 @@ void Request::parseRequest()
 }
 void Request::requestInit()
 {
-	clear();
+	reset();
     __startTime = std::time(NULL);
     __requestPhase = REQUEST_PARSE;
 }

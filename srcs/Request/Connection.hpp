@@ -10,6 +10,7 @@ class Connection
 {
 	private :
 		int								__sd;
+        std::time_t                     __time;
 		BasicString						__data;
 		t_connection_phase				__phase;
 		Request							__request;
@@ -33,6 +34,7 @@ class Connection
 		Connection	&operator=( const Connection &assign );
 
 	public:
+        bool                            __functional;
 		std::queue< BasicString >		__responseQueue;
 
 		void							addData(const BasicString &input);

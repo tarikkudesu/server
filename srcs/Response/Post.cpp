@@ -7,7 +7,7 @@ Post::Post(Request &request, t_response_phase &phase) : request(request),
                                                         __startTime(std::time(NULL)),
                                                         __phase(MP_INIT)
 {
-	wsu::debug("Post default constructor");
+    wsu::debug("Post default constructor");
 }
 
 Post::Post(const Post &copy) : request(copy.request),
@@ -17,13 +17,13 @@ Post::Post(const Post &copy) : request(copy.request),
                                __phase(copy.__phase),
                                __data(copy.__data)
 {
-	wsu::debug("Post copy constructor");
+    wsu::debug("Post copy constructor");
     *this = copy;
 }
 
 Post &Post::operator=(const Post &assign)
 {
-	wsu::debug("Post copy assignement operator");
+    wsu::debug("Post copy assignement operator");
     if (this != &assign)
     {
         this->__data = assign.__data;
@@ -39,7 +39,7 @@ Post &Post::operator=(const Post &assign)
 
 Post::~Post()
 {
-	wsu::debug("Post destructor");
+    wsu::debug("Post destructor");
     reset();
 }
 
@@ -89,14 +89,14 @@ void Post::createFile(std::vector<String> &headers)
                     return;
                 __fs.open(wsu::joinPaths(explorer->__fullPath, file).c_str());
                 if (!__fs.is_open())
-                    throw wsu::Close();
+                    throw ErrorResponse(500, *location, "post: could no create file");
                 return;
             }
             else
-                throw wsu::Close();
+                throw ErrorResponse(400, *location, "post: invalid headers");
         }
         else
-            throw wsu::Close();
+            throw ErrorResponse(400, *location, "post: invalid headers");
     }
 }
 
@@ -137,7 +137,7 @@ void Post::mpHeaders()
     wsu::debug("Post form data headers");
     size_t pos = __data.find(D_LINE_BREAK);
     if (pos == String::npos && __data.length() > REQUEST_MAX_SIZE)
-        throw wsu::Close();
+        throw ErrorResponse(400, *location, "post: oversized headers");
     else if (pos == String::npos)
         throw wsu::persist();
     std::vector<String> headers;
@@ -163,10 +163,10 @@ void Post::mpInit()
     if (pos2 == 0)
     {
         __data.erase(0, request.__headers.__boundary.length() + 6);
-        throw ErrorResponse(400, *location, "No files were uploaded");
+        throw ErrorResponse(400, *location, "post: No files were uploaded");
     }
     if (pos1 != 0)
-        throw wsu::Close();
+        throw ErrorResponse(400, *location, "post: multipart data");
     __data.erase(0, request.__headers.__boundary.length() + 4);
     __phase = MP_HEADERS;
 }
@@ -185,7 +185,7 @@ void Post::processFormData()
     wsu::debug("Post form data");
     __form.join(__data);
     if (__form.length() > FORM_MAX_SIZE)
-        throw wsu::Close();
+        throw ErrorResponse(413, *location, "post: oversized form");
 }
 /***********************************************************************************************
  *                                           METHODS                                           *
@@ -202,13 +202,14 @@ void Post::processData(BasicString &data)
         return wsu::fatal("no objects to be referenced");
     __data.join(data);
     if (request.__bodySize > location->__clientBodyBufferSize)
-        throw wsu::Close();
+        throw ErrorResponse(413, *location, "post: non uplodable location");
     if (std::time(NULL) - __startTime > CLIENT_TIMEOUT)
-        throw wsu::Close();
+        throw ErrorResponse(408, *location, "post: Request timeout");
+
     if (request.__headers.__contentType == FORM)
         processFormData();
     else if (request.__headers.__contentType == MULTIPART)
         processMultiPartBody();
     else
-        throw wsu::Close();
+        throw ErrorResponse(415, *location, "post: form and upload are accepte");
 }

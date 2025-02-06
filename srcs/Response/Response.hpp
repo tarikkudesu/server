@@ -21,7 +21,6 @@ class Response
 		t_svec							__tempFiles;
 
 
-		void							reset();
 		void							cgiPhase();
 		void							postDone();
 		bool							checkCgi();
@@ -40,6 +39,7 @@ class Response
 
 	public:
 
+		void							reset();
 		BasicString 					getResponse();
 		void							setupWorkers(Server &server, Location &location);
 		void							processData(BasicString &data);

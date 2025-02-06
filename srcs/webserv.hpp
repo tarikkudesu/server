@@ -51,6 +51,7 @@ typedef std::map<String,  String> Map;
 #define CGI_TIMEOUT 3
 #define POLL_TIMEOUT 5000
 #define CLIENT_TIMEOUT 15
+#define CONNECTION_TIMEOUT 600
 
 #define MAX_EVENTS 1024
 

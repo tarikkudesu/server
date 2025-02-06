@@ -176,6 +176,7 @@ void Core::writeDataToSocket(int sd)
     }
     if (Core::__connections[sd]->__responseQueue.empty())
         return;
+std::cout << Core::__connections[sd]->__responseQueue.front() << "\n";
     ssize_t bytesWritten = send(sd,
                                 Core::__connections[sd]->__responseQueue.front().getBuff(),
                                 Core::__connections[sd]->__responseQueue.front().length(), 0);
@@ -183,8 +184,8 @@ void Core::writeDataToSocket(int sd)
     if (bytesWritten > 0)
     {
         wsu::info("response sent");
-        if (Core::__connections[sd]->close())
-            removeConnection(sd);
+        // if (Core::__connections[sd]->close())
+        //     removeConnection(sd);
     }
     else
     {
@@ -200,6 +201,9 @@ void Core::writeDataToSocket(int sd)
 void Core::readDataFromSocket(int sd)
 {
     char buff[READ_SIZE + 1];
+    t_Connections::iterator iter = Core::__connections.find(sd);
+    if (iter == Core::__connections.end() || iter->second->__functional == false)
+        return ;
 
     ssize_t bytesRead = recv(sd, buff, READ_SIZE, 0);
     if (bytesRead == 0)
@@ -207,18 +211,14 @@ void Core::readDataFromSocket(int sd)
     else if (bytesRead > 0)
     {
         buff[bytesRead] = '\0';
-        t_Connections::iterator iter = Core::__connections.find(sd);
-        if (iter != Core::__connections.end())
-        {
-            iter->second->addData(BasicString(buff, bytesRead));
-        }
+        iter->second->addData(BasicString(buff, bytesRead));
     }
     else
     {
         int sockErr = 0;
         if (setsockopt(sd, SOL_SOCKET, SO_ERROR,
                        &sockErr, sizeof(sockErr)) != 0 ||
-            sockErr != 0) // surprise
+            sockErr != 0)
         {
             removeConnection(sd);
         }
@@ -324,7 +324,6 @@ void Core::mainProcess()
     }
     for (std::vector<int>::iterator it = closeConnection.begin(); it != closeConnection.end(); it++)
     {
-        wsu::warn("closing connection due to invalid client data transfer");
         Core::removeConnection(*it);
     }
 }

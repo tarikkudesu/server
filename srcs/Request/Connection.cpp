@@ -1,18 +1,22 @@
 #include "Connection.hpp"
 
 Connection::Connection() : __sd(-1),
+                           __time(std::time(NULL)),
                            __phase(PROCESSING_REQUEST),
                            __request(__phase),
                            __response(__phase, __request),
-                           __serversP(NULL)
+                           __serversP(NULL),
+                           __functional(true)
 {
     wsu::debug("Connection default constructor");
 }
 Connection::Connection(int sd) : __sd(sd),
+                                 __time(std::time(NULL)),
                                  __phase(PROCESSING_REQUEST),
                                  __request(__phase),
                                  __response(__phase, __request),
-                                 __serversP(NULL)
+                                 __serversP(NULL),
+                                 __functional(true)
 {
     wsu::debug("Connection single para constructor");
 }
@@ -92,14 +96,21 @@ void Connection::identifyWorkers()
 void Connection::addData(const BasicString &input)
 {
     wsu::info("receiving data");
-    this->__data.join(input);
-    processData();
+    if (this->__functional)
+    {
+        this->__data.join(input);
+        this->__time = std::time(NULL);
+    }
 }
 
 void Connection::processData()
 {
-    if (__phase == PROCESSING_REQUEST && __request.__requestPhase == REQUEST_INIT && __data.empty())
-        return;
+    // if (std::time(NULL) - __time > CONNECTION_TIMEOUT)
+    //     throw wsu::Close();
+    // if (__functional == false)
+    //     return;
+    // if (__phase == PROCESSING_REQUEST && __request.__requestPhase == REQUEST_INIT && __data.empty())
+    //     return;
     try
     {
         wsu::debug("processing data");
@@ -114,8 +125,12 @@ void Connection::processData()
     }
     catch (ErrorResponse &e)
     {
+        // if (this->__request.__method == POST)
+        //     this->__functional = false;
         this->__responseQueue.push(e.getResponse());
-        __phase = PROCESSING_REQUEST;
+        this->__phase = PROCESSING_REQUEST;
+        this->__response.reset();
+        this->__request.reset();
     }
     catch (wsu::persist &e)
     {
