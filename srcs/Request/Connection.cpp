@@ -105,12 +105,12 @@ void Connection::addData(const BasicString &input)
 
 void Connection::processData()
 {
-    // if (std::time(NULL) - __time > CONNECTION_TIMEOUT)
-    //     throw wsu::Close();
-    // if (__functional == false)
-    //     return;
-    // if (__phase == PROCESSING_REQUEST && __request.__requestPhase == REQUEST_INIT && __data.empty())
-    //     return;
+    if (std::time(NULL) - __time > CONNECTION_TIMEOUT)
+        throw wsu::Close();
+    if (__functional == false)
+        return;
+    if (__phase == PROCESSING_REQUEST && __request.__requestPhase == REQUEST_INIT && __data.empty())
+        return;
     try
     {
         wsu::debug("processing data");
@@ -125,8 +125,8 @@ void Connection::processData()
     }
     catch (ErrorResponse &e)
     {
-        // if (this->__request.__method == POST)
-        //     this->__functional = false;
+        if (this->__request.__method == POST)
+            this->__functional = false;
         this->__responseQueue.push(e.getResponse());
         this->__phase = PROCESSING_REQUEST;
         this->__response.reset();

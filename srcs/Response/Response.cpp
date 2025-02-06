@@ -55,7 +55,7 @@ void Response::reset()
 {
 	__get.reset();
 	__post.reset();
-    __body.clear();
+	__body.clear();
 	__cookie.clear();
 	__getPhase = GET_INIT;
 	__postPhase = POST_INIT;
@@ -231,6 +231,7 @@ void Response::processDefinedBody(BasicString &data)
 /*************************************************************************************
  *										  GET										 *
  *************************************************************************************/
+
 void Response::autoindex()
 {
 	wsu::debug("autoindex");
@@ -348,7 +349,6 @@ void Response::postPhase(BasicString &data)
 void Response::preparePhase()
 {
 	wsu::debug("preparing response");
-	reset();
 	__check_methods();
 	this->__explorer.prepareRessource(*__location, __request.__URI);
 	std::vector<t_method>::iterator it = __location->__allowMethods.begin();

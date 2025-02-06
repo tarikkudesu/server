@@ -176,7 +176,7 @@ void Core::writeDataToSocket(int sd)
     }
     if (Core::__connections[sd]->__responseQueue.empty())
         return;
-std::cout << Core::__connections[sd]->__responseQueue.front() << "\n";
+
     ssize_t bytesWritten = send(sd,
                                 Core::__connections[sd]->__responseQueue.front().getBuff(),
                                 Core::__connections[sd]->__responseQueue.front().length(), 0);
@@ -184,8 +184,8 @@ std::cout << Core::__connections[sd]->__responseQueue.front() << "\n";
     if (bytesWritten > 0)
     {
         wsu::info("response sent");
-        // if (Core::__connections[sd]->close())
-        //     removeConnection(sd);
+        if (Core::__connections[sd]->close())
+            removeConnection(sd);
     }
     else
     {

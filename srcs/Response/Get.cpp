@@ -46,6 +46,11 @@ void Get::reset()
     __phase = OPEN_FILE;
     __responsePhase = RESPONSE_DONE;
 }
+
+/***********************************************************************************************
+ *                                           METHODS                                           *
+ ***********************************************************************************************/
+
 void Get::getInPhase()
 {
     this->__bodySize = wsu::getFileSize(explorer->__fullPath);
@@ -56,8 +61,6 @@ void Get::getInPhase()
 }
 void Get::duringGetPhase(BasicString &body)
 {
-    // if (!__file.is_open() || !__file.good())
-    //     return ;
     wsu::debug("During GET phase");
     char buffer[READ_SIZE];
     wsu::ft_bzero(buffer, READ_SIZE);
@@ -76,18 +79,10 @@ void Get::executeGet(BasicString &body)
 {
     if (!explorer || !location)
         return wsu::fatal("no objects to be referenced");
-    try
-    {
-        if (__phase == OPEN_FILE)
-            getInPhase();
-        if (__phase == READ_FILE)
-            duringGetPhase(body);
-        if (__phase == CLOSE_FILE)
-            reset();
-    }
-    catch (ErrorResponse &e)
-    {
+    if (__phase == OPEN_FILE)
+        getInPhase();
+    if (__phase == READ_FILE)
+        duringGetPhase(body);
+    if (__phase == CLOSE_FILE)
         reset();
-        throw e;
-    }
 }

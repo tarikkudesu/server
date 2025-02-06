@@ -62,6 +62,11 @@ BasicString &Post::getForm()
 {
     return this->__form;
 }
+
+/***********************************************************************************************
+ *                                           METHODS                                           *
+ ***********************************************************************************************/
+
 void Post::writeDataIntoFile(BasicString &data)
 {
     if (!data.empty())
@@ -187,9 +192,6 @@ void Post::processFormData()
     if (__form.length() > FORM_MAX_SIZE)
         throw ErrorResponse(413, *location, "post: oversized form");
 }
-/***********************************************************************************************
- *                                           METHODS                                           *
- ***********************************************************************************************/
 void Post::setWorkers(FileExplorer &explorer, Location &location)
 {
     this->location = &location;
@@ -200,6 +202,7 @@ void Post::processData(BasicString &data)
 {
     if (!explorer || !location)
         return wsu::fatal("no objects to be referenced");
+
     __data.join(data);
     if (request.__bodySize > location->__clientBodyBufferSize)
         throw ErrorResponse(413, *location, "post: non uplodable location");

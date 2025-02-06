@@ -185,7 +185,7 @@ void Request::processData(BasicString &data)
     wsu::debug("processing request");
     if (__requestPhase == REQUEST_INIT)
         requestInit();
-    else if (__requestPhase == REQUEST_PARSE)
+    if (__requestPhase == REQUEST_PARSE)
         requestExecute(data);
 }
 std::ostream &operator<<(std::ostream &o, const Request &req)
