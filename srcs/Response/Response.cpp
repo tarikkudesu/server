@@ -42,12 +42,10 @@ Response &Response::operator=(const Response &assign)
 }
 Response::~Response()
 {
-	for (t_svec::iterator it = this->__tempFiles.begin(); it != this->__tempFiles.end(); it++)
-	{
-		unlink(it->c_str());
-		this->__tempFiles.erase(it);
-	}
 	wsu::debug("Response destructor");
+	for (t_svec::iterator it = this->__tempFiles.begin(); it != this->__tempFiles.end(); it++)
+		unlink(it->c_str());
+	this->__tempFiles.clear();
 }
 /***********************************************************************
  *								 METHODS							   *

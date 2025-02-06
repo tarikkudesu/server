@@ -41,6 +41,8 @@ void Core::clear()
         Core::removeServer(*it);
     for (std::vector<int>::iterator it = tmpMapC.begin(); it != tmpMapC.end(); it++)
         Core::removeConnection(*it);
+    tmpMapV.clear();
+    tmpMapC.clear();
     Core::__sockNum = 0;
     Core::__servers.clear();
     Core::__sockets.clear();
