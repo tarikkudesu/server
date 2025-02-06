@@ -194,29 +194,21 @@ void Post::setWorkers(FileExplorer &explorer, Location &location)
 {
     this->location = &location;
     this->explorer = &explorer;
+    __startTime = std::time(NULL);
 }
 void Post::processData(BasicString &data)
 {
     if (!explorer || !location)
         return wsu::fatal("no objects to be referenced");
     __data.join(data);
-    try
-    {
-        if (request.__bodySize > location->__clientBodyBufferSize)
-            throw wsu::Close();
-        if (std::time(NULL) - __startTime > CLIENT_TIMEOUT)
-            throw ErrorResponse(408, *location, "Post timeout");
-        if (request.__headers.__contentType == FORM)
-            processFormData();
-        else if (request.__headers.__contentType == MULTIPART)
-            processMultiPartBody();
-        else
-            throw wsu::Close();
-    }
-    catch (ErrorResponse &e)
-    {
-        this->__responsePhase = RESPONSE_DONE;
-        reset();
-        throw e;
-    }
+    if (request.__bodySize > location->__clientBodyBufferSize)
+        throw wsu::Close();
+    if (std::time(NULL) - __startTime > CLIENT_TIMEOUT)
+        throw wsu::Close();
+    if (request.__headers.__contentType == FORM)
+        processFormData();
+    else if (request.__headers.__contentType == MULTIPART)
+        processMultiPartBody();
+    else
+        throw wsu::Close();
 }

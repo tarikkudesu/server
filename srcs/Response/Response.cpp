@@ -298,10 +298,13 @@ void Response::cgiPhase()
 	Cgi cgi(__request);
 	cgi.setWorkers(__explorer, *__location);
 	String fileName = wsu::generateTimeBasedFileName();
-    String filePath = wsu::joinPaths(__location->__serverRoot, fileName);
+	String filePath = wsu::joinPaths(__location->__serverRoot, fileName);
 	this->__tempFiles.push_back(filePath);
 	cgi.processData(__post.getForm(), filePath);
-	throw ErrorResponse(307, fileName, *__location);
+    if (__request.__method == GET)
+        throw ErrorResponse(307, fileName, *__location);
+    __explorer.__fullPath = filePath;
+    __responsePhase = GET_PROCESS;
 }
 
 void Response::getPhase()
@@ -328,7 +331,7 @@ void Response::postPhase(BasicString &data)
 		__post.setWorkers(__explorer, *__location);
 		__postPhase = POST_EXECUTE;
 	}
-	else
+	if (__postPhase == POST_EXECUTE)
 	{
 		if (__request.__headers.__transferType == DEFINED)
 			processDefinedBody(data);

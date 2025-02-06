@@ -54,7 +54,7 @@ typedef std::map<String,  String> Map;
 
 #define MAX_EVENTS 1024
 
-#define READ_SIZE 8192
+#define READ_SIZE 16384
 #define FORM_MAX_SIZE 1024
 #define REQUEST_MAX_SIZE 4096
 #define TEMP_FILE_LIFE_SPAN 30

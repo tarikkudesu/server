@@ -90,7 +90,6 @@ void Core::addServer(Server *server)
 }
 void Core::removeSocket(int sd)
 {
-    wsu::info("removing socket " + wsu::intToString(sd));
     for (t_events::iterator it = __sockets.begin(); it != __sockets.end(); it++)
     {
         if (sd == it->fd)
@@ -104,7 +103,6 @@ void Core::removeSocket(int sd)
 }
 void Core::addSocket(int sd, t_endian endian)
 {
-    wsu::info("creating socket " + wsu::intToString(sd));
     struct pollfd sockStruct;
     sockStruct.fd = sd;
     if (endian == SERVER)
@@ -178,9 +176,10 @@ void Core::writeDataToSocket(int sd)
     }
     if (Core::__connections[sd]->__responseQueue.empty())
         return;
-    BasicString response = Core::__connections[sd]->__responseQueue.front();
+    ssize_t bytesWritten = send(sd,
+                                Core::__connections[sd]->__responseQueue.front().getBuff(),
+                                Core::__connections[sd]->__responseQueue.front().length(), 0);
     Core::__connections[sd]->__responseQueue.pop();
-    ssize_t bytesWritten = send(sd, response.getBuff(), response.length(), 0);
     if (bytesWritten > 0)
     {
         wsu::info("response sent");

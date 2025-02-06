@@ -71,8 +71,10 @@ Server *Connection::identifyServer()
         if ((*it)->amITheServerYouAreLookingFor(this->__request.__headers.__host) == true)
             tmpMapH.push_back(*it);
     }
-    if (tmpMapH.empty())
+    if (tmpMapH.empty() && tmpMapP.empty())
         return this->__serversP->begin()->second;
+    if (tmpMapH.empty())
+        return tmpMapP.at(0);
     return tmpMapH.at(0);
 }
 void Connection::identifyWorkers()
@@ -91,6 +93,7 @@ void Connection::addData(const BasicString &input)
 {
     wsu::info("receiving data");
     this->__data.join(input);
+    processData();
 }
 
 void Connection::processData()

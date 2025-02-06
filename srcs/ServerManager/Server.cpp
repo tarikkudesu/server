@@ -171,7 +171,7 @@ void Server::setup()
         addr.sin_port = htons(this->__port);
         if (-1 == bind(this->__sd, (struct sockaddr *)&addr, sizeof(addr)))
             throw std::runtime_error(serverIdentity() + " non functional: failed to bind socket");
-        if (-1 == listen(this->__sd, 10))
+        if (-1 == listen(this->__sd, SOMAXCONN))
             throw std::runtime_error(serverIdentity() + " non functional: failed to listen for connections");
     }
     catch (std::runtime_error &e)
