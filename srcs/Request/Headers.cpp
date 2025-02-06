@@ -47,14 +47,14 @@ void Headers::clear()
     this->__transferEncoding.clear();
     this->__connectionType = KEEP_ALIVE;
 }
-String Headers::getHeaderFeildValue(const String &key, std::map<String, String> &headers)
+String Headers::getHeaderFeildValue(const String &key, Map &headers)
 {
-    std::map<String, String>::iterator iter = headers.find(key);
+    Map::iterator iter = headers.find(key);
     if (iter == headers.end())
         throw std::exception();
     return iter->second;
 }
-void Headers::contentLength(std::map<String, String> &headers)
+void Headers::contentLength(Map &headers)
 {
     try
     {
@@ -67,7 +67,7 @@ void Headers::contentLength(std::map<String, String> &headers)
     {
     }
 }
-void Headers::contentType(std::map<String, String> &headers)
+void Headers::contentType(Map &headers)
 {
     try
     {
@@ -91,7 +91,7 @@ void Headers::contentType(std::map<String, String> &headers)
     }
 }
 
-void Headers::connectionType(std::map<String, String> &headers)
+void Headers::connectionType(Map &headers)
 {
     try
     {
@@ -103,7 +103,7 @@ void Headers::connectionType(std::map<String, String> &headers)
     {
     }
 }
-void Headers::cookie(std::map<String, String> &headers)
+void Headers::cookie(Map &headers)
 {
     try
     {
@@ -113,7 +113,7 @@ void Headers::cookie(std::map<String, String> &headers)
     {
     }
 }
-void Headers::transferEncoding(std::map<String, String> &headers)
+void Headers::transferEncoding(Map &headers)
 {
     try
     {
@@ -125,7 +125,7 @@ void Headers::transferEncoding(std::map<String, String> &headers)
     {
     }
 }
-void Headers::range(std::map<String, String> &headers)
+void Headers::range(Map &headers)
 {
     try
     {
@@ -136,7 +136,7 @@ void Headers::range(std::map<String, String> &headers)
     {
     }
 }
-void Headers::hostAndPort(std::map<String, String> &headers)
+void Headers::hostAndPort(Map &headers)
 {
     try
     {
@@ -159,7 +159,7 @@ void Headers::hostAndPort(std::map<String, String> &headers)
         throw ErrorResponse(400, "No Host header feild");
     }
 }
-void Headers::parseHeaders(std::map<String, String> &headers)
+void Headers::parseHeaders(Map &headers)
 {
     clear();
     hostAndPort(headers);

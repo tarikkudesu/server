@@ -11,7 +11,7 @@ wsu::~wsu() {}
 
 std::map<int16_t, String> wsu::__defaultErrorPages;
 std::map<int16_t, String> wsu::__errCode;
-std::map<String, String> wsu::__mimeTypes;
+Map wsu::__mimeTypes;
 bool wsu::__criticalOverLoad = false;
 bool wsu::__debug = false;
 bool wsu::__info = false;
@@ -217,6 +217,13 @@ ssize_t wsu::getFileSize(const String &filename)
     struct stat st;
     if (stat(filename.c_str(), &st) == 0)
         return st.st_size;
+    return -1;
+}
+ssize_t wsu::getFileLastModifiedTime(const String &filename)
+{
+    struct stat st;
+    if (stat(filename.c_str(), &st) == 0)
+        return st.st_mtime;
     return -1;
 }
 bool wsu::endWith(const std::string &file, const char *extension)
@@ -426,7 +433,7 @@ String wsu::getContentType(const String &uri)
     if (dot_pos == String::npos)
         return "text/html";
     String ext = file.substr(dot_pos + 1);
-    std::map<String, String>::iterator it = wsu::__mimeTypes.find(ext);
+    Map::iterator it = wsu::__mimeTypes.find(ext);
     if (it != __mimeTypes.end())
         return it->second;
     return "text/html";

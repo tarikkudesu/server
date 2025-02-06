@@ -9,6 +9,7 @@ Location::Location(const String &conf, const String &root) : b__r(true),
 															 __line(conf),
 															 __root(root),
 															 __autoindex(false),
+															 __serverRoot(root),
 															 __clientBodyBufferSize(8000)
 {
 	wsu::debug("Location para constructor");
@@ -19,6 +20,7 @@ Location::Location(const String &dir, const String &conf, const String &root) : 
 																				__line(conf),
 																				__root(root),
 																				__autoindex(false),
+																				__serverRoot(root),
 																				__clientBodyBufferSize(8000)
 {
 	wsu::debug("Location para constructor : ");
@@ -34,18 +36,19 @@ Location &Location::operator=(const Location &assign)
 	wsu::debug("Location copy assignement operator");
 	if (this != &assign)
 	{
-        this->__path = assign.__path;
-        this->__root = assign.__root;
-        this->__alias = assign.__alias;
-        this->__index = assign.__index;
-        this->__return = assign.__return;
-        this->__cgiPass = assign.__cgiPass;
-        this->__autoindex = assign.__autoindex;
-        this->__directives = assign.__directives;
-        this->__errorPages = assign.__errorPages;
-        this->__allowMethods = assign.__allowMethods;
-        this->__authenticate = assign.__authenticate;
-        this->__clientBodyBufferSize = assign.__clientBodyBufferSize;
+		this->__path = assign.__path;
+		this->__root = assign.__root;
+		this->__alias = assign.__alias;
+		this->__index = assign.__index;
+		this->__return = assign.__return;
+		this->__cgiPass = assign.__cgiPass;
+		this->__autoindex = assign.__autoindex;
+		this->__serverRoot = assign.__serverRoot;
+		this->__directives = assign.__directives;
+		this->__errorPages = assign.__errorPages;
+		this->__allowMethods = assign.__allowMethods;
+		this->__authenticate = assign.__authenticate;
+		this->__clientBodyBufferSize = assign.__clientBodyBufferSize;
 	}
 	return *this;
 }
@@ -123,7 +126,7 @@ void Location::proccessAllowMethodsDirective(t_svec &tokens)
 			this->__allowMethods.push_back(DELETE);
 		else if (*it == "POST" && std::find(__allowMethods.begin(), __allowMethods.end(), POST) == __allowMethods.end())
 			this->__allowMethods.push_back(POST);
-        else
+		else
 			throw std::runtime_error(*it + " method not supported");
 	}
 }
@@ -287,6 +290,7 @@ std::ostream &operator<<(std::ostream &o, const Location &loc)
 {
 	o << "\tlocation: " << loc.__path << "\n";
 	o << "\t\troot: [" << loc.__root << "]\n";
+	o << "\t\tserverRoot: [" << loc.__serverRoot << "]\n";
 	o << "\t\tindex: ";
 	for (t_svec::const_iterator it = loc.__index.begin(); it != loc.__index.end(); it++)
 		o << *it << " ";
@@ -298,9 +302,9 @@ std::ostream &operator<<(std::ostream &o, const Location &loc)
 	o << "\t\talias: " << loc.__alias << "\n";
 	o << "\t\tallow_methods: \n";
 	o << "\t\tauthenticate: ";
-    for (t_svec::const_iterator it = loc.__authenticate.begin(); it != loc.__authenticate.end(); it++)
-        o << *it << " ";
-    o << "\n";
+	for (t_svec::const_iterator it = loc.__authenticate.begin(); it != loc.__authenticate.end(); it++)
+		o << *it << " ";
+	o << "\n";
 	for (std::vector<t_method>::const_iterator it = loc.__allowMethods.begin(); it != loc.__allowMethods.end(); it++)
 		o << "\t\t" << wsu::methodToString(*it) << " ";
 	o << "\n";

@@ -35,6 +35,7 @@ class Location
 		String								__return;
 		String								__cgiPass;
 		bool								__autoindex;
+		String								__serverRoot;
 		std::deque< String >				__directives;
 		std::map< int16_t, String >			__errorPages;
 		std::vector< t_method >				__allowMethods;

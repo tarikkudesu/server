@@ -12,7 +12,6 @@ class Cgi
 		Location					*__location;
 
 		int 						__fd;
-		String						__file;
 		char						**env;
 
 		void						execute(const char* path);
@@ -21,9 +20,8 @@ class Cgi
 
 
 	public:
-		void						reset();
 		void						setWorkers(FileExplorer &explorer, Location &location);
-		void						processData( BasicString &reqBody );
+		void						processData( BasicString &reqBody, String file );
 		String						&getFileName();
 
 		Cgi(Request &request);

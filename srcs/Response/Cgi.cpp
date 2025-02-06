@@ -1,27 +1,20 @@
 
 #include "Cgi.hpp"
 
-typedef std::map<String, String> Map;
-
 /*=---------------------constructors-----------------------*/
 
 Cgi::Cgi(Request &request) : __request(request),
+                             __explorer(NULL),
+                             __location(NULL),
                              env(NULL)
 {
     wsu::debug("Cgi param constructor");
-}
-
-Cgi::~Cgi()
-{
-    wsu::debug("Cgi destructor");
-    reset();
 }
 
 Cgi &Cgi::operator=(const Cgi &cgi)
 {
     if (this != &cgi)
     {
-        this->__file = cgi.__file;
         this->__request = cgi.__request;
         this->__location = cgi.__location;
     }
@@ -33,8 +26,9 @@ Cgi::Cgi(const Cgi &cgi) : __request(cgi.__request)
     *this = cgi;
 }
 
-void Cgi::reset(void)
+Cgi::~Cgi()
 {
+    wsu::debug("Cgi destructor");
     if (env)
     {
         for (int i = 0; env[i]; i++)
@@ -44,12 +38,6 @@ void Cgi::reset(void)
     }
     this->__explorer = NULL;
     this->__location = NULL;
-    if (!__file.empty())
-    {
-        unlink(__file.c_str());
-        wsu::fatal("unlinked " + __file);
-        __file.clear();
-    }
     close(__fd);
 }
 
@@ -70,16 +58,12 @@ String &Cgi::getFileName()
 void Cgi::execute(const char *path)
 {
     if (dup2(__fd, STDOUT_FILENO) < 0)
-    {
-        reset();
         exit(1);
-    }
     int nullfd = open("/dev/null", O_WRONLY);
     dup2(nullfd, STDERR_FILENO);
     close(nullfd);
     const char *argv[] = {__location->__cgiPass.c_str(), path, NULL};
     execve(argv[0], (char *const *)argv, env);
-    reset();
     exit(1);
 }
 
@@ -115,16 +99,15 @@ void Cgi::setCgiEnvironement(BasicString &reqBody)
     env[i] = NULL;
 }
 
-void Cgi::processData(BasicString &reqBody)
+void Cgi::processData(BasicString &reqBody, String file)
 {
     if (!__explorer || !__location)
-        return wsu::fatal("no objects to be referenced");
+        return wsu::error("no objects to be referenced");
     std::time_t start = std::time(NULL);
-    __file = wsu::joinPaths(CGI_PATH, wsu::generateTimeBasedFileName());
     setCgiEnvironement(reqBody);
     int child, status, pid;
 
-    __fd = open(__file.c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO);
+    __fd = open(file.c_str(), O_CREAT | O_RDWR | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO);
     if (__fd < 0)
         throw ErrorResponse(500, *__location, "open fail");
 

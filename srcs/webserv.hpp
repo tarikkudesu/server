@@ -38,7 +38,7 @@
 typedef std::string String;
 typedef std::vector<String> t_svec;
 typedef std::vector<pollfd> t_events;
-typedef std::map<String, String>::iterator mapIterator;
+typedef std::map<String,  String> Map;
 
 #define RED "\033[1;31m"
 #define BLUE "\033[1;34m"
@@ -57,6 +57,7 @@ typedef std::map<String, String>::iterator mapIterator;
 #define READ_SIZE 8192
 #define FORM_MAX_SIZE 1024
 #define REQUEST_MAX_SIZE 4096
+#define TEMP_FILE_LIFE_SPAN 30
 #define REQUEST_LINE_MAX_SIZE 4096
 #define REQUEST_HEADERS_MAX_SIZE 8192
 #define REQUEST_HEADER_FEILD_MAX_SIZE 4096

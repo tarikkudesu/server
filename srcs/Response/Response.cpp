@@ -1,7 +1,7 @@
 #include "Response.hpp"
 
 Response::Response(t_connection_phase &phase, Request &request) : __connectionPhase(phase),
-                                                                  __responsePhase(PREPARING_RESPONSE),
+																  __responsePhase(PREPARING_RESPONSE),
 																  __postPhase(POST_INIT),
 																  __getPhase(GET_INIT),
 																  __get(request, __responsePhase),
@@ -42,6 +42,11 @@ Response &Response::operator=(const Response &assign)
 }
 Response::~Response()
 {
+	for (t_svec::iterator it = this->__tempFiles.begin(); it != this->__tempFiles.end(); it++)
+	{
+		unlink(it->c_str());
+		this->__tempFiles.erase(it);
+	}
 	wsu::debug("Response destructor");
 }
 /***********************************************************************
@@ -57,6 +62,14 @@ void Response::reset()
 	__postPhase = POST_INIT;
 	__responsePhase = PREPARING_RESPONSE;
 	__connectionPhase = PROCESSING_REQUEST;
+	for (t_svec::iterator it = this->__tempFiles.begin(); it != this->__tempFiles.end(); it++)
+	{
+		if (std::time(NULL) - wsu::getFileLastModifiedTime(*it) > TEMP_FILE_LIFE_SPAN)
+		{
+			unlink(it->c_str());
+			this->__tempFiles.erase(it);
+		}
+	}
 }
 BasicString Response::getResponse()
 {
@@ -68,7 +81,7 @@ bool Response::shouldAuthenticate()
 		return __explorer.__fullPath == wsu::joinPaths(__location->__root, __location->__authenticate[0]);
 	return false;
 }
-void Response::buildResponse(int code, size_t length)
+void Response::buildResponse(int code, ssize_t length)
 {
 	__body.clear();
 	String reasonPhrase;
@@ -82,11 +95,12 @@ void Response::buildResponse(int code, size_t length)
 	__body.join("date: " + wsu::buildIMFDate(0) + LINE_BREAK);
 	__body.join(String("Accept-Ranges: none") + LINE_BREAK);
 	__body.join(String("server: webserv/1.0") + LINE_BREAK);
-    if (__request.__headers.__connectionType == CLOSE)
-        __body.join(String("Connection: close") + LINE_BREAK);
-    else
-        __body.join(String("Connection: keep-alive") + LINE_BREAK);
-    __body.join("Content-Length: " + wsu::intToString(length) + LINE_BREAK);
+	if (__request.__headers.__connectionType == CLOSE)
+		__body.join(String("Connection: close") + LINE_BREAK);
+	else
+		__body.join(String("Connection: keep-alive") + LINE_BREAK);
+	if (length != -1)
+		__body.join("Content-Length: " + wsu::intToString(length) + LINE_BREAK);
 	if (!__cookie.empty())
 		__body.join("Set-Cookie: token=" + __cookie + "; path=/; expires=Thu, 31 Dec 2025 12:00:00 UTC;" LINE_BREAK), __cookie.clear();
 	__body.join(String(LINE_BREAK));
@@ -259,7 +273,7 @@ void Response::getProcess()
 
 		if (shouldAuthenticate() && !authenticated())
 			__explorer.changeRequestedFile(__location->__authenticate[1]);
-		__get.setWorkers(__explorer, *__location, *__server);
+		__get.setWorkers(__explorer, *__location);
 		buildResponse(200, wsu::getFileSize(__explorer.__fullPath));
 		__getPhase = GET_EXECUTE;
 	}
@@ -283,10 +297,12 @@ void Response::deletePhase()
 void Response::cgiPhase()
 {
 	wsu::debug("CGI phase");
-	Cgi cgi(__explorer, __request, *__location, __post.getForm());
-	buildResponse(200, cgi.getBody().length());
-	__body.join(cgi.getBody());
-	__responsePhase = RESPONSE_DONE;
+	Cgi cgi(__request);
+	cgi.setWorkers(__explorer, *__location);
+	String filename = wsu::joinPaths(__location->__serverRoot, wsu::generateTimeBasedFileName());
+	this->__tempFiles.push_back(filename);
+	cgi.processData(__post.getForm(), filename);
+	throw ErrorResponse(307, cgi.getFileName(), *__location);
 }
 
 void Response::getPhase()
@@ -310,7 +326,7 @@ void Response::postPhase(BasicString &data)
 	wsu::debug("post phase");
 	if (__postPhase == POST_INIT)
 	{
-		__post.setWorkers(__explorer, *__location, *__server);
+		__post.setWorkers(__explorer, *__location);
 		__postPhase = POST_EXECUTE;
 	}
 	else

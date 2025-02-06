@@ -27,8 +27,8 @@ public:
 
 	static std::map<int16_t, String> __defaultErrorPages;
 	static std::map<int16_t, String> __errCode;
-	static std::map<String, String> __mimeTypes;
 	static bool __criticalOverLoad;
+	static Map __mimeTypes;
 	static bool __debug;
 	static bool __info;
 	static bool __warn;
@@ -65,6 +65,7 @@ public:
     static String readFielContent(String fileName);
 	static String getContentType(const String &uri);
     static ssize_t getFileSize(const String &filename);
+    static ssize_t getFileLastModifiedTime(const String &filename);
 	static std::vector<String> splitBySpaces(const String &input);
 	static bool samePath(const String &path1, const String &path2);
 	static String buildListingBody(String path, const t_svec &list);

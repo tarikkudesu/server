@@ -18,6 +18,7 @@ class Response
 		Server							*__server;
 		Request							&__request;
 		Location						*__location;
+		t_svec							__tempFiles;
 
 
 		void							reset();
@@ -35,7 +36,7 @@ class Response
 		void							postPhase(BasicString &data);
 		void						    processCunkedBody(BasicString &data);
 		void						    processDefinedBody(BasicString &data);
-		void							buildResponse(int code, size_t length);
+		void							buildResponse(int code, ssize_t length);
 
 	public:
 
