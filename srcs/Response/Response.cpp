@@ -302,7 +302,7 @@ void Response::cgiPhase()
 	this->__tempFiles.push_back(filePath);
 	cgi.processData(__post.getForm(), filePath);
     if (__request.__method == GET)
-        throw ErrorResponse(307, fileName, *__location);
+        throw ErrorResponse(307, "/" + fileName, *__location);
     __explorer.__fullPath = filePath;
     __responsePhase = GET_PROCESS;
 }

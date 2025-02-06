@@ -65,24 +65,35 @@ void Cgi::execute(const char *path)
 String Cgi::getQueryString(BasicString &reqBody)
 {
     String query = __request.__method == POST ? reqBody.to_string() : __request.__queryString;
+	size_t pos = query.find('/');
+	if (pos != String::npos)
+		query.erase(0, pos);
+    return wsu::decode(query);
+}
+
+String Cgi::getPathInfo(BasicString &reqBody)
+{
+    String query = __request.__method == POST ? reqBody.to_string() : __request.__queryString;
+	size_t pos = query.find('/');
+	if (pos == String::npos)
+		return "";
+	query = query.substr(pos);
     return wsu::decode(query);
 }
 
 void Cgi::setCgiEnvironement(BasicString &reqBody)
 {
-    Map headers = __request.__headerFeilds;
+	Map headers = __request.__headerFeilds;
     headers["GATEWAY_INTERFACE"] = "CGI/1.1";
-    headers["SERVER_NAME"] = "SERVER_NAME"; //tmp header value
-    headers["SERVER_SOFTWARE"] = "WebServ-1337/1.0.0";
+    headers["SERVER_NAME"] = __request.__headers.__host ; //tmp header value
+    headers["SERVER_SOFTWARE"] = "webserv/1.0";
     headers["SERVER_PROTOCOL"] = "HTTP/1.1";
-    headers["SERVER_PORT"] = "9001"; //tmp header value
+    headers["SERVER_PORT"] = wsu::intToString(__request.__headers.__port);
     headers["QUERY_STRING"] = getQueryString(reqBody);
+    headers["PATH_INFO"] = getPathInfo(reqBody);
     headers["REQUEST_METHOD"] = wsu::methodToString(__request.__method);
-    headers["SCRIPT_NAME"] = "index.php";
-    headers["SCRIPT_FILENAME"] = "cgi-bin/php/index.php";
+    headers["SCRIPT_FILENAME"] = __explorer->__fullPath;
     headers["REDIRECT_STATUS"] = "200";
-    headers["REMOTE_ADDR"] = "127.0.0.1"; //tmp header value
-    headers["REMOTE_HOST"] = "127.0.0.1"; //tmp header value
     env = new char *[headers.size() + 1];
     int i = 0;
     for (Map::iterator it = headers.begin(); it != headers.end(); it++, i++)

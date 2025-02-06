@@ -15,6 +15,7 @@ class Cgi
 		char						**env;
 
 		void						execute(const char* path);
+		String						getPathInfo(BasicString &reqBody);
 		String						getQueryString( BasicString &reqBody );
 		void						setCgiEnvironement( BasicString &reqBody );
 
