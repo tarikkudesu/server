@@ -48,7 +48,8 @@ typedef std::map<String, String>::iterator mapIterator;
 #define YELLOW "\033[1;33m"
 #define MAGENTA "\033[1;35m"
 
-#define CGI_TIMEOUT 15
+#define CGI_TIMEOUT 3
+#define POLL_TIMEOUT 5000
 #define CLIENT_TIMEOUT 15
 
 #define MAX_EVENTS 1024
@@ -60,6 +61,7 @@ typedef std::map<String, String>::iterator mapIterator;
 #define REQUEST_HEADERS_MAX_SIZE 8192
 #define REQUEST_HEADER_FEILD_MAX_SIZE 4096
 
+#define CGI_PATH "cgi-bin"
 #define DEFAULT_HOST "0.0.0.0"
 #define DEFAULT_SERVER_PATH "./Content/"
 #define ERROR_PAGES_DIR_PATH "/essentials/pages"
@@ -151,11 +153,6 @@ typedef enum e_post_phase {
     POST_INIT,
     POST_EXECUTE,
 } t_post_phase;
-
-typedef enum e_cgi_phase {
-    CGI_INIT,
-    CGI_EXECUTE,
-} t_cgi_phase;
 
 typedef enum e_content_type {
     FORM,

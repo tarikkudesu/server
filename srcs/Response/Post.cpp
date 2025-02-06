@@ -4,7 +4,6 @@ Post::Post(Request &request, t_response_phase &phase) : request(request),
                                                         __responsePhase(phase),
                                                         explorer(NULL),
                                                         location(NULL),
-                                                        server(NULL),
                                                         __startTime(std::time(NULL)),
                                                         __phase(MP_INIT)
 {
@@ -15,7 +14,6 @@ Post::Post(const Post &copy) : request(copy.request),
                                __responsePhase(copy.__responsePhase),
                                explorer(copy.explorer),
                                location(copy.location),
-                               server(copy.server),
                                __phase(copy.__phase),
                                __data(copy.__data)
 {
@@ -30,7 +28,6 @@ Post &Post::operator=(const Post &assign)
     {
         this->__data = assign.__data;
         this->__form = assign.__form;
-        this->server = assign.server;
         this->__phase = assign.__phase;
         this->request = assign.request;
         this->explorer = assign.explorer;
@@ -55,8 +52,10 @@ void Post::reset()
     if (__fs.is_open())
         __fs.close();
     __form.clear();
-    __data.clear(); // skeptical about it
+    __data.clear();
     __phase = MP_INIT;
+    this->explorer = NULL;
+    this->location = NULL;
     request.__headers.__boundary.clear();
 }
 BasicString &Post::getForm()
@@ -191,14 +190,15 @@ void Post::processFormData()
 /***********************************************************************************************
  *                                           METHODS                                           *
  ***********************************************************************************************/
-void Post::setWorkers(FileExplorer &explorer, Location &location, Server &server)
+void Post::setWorkers(FileExplorer &explorer, Location &location)
 {
     this->location = &location;
     this->explorer = &explorer;
-    this->server = &server;
 }
 void Post::processData(BasicString &data)
 {
+    if (!explorer || !location)
+        return wsu::fatal("no objects to be referenced");
     __data.join(data);
     try
     {

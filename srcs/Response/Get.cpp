@@ -4,47 +4,45 @@ Get::Get(Request &request, t_response_phase &phase) : request(request),
                                                       __responsePhase(phase),
                                                       explorer(NULL),
                                                       location(NULL),
-                                                      server(NULL),
                                                       __phase(OPEN_FILE)
 {
-	wsu::debug("Get default constructor");
+    wsu::debug("Get default constructor");
 }
 Get::Get(const Get &copy) : request(copy.request),
                             __responsePhase(copy.__responsePhase),
                             explorer(copy.explorer),
                             location(copy.location),
-                            server(copy.server),
                             __phase(copy.__phase)
 {
-	wsu::debug("Get copy constructor");
+    wsu::debug("Get copy constructor");
     *this = copy;
 }
 Get &Get::operator=(const Get &assign)
 {
-	wsu::debug("Get copy assignement operator");
+    wsu::debug("Get copy assignement operator");
     if (this != &assign)
     {
+        this->__phase = assign.__phase;
         this->request = assign.request;
-        this->__responsePhase = assign.__responsePhase;
         this->explorer = assign.explorer;
         this->location = assign.location;
-        this->server = assign.server;
-        this->__phase = assign.__phase;
+        this->__responsePhase = assign.__responsePhase;
     }
     return *this;
 }
 Get::~Get()
 {
-	wsu::debug("Get destructor");
+    wsu::debug("Get destructor");
     reset();
 }
 
 void Get::reset()
 {
-    wsu::debug("GET out phase");
     if (__file.is_open())
         __file.close();
     this->__bodySize = 0;
+    this->explorer = NULL;
+    this->location = NULL;
     __phase = OPEN_FILE;
     __responsePhase = RESPONSE_DONE;
 }
@@ -58,6 +56,8 @@ void Get::getInPhase()
 }
 void Get::duringGetPhase(BasicString &body)
 {
+    // if (!__file.is_open() || !__file.good())
+    //     return ;
     wsu::debug("During GET phase");
     char buffer[READ_SIZE];
     wsu::ft_bzero(buffer, READ_SIZE);
@@ -67,15 +67,14 @@ void Get::duringGetPhase(BasicString &body)
         __phase = CLOSE_FILE;
     this->__bodySize -= __file.gcount();
 }
-void Get::setWorkers(FileExplorer &explorer, Location &location, Server &server)
+void Get::setWorkers(FileExplorer &explorer, Location &location)
 {
     this->location = &location;
     this->explorer = &explorer;
-    this->server = &server;
 }
 void Get::executeGet(BasicString &body)
 {
-    if (!explorer || !location || !server)
+    if (!explorer || !location)
         return wsu::fatal("no objects to be referenced");
     try
     {

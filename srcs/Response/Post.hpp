@@ -12,7 +12,6 @@ class Post
 
 		FileExplorer				*explorer;
 		Location					*location;
-		Server						*server;
 
         std::time_t                 __startTime;
 		t_multipartsection			__phase;
@@ -30,7 +29,7 @@ class Post
 
 	public:
 		void						reset();
-		void						setWorkers(FileExplorer &explorer, Location &location, Server &server);
+		void						setWorkers(FileExplorer &explorer, Location &location);
 		void						processData(BasicString &data);
 		BasicString 				&getForm();
 

@@ -156,7 +156,7 @@ void wsu::terr(String __error_message)
 String wsu::generateTimeBasedFileName()
 {
 	static unsigned long cpt;
-	return "./.temp/." + wsu::intToString(std::time(NULL) + cpt++) + ".tmp"; // change path Later
+	return wsu::intToString(std::time(NULL) + cpt++) + ".html";
 }
 String wsu::decode(String &encoded)
 {

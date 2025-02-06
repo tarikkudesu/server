@@ -11,7 +11,6 @@ class Get
         
 		FileExplorer				    *explorer;
 		Location						*location;
-		Server							*server;
 
 		size_t							__bodySize;
 		t_get_file_operation			__phase;
@@ -25,7 +24,7 @@ class Get
 	public:
 
 		void							reset();
-		void							setWorkers(FileExplorer &explorer, Location &location, Server &server);
+		void							setWorkers(FileExplorer &explorer, Location &location);
 		void							executeGet(BasicString &body);
 
 		Get(Request &request, t_response_phase &phase);
