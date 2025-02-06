@@ -142,7 +142,7 @@ Location &Server::identifyLocation(const String &URI)
 void Server::setup()
 {
     struct sockaddr_in addr;
-    int ra = 1;
+    int ra = 1, rp = 1;
 
     this->__sd = socket(AF_INET, SOCK_STREAM, 0);
     if (this->__sd == -1)
@@ -151,6 +151,8 @@ void Server::setup()
     {
         if (-1 == setsockopt(__sd, SOL_SOCKET, SO_REUSEADDR, (void *)&ra, sizeof(ra)))
             throw std::runtime_error(serverIdentity() + ": non functional: failed to make reusable address");
+        if (-1 == setsockopt(__sd, SOL_SOCKET, SO_REUSEPORT, (void *)&rp, sizeof(rp)))
+            throw std::runtime_error(serverIdentity() + ": non functional: failed to make reusable port");
         addr.sin_family = AF_INET;
         {
             struct addrinfo hint;
@@ -217,6 +219,8 @@ void Server::proccessListenToken(t_svec &tokens)
             size_t port = wsu::stringToInt(*it);
             if (port > 65535)
                 throw std::runtime_error(tokens.at(0) + ": invalid port: out of range");
+            if (std::find(this->__ports.begin(), this->__ports.end(), port) != this->__ports.end())
+                throw std::runtime_error(tokens.at(0) + ": duplicate port");
             this->__ports.push_back(port);
         }
     }
@@ -234,6 +238,8 @@ void Server::proccessServerNameToken(t_svec &tokens)
         {
             if (String::npos != it->find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_*"))
                 throw std::runtime_error(tokens.at(0) + ": invalid server_name: out of character range");
+            if (std::find(this->__serverNames.begin(), this->__serverNames.end(), *it) != this->__serverNames.end())
+                throw std::runtime_error(tokens.at(0) + ": duplicate value: " + *it);
             this->__serverNames.push_back(*it);
         }
     }
@@ -398,8 +404,8 @@ std::ostream &operator<<(std::ostream &o, const Server &ser)
     for (t_svec::const_iterator it = ser.__serverNames.begin(); it != ser.__serverNames.end(); it++)
         o << *it << " ";
     o << "\n";
-    for (std::vector<Location>::const_iterator it = ser.__locations.begin(); it != ser.__locations.end(); it++)
-        o << *it;
+    // for (std::vector<Location>::const_iterator it = ser.__locations.begin(); it != ser.__locations.end(); it++)
+    //     o << *it;
     o << "\n";
     return o;
 }

@@ -128,7 +128,7 @@ void Cgi::processData(BasicString &reqBody, String file)
         ;
 
     if (!child)
-        kill(pid, SIGKILL), throw ErrorResponse(408, *__location, "Request Time-out");
+        kill(pid, SIGKILL), throw ErrorResponse(504, *__location, "CGI Time-out");
 
     if (WIFEXITED(pid) && WEXITSTATUS(status))
         throw ErrorResponse(500, *__location, "wait error");

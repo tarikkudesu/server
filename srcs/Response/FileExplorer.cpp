@@ -58,7 +58,6 @@ void FileExplorer::loadPathExploring(const String& uri)
 {	
     String newUri = setAlias(uri);
     __fullPath = wsu::joinPaths(__location->__root, newUri);
-	std::cout << __fullPath << std::endl;
     loadType(__fullPath.c_str());
     if (__type == FOLDER)
     {

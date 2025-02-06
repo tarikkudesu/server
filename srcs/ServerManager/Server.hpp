@@ -10,6 +10,7 @@ class Server
 		int								__port;
 		String							__host;
 		String							__root;
+		std::vector< Location >			__locations;
 		t_svec							__directives; // temporary usage
 
 		void							proccessServerDirectives();
@@ -29,7 +30,6 @@ class Server
 	public:
 		bool							__valid; // temporary usage
 		std::vector< int >				__ports; // temporary usage
-		std::vector< Location >			__locations;
 		t_svec							__serverNames;
 
 		bool							amITheServerYouAreLookingFor( const String &sN );
