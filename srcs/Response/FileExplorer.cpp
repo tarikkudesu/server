@@ -47,19 +47,18 @@ String FileExplorer::setAlias(String uri)
 {
     if (__location->__alias.empty())
         return uri;
-    String newUri = uri;
-    size_t endPos = uri.find("/", 1);
-    if (endPos != String::npos)
-    {
-        String newStr = uri.substr(endPos);
-        newUri = __location->__alias + newStr;
-    }
-    return newUri;
+    size_t endPos = uri.find(__location->__path);
+    if (endPos == String::npos)
+		return uri;
+	String newStr = uri.substr(endPos + __location->__path.size());
+	newStr = __location->__alias + newStr;
+    return newStr;
 }
 void FileExplorer::loadPathExploring(const String& uri)
-{
+{	
     String newUri = setAlias(uri);
-    __fullPath = wsu::joinPaths(__location->__root, uri);
+    __fullPath = wsu::joinPaths(__location->__root, newUri);
+	std::cout << __fullPath << std::endl;
     loadType(__fullPath.c_str());
     if (__type == FOLDER)
     {
