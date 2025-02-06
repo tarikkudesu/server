@@ -22,7 +22,6 @@ class Cgi
 	public:
 		void						setWorkers(FileExplorer &explorer, Location &location);
 		void						processData( BasicString &reqBody, String file );
-		String						&getFileName();
 
 		Cgi(Request &request);
 		Cgi(const Cgi& cgi);

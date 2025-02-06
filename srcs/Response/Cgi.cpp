@@ -48,11 +48,6 @@ void Cgi::setWorkers(FileExplorer &explorer, Location &location)
     this->__location = &location;
     this->__explorer = &explorer;
 }
-
-String &Cgi::getFileName()
-{
-    return __file;
-}
 /*----------------------business logic------------------------*/
 
 void Cgi::execute(const char *path)

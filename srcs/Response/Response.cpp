@@ -299,10 +299,11 @@ void Response::cgiPhase()
 	wsu::debug("CGI phase");
 	Cgi cgi(__request);
 	cgi.setWorkers(__explorer, *__location);
-	String filename = wsu::joinPaths(__location->__serverRoot, wsu::generateTimeBasedFileName());
-	this->__tempFiles.push_back(filename);
-	cgi.processData(__post.getForm(), filename);
-	throw ErrorResponse(307, cgi.getFileName(), *__location);
+	String fileName = wsu::generateTimeBasedFileName();
+    String filePath = wsu::joinPaths(__location->__serverRoot, fileName);
+	this->__tempFiles.push_back(filePath);
+	cgi.processData(__post.getForm(), filePath);
+	throw ErrorResponse(307, fileName, *__location);
 }
 
 void Response::getPhase()
