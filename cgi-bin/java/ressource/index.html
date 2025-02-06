@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -40,8 +41,6 @@
 			transform: translateY(-5px);
 			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 		}
-
-
 		.member-name {
 			color: rgb(210, 215, 223);
 			font-size: 24px;
@@ -97,20 +96,34 @@
             <p style="font-size: 18px; color: rgba(210, 215, 223, 0.7);">Meet the amazing people behind our success</p>
         </div>
 		<div class="team-grid">
-		<?php 
-			foreach ($members as $key => $value) {
-		?>
-				<div class="team-member">
-					<h2 class="member-name"><?=$value["name"]?></h2>
-					<div class="member-role"><?=$value["task"]?>.</div>
+						<div class="team-member">
+					<h2 class="member-name">tarik amehri</h2>
+					<div class="member-role">Core builder.</div>
 					<p class="member-bio">A computer science student at 1337 coding school</p>
 					<div class="social-links">
-						<a href="https://github.com/<?=$value["github"]?>" class="social-link">GitHub</a>
-						<a href="https://linkedin.com/in/<?=$value["linkdin"]?>" class="social-link">LinkedIn</a>
+						<a href="https://github.com/tarikkudesu" class="social-link">GitHub</a>
+						<a href="https://linkedin.com/in/tarik-amehri" class="social-link">LinkedIn</a>
 					</div>
 				</div>
-		<? } ?>
-        </div>
+						<div class="team-member">
+					<h2 class="member-name">otman oulcaid</h2>
+					<div class="member-role">CGI Manager.</div>
+					<p class="member-bio">A computer science student at 1337 coding school</p>
+					<div class="social-links">
+						<a href="https://github.com/otmanoulcaid" class="social-link">GitHub</a>
+						<a href="https://linkedin.com/in/otmanoulcaid" class="social-link">LinkedIn</a>
+					</div>
+				</div>
+						<div class="team-member">
+					<h2 class="member-name">omar ghazi</h2>
+					<div class="member-role">Response builder.</div>
+					<p class="member-bio">A computer science student at 1337 coding school</p>
+					<div class="social-links">
+						<a href="https://github.com/Om7gh" class="social-link">GitHub</a>
+						<a href="https://linkedin.com/in/oamr-ghazi0" class="social-link">LinkedIn</a>
+					</div>
+				</div>
+		        </div>
     </div>
 </body>
 </html>
