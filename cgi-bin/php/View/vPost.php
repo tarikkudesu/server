@@ -1,0 +1,11 @@
+<body style="background-color: rgb(35, 40, 47);">
+    <div style="border: 1px solid rgba(210, 215, 223, 0.26); border-radius: 4px; margin: 100px auto; background-color: rgb(22, 27, 34); padding: 20px; max-width: 400px;">
+        <h2 style="font-size: 25px; font-family: sans-serif; text-align: center; padding: 0px 0px 25px 0px; margin: 0px; color: rgb(210, 215, 223);">Contact Form</h2>
+		<h1 style="color:white; text-align:center"><?=$_POST["firstName"] ?? "nothing turned in"?></h1>
+		<h1 style="color:white; text-align:center"><?=$_POST["lastName"] ?? "nothing turned in"?></h1>
+		<h1 style="color:white; text-align:center"><?=$_POST["email"] ?? "nothing turned in"?></h1>
+		<h1 style="color:white; text-align:center"><?=$_POST["phone"] ?? "nothing turned in"?></h1>
+    </div>
+</body>
+
+
