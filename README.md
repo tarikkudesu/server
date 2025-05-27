@@ -169,21 +169,19 @@ server {
 
 ## Project Build Process
 
-# Web Server Build Process
-
-## Architecture Overview
+### Architecture Overview
 
 The project is built using a modular class architecture that follows the **Single Responsibility Principle**. This design approach ensures that each component has a distinct purpose and can be developed and tested independently.
 
 ![Class Architecture](img/Classhierarchy.jpeg)
 
-## Communication Layer
+### Communication Layer
 
 The server's communication layer is built on top of the **Socket API**, making proper management of open file descriptor connections essential for optimal performance and resource utilization.
 
 ![Socket Communication](img/PollFds.jpeg)
 
-## Event Loop Architecture
+### Event Loop Architecture
 
 The server implements a main event loop responsible for two core functions:
 
@@ -195,13 +193,13 @@ The server implements a main event loop responsible for two core functions:
 
 ![Request Processing](img/RequestFlow.jpeg)
 
-## HTTP Response Support
+### HTTP Response Support
 
 The server supports standard HTTP response codes and formats, ensuring compatibility with web standards and client expectations.
 
 ![HTTP Responses](img/ResponseProcessingFlow.jpeg)
 
-## Phase-Based Processing
+### Phase-Based Processing
 
 The server employs a **phase-based processing architecture** that provides several key benefits:
 
