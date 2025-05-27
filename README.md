@@ -16,11 +16,15 @@ This is an HTTP based, single threaded, non-blocking, `nginx` like web server bu
 -   The server supports the `GET`, `POST` and `DELETE` HTTP methods.
 -   The server has CGI support for `php` and `java`.
 -   The server also supports session management and cookies.
+-   The server has a log support for all events, classified as debug, info, warn, error and fatal logs,
 
 ## Usage
 
 ```bash
-./webserv [configuration file]
+./webserv [OPTIONS] [configuration file]
+
+Options:
+        -l, --logs string       log events("debug"|"info"|"warn"|"error"|"fatal"|"all")
 ```
 
 ## Configuration file
